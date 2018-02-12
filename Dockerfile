@@ -86,6 +86,21 @@ RUN set -eux; \
 	rm bin/tomcat-native.tar.gz; \
 	find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +
 
+# security: https://tomcat.apache.org/tomcat-8.0-doc/security-howto.html#Non-Tomcat_settings
+RUN adduser tomcat \
+	&& cd "$CATALINA_HOME" \
+	&& chown -R root . \
+	&& chgrp -R tomcat . \
+	&& chown -R tomcat logs \
+	&& chown -R tomcat temp \
+	&& chown -R tomcat work \
+	&& chmod -R g+r conf \
+	&& chmod g+x conf \
+	&& chmod -R o-rwx .
+
+# run as tomcat from now on
+USER tomcat
+
 # verify Tomcat Native is working properly
 RUN set -e \
 	&& nativeLines="$(catalina.sh configtest 2>&1)" \
