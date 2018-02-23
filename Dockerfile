@@ -1,6 +1,6 @@
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat/blob/master/8.5/jre8/Dockerfile
-FROM quay.io/alfresco/alfresco-base-java:9.0.4-oracle-centos-7
+FROM quay.io/alfresco/alfresco-base-java:8u161-oracle-centos-7-333472fed423
 
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
