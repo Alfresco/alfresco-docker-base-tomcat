@@ -32,7 +32,7 @@ RUN set -ex; \
 
 ENV TOMCAT_MAJOR 8
 ENV TOMCAT_VERSION 8.5.27
-ENV TOMCAT_SHA1 f12be9ec09b94feb054a6ce00a0c89ccccb84f31
+ENV TOMCAT_SHA1 dc63fe7cefd5eb4f746d17b68578acc92e8af576
 
 ENV TOMCAT_TGZ_URLS \
 # https://issues.apache.org/jira/browse/INFRA-8753?focusedCommentId=14735394#comment-14735394
