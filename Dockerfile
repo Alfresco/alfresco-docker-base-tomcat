@@ -1,6 +1,6 @@
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat/blob/master/8.5/jre8/Dockerfile
-FROM quay.io/alfresco/alfresco-base-java:8u161-oracle-centos-7-333472fed423
+FROM quay.io/alfresco/alfresco-base-java:9.0.1-oracle-centos-7-4aa41f19bb4a
 
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
@@ -31,17 +31,20 @@ RUN set -ex; \
 	done
 
 ENV TOMCAT_MAJOR 8
-ENV TOMCAT_VERSION 8.5.23
-ENV TOMCAT_SHA1 1ba27c1bb86ab9c8404e98068800f90bd662523c
+ENV TOMCAT_VERSION 8.5.27
+ENV TOMCAT_SHA1 dc63fe7cefd5eb4f746d17b68578acc92e8af576
 
 ENV TOMCAT_TGZ_URLS \
+# https://issues.apache.org/jira/browse/INFRA-8753?focusedCommentId=14735394#comment-14735394
 	https://www.apache.org/dyn/closer.cgi?action=download&filename=tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz \
+# if the version is outdated, we might have to pull from the dist/archive :/
 	https://www-us.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz \
 	https://www.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz \
 	https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz
 
 ENV TOMCAT_ASC_URLS \
 	https://www.apache.org/dyn/closer.cgi?action=download&filename=tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc \
+# not all the mirrors actually carry the .asc files :'(
 	https://www-us.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc \
 	https://www.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc \
 	https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc
@@ -55,7 +58,9 @@ RUN set -eux; \
 		fi; \
 	done; \
 	[ -n "$success" ]; \
+	\
 	echo "$TOMCAT_SHA1 *tomcat.tar.gz" | sha1sum -c -; \
+	\
 	success=; \
 	for url in $TOMCAT_ASC_URLS; do \
 		if wget -O tomcat.tar.gz.asc "$url"; then \
@@ -64,10 +69,12 @@ RUN set -eux; \
 		fi; \
 	done; \
 	[ -n "$success" ]; \
+	\
 	gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz; \
 	tar -xvf tomcat.tar.gz --strip-components=1; \
 	rm bin/*.bat; \
 	rm tomcat.tar.gz*; \
+	\
 	nativeBuildDir="$(mktemp -d)"; \
 	tar -xvf bin/tomcat-native.tar.gz -C "$nativeBuildDir" --strip-components=1; \
 	( \
@@ -78,13 +85,33 @@ RUN set -eux; \
 			--build="$gnuArch" \
 			--libdir="$TOMCAT_NATIVE_LIBDIR" \
 			--prefix="$CATALINA_HOME" \
+			--with-apr="$(which apr-1-config)" \
 			--with-ssl=yes; \
 		make -j "$(nproc)"; \
 		make install; \
 	); \
 	rm -rf "$nativeBuildDir"; \
 	rm bin/tomcat-native.tar.gz; \
+	\
+# sh removes env vars it doesn't support (ones with periods)
+# https://github.com/docker-library/tomcat/issues/77
 	find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +
+
+# DEPLOY-387
+# Remove RPMs installed above (except apr, which has been linked again)
+RUN rpm -e mpfr libmpc libmnl libnfnetlink libnetfilter_conntrack iptables iproute \
+    apr-util apr-devel cpp libdb-devel m4 groff-base perl-parent perl-HTTP-Tiny perl-podlators \
+    perl-Pod-Perldoc perl-Text-ParseWords perl-Pod-Escapes perl-Encode perl-Pod-Usage perl-macros \
+    perl-libs perl-Socket perl-Time-HiRes perl-Exporter perl-constant perl-Filter perl-Carp \
+    perl-Storable perl-PathTools perl-Scalar-List-Utils perl-Time-Local perl-File-Temp perl-File-Path \
+    perl-threads-shared perl-threads perl-Pod-Simple perl-Getopt-Long perl perl-Test-Harness \
+    perl-Thread-Queue perl-Data-Dumper autoconf libkadm5 libgomp sysvinit-tools initscripts cyrus-sasl \
+    cyrus-sasl-devel openldap-devel make kernel-headers glibc-headers glibc-devel libsepol-devel \
+    pcre-devel libselinux-devel libcom_err-devel libverto-devel expat-devel keyutils-libs-devel \
+    krb5-devel zlib-devel openssl-devel apr-util-devel gcc openssl automake wget
+
+# DEPLOY-387
+RUN yum clean all
 
 # verify Tomcat Native is working properly
 RUN set -e \
