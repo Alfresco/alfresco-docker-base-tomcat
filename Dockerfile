@@ -2,6 +2,11 @@
 # see also https://github.com/docker-library/tomcat/blob/master/8.5/jre8/Dockerfile
 FROM quay.io/alfresco/alfresco-base-java:9.0.1-oracle-centos-7-4aa41f19bb4a
 
+LABEL name="Alfresco Base Tomcat" \
+    vendor="Alfresco" \
+    license="Various" \
+    build-date="unset"
+
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN mkdir -p "$CATALINA_HOME"
