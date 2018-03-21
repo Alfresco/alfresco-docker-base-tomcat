@@ -52,8 +52,10 @@ ENV TOMCAT_ASC_URLS \
 	https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc
 
 RUN set -eux; \
+  # CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
   yum install -y apr apr-devel apr-util apr-util-devel openssl-$OPENSSL_VERSION openssl-devel-$OPENSSL_VERSION \
      wget gcc automake autoconf ; \
+  # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
 	success=; \
 	for url in $TOMCAT_TGZ_URLS; do \
 		if wget -O tomcat.tar.gz "$url"; then \
@@ -100,6 +102,7 @@ RUN set -eux; \
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
 	find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' + ; \
+	# CentOS specific addition: Delete RPMs installed by above yum command (only) \
 	\
 	rpm -e mpfr libmpc libmnl libnfnetlink libnetfilter_conntrack iptables iproute \
       apr-util apr-devel cpp libdb-devel m4 groff-base perl-parent perl-HTTP-Tiny perl-podlators \
