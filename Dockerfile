@@ -23,9 +23,6 @@ ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
 # see http://tomcat.10.x6.nabble.com/VOTE-Release-Apache-Tomcat-8-0-32-tp5046007p5046024.html (and following discussion)
 # and https://github.com/docker-library/tomcat/pull/31
 ENV OPENSSL_VERSION 1.0.2k-8.el7
-RUN yum install -y apr apr-devel apr-util apr-util-devel openssl-$OPENSSL_VERSION openssl-devel-$OPENSSL_VERSION \
-   wget gcc automake autoconf \
-   && yum clean all
 
 # see https://www.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/KEYS
 # see also "update.sh" (https://github.com/docker-library/tomcat/blob/master/update.sh)
@@ -55,6 +52,10 @@ ENV TOMCAT_ASC_URLS \
 	https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc
 
 RUN set -eux; \
+  # CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
+  yum install -y apr apr-devel apr-util apr-util-devel openssl-$OPENSSL_VERSION openssl-devel-$OPENSSL_VERSION \
+     wget gcc automake autoconf ; \
+  # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
 	success=; \
 	for url in $TOMCAT_TGZ_URLS; do \
 		if wget -O tomcat.tar.gz "$url"; then \
@@ -100,23 +101,20 @@ RUN set -eux; \
 	\
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
-	find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +
-
-# DEPLOY-387
-# Remove RPMs installed above (except apr, which has been linked again)
-RUN rpm -e mpfr libmpc libmnl libnfnetlink libnetfilter_conntrack iptables iproute \
-    apr-util apr-devel cpp libdb-devel m4 groff-base perl-parent perl-HTTP-Tiny perl-podlators \
-    perl-Pod-Perldoc perl-Text-ParseWords perl-Pod-Escapes perl-Encode perl-Pod-Usage perl-macros \
-    perl-libs perl-Socket perl-Time-HiRes perl-Exporter perl-constant perl-Filter perl-Carp \
-    perl-Storable perl-PathTools perl-Scalar-List-Utils perl-Time-Local perl-File-Temp perl-File-Path \
-    perl-threads-shared perl-threads perl-Pod-Simple perl-Getopt-Long perl perl-Test-Harness \
-    perl-Thread-Queue perl-Data-Dumper autoconf libkadm5 libgomp sysvinit-tools initscripts cyrus-sasl \
-    cyrus-sasl-devel openldap-devel make kernel-headers glibc-headers glibc-devel libsepol-devel \
-    pcre-devel libselinux-devel libcom_err-devel libverto-devel expat-devel keyutils-libs-devel \
-    krb5-devel zlib-devel openssl-devel apr-util-devel gcc openssl automake wget
-
-# DEPLOY-387
-RUN yum clean all
+	find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' + ; \
+	# CentOS specific addition: Delete RPMs installed by above yum command (only) \
+	\
+	rpm -e mpfr libmpc libmnl libnfnetlink libnetfilter_conntrack iptables iproute \
+      apr-util apr-devel cpp libdb-devel m4 groff-base perl-parent perl-HTTP-Tiny perl-podlators \
+      perl-Pod-Perldoc perl-Text-ParseWords perl-Pod-Escapes perl-Encode perl-Pod-Usage perl-macros \
+      perl-libs perl-Socket perl-Time-HiRes perl-Exporter perl-constant perl-Filter perl-Carp \
+      perl-Storable perl-PathTools perl-Scalar-List-Utils perl-Time-Local perl-File-Temp perl-File-Path \
+      perl-threads-shared perl-threads perl-Pod-Simple perl-Getopt-Long perl perl-Test-Harness \
+      perl-Thread-Queue perl-Data-Dumper autoconf libkadm5 libgomp sysvinit-tools initscripts cyrus-sasl \
+      cyrus-sasl-devel openldap-devel make kernel-headers glibc-headers glibc-devel libsepol-devel \
+      pcre-devel libselinux-devel libcom_err-devel libverto-devel expat-devel keyutils-libs-devel \
+      krb5-devel zlib-devel openssl-devel apr-util-devel gcc openssl automake wget ; \
+   yum clean all
 
 # verify Tomcat Native is working properly
 RUN set -e \
