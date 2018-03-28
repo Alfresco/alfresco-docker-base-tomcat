@@ -77,7 +77,7 @@ the
 [VOLUME](https://docs.docker.com/engine/reference/builder/#volume)
 instruction,
 [best practices with VOLUMEs](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#volume),
-[best practices with persistence](https://docs.docker.com/develop/dev-best-practices/#where-and-how-to-persist-application-data)
+[best practices with persistence](https://docs.docker.com/develop/dev-best-practices/#where-and-how-to-persist-application-data),
 and
 [tmpfs](https://docs.docker.com/storage/tmpfs/) mounts.
 
@@ -101,8 +101,5 @@ Used as parent image and with the default configuration, ensure the following
 volumes are all specified.
 
 ```bash
-VOLUME /usr/local/tomcat/logs
-VOLUME /usr/local/tomcat/work
-VOLUME /usr/local/tomcat/conf/Catalina
-VOLUME /usr/local/tomcat/temp
+VOLUME [ "/usr/local/tomcat/logs", "/usr/local/tomcat/work" "/usr/local/tomcat/conf/Catalina", "/usr/local/tomcat/temp" ]
 ```
