@@ -101,5 +101,5 @@ Used as parent image and with the default configuration, ensure the following
 volumes are all specified.
 
 ```bash
-VOLUME [ "/usr/local/tomcat/logs", "/usr/local/tomcat/work" "/usr/local/tomcat/conf/Catalina", "/usr/local/tomcat/temp" ]
+VOLUME [ "/usr/local/tomcat/logs", "/usr/local/tomcat/work", "/usr/local/tomcat/conf/Catalina", "/usr/local/tomcat/temp" ]
 ```
