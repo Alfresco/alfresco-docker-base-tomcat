@@ -25,7 +25,7 @@ image, which is also available (privately) on
 To build this image, run the following script:
 
 ```bash
-docker build -t alfresco/alfresco-docker-base-tomcat .
+docker build -t alfresco/alfresco-base-tomcat .
 ```
 
 ## Pulling released images
