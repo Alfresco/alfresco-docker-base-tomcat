@@ -100,6 +100,10 @@ FROM quay.io/alfresco/alfresco-base-tomcat:8.5.28-java-8-oracle-centos-7-f7b1278
 Used as parent image and with the default configuration, ensure the following
 volumes are all specified.
 
+<!-- markdownlint-disable MD013 -->
+
 ```bash
 VOLUME [ "/usr/local/tomcat/logs", "/usr/local/tomcat/work", "/usr/local/tomcat/conf/Catalina", "/usr/local/tomcat/temp" ]
 ```
+
+<!-- markdownlint-enable MD013 -->
