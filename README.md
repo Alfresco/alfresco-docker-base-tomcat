@@ -55,7 +55,7 @@ The image can be used via `docker run` to run java applications
 with `--read-only` set, without any loss of functionality providing the various
 directories tomcat writes to are volumes.
 
-With the supplied tomcat congiuration, the following should all be mounted on volumes:
+With the supplied tomcat configuration, the following should all be mounted on volumes:
 
 * `/usr/local/tomcat/logs`
 * `/usr/local/tomcat/work`
