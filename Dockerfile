@@ -1,6 +1,6 @@
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat/blob/master/8.5/jre8/Dockerfile
-FROM quay.io/alfresco/alfresco-base-java:8u161-oracle-centos-7-333472fed423
+FROM quay.io/alfresco/alfresco-base-java:8u161-oracle-centos-7-b5f3c2d4c871
 
 LABEL name="Alfresco Base Tomcat" \
     vendor="Alfresco" \
