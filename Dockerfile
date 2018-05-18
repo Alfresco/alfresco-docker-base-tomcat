@@ -126,5 +126,19 @@ RUN set -e \
 		exit 1; \
 	fi
 
+# Security improvements:
+# Remove server banner
+RUN sed -i "s/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"\n\               Server=\" \"/g" /usr/local/tomcat/conf/server.xml && \
+# Add httpOnly flag to Cookies
+    sed -i "s/\    <\/session-config>/\        <cookie-config>\n\            <http-only>true<\/http-only> \n\            <secure>true<\/secure>\n\        <\/cookie-config>\n\    <\/session-config>/g" /usr/local/tomcat/conf/web.xml && \
+# Removal of default/unwanted Applications
+    rm -f -r -d /usr/local/tomcat/webapps/* && \
+# Change SHUTDOWN port and command.
+#     sed -i "s/<Server\ port=\"8005\"\ shutdown=\"SHUTDOWN\">/<Server\ port=\"ShutDownPort\"\ shutdown=\"ShutDownCommand\">/g" /usr/local/tomcat/conf/server.xml \
+# Replace default 404,403,500 page
+      sed -i "$ d" /usr/local/tomcat/conf/web.xml && \
+      sed -i -e "\$a\    <error-page\>\n\        <error-code\>404<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>403<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>500<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\n\<\/web-app\>" /usr/local/tomcat/conf/web.xml
+
 EXPOSE 8080
-CMD ["catalina.sh", "run"]
+# Starting tomcat with Security Manager
+CMD ["catalina.sh", "run", "-security"]
