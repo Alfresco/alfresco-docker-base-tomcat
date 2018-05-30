@@ -45,8 +45,19 @@ ENV TOMCAT_ASC_URLS \
 
 RUN set -eux; \
   # CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
-  yum install -y apr apr-devel apr-util apr-util-devel openssl openssl-devel \
-     wget gcc automake autoconf ; \
+	# We're version-pinning to improve the chances of repeatable builds. [DEPLOY-433] \
+	# openssl's version is always the same as the openssl-libs RPM already installed \
+  yum install -y \
+		apr-1.4.8-3.el7_4.1 \
+		apr-devel \
+		apr-util-1.5.2-6.el7 \
+		apr-util-devel \
+		openssl \
+		openssl-devel \
+		wget-1.14-15.el7_4.1 \
+		gcc-4.8.5-28.el7_5.1 \
+		automake-1.13.4-3.el7 \
+		autoconf-2.69-11.el7 ; \
   # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
 	success=; \
 	for url in $TOMCAT_TGZ_URLS; do \
