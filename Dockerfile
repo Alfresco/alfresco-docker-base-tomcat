@@ -1,6 +1,6 @@
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat/blob/master/8.5/jre8/Dockerfile
-FROM quay.io/alfresco/alfresco-base-java:8u161-oracle-centos-7-b5f3c2d4c871
+FROM quay.io/alfresco/alfresco-base-java:8u161-oracle-centos-7-ce1a67232405
 
 LABEL name="Alfresco Base Tomcat" \
     vendor="Alfresco" \
@@ -15,14 +15,6 @@ WORKDIR $CATALINA_HOME
 # let "Tomcat Native" live somewhere isolated
 ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
-
-# runtime dependencies for Tomcat Native Libraries
-# Tomcat Native 1.2+ requires a newer version of OpenSSL than debian:jessie has available
-# > checking OpenSSL library version >= 1.0.2...
-# > configure: error: Your version of OpenSSL is not compatible with this version of tcnative
-# see http://tomcat.10.x6.nabble.com/VOTE-Release-Apache-Tomcat-8-0-32-tp5046007p5046024.html (and following discussion)
-# and https://github.com/docker-library/tomcat/pull/31
-ENV OPENSSL_VERSION 1.0.2k-8.el7
 
 # see https://www.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/KEYS
 # see also "update.sh" (https://github.com/docker-library/tomcat/blob/master/update.sh)
@@ -53,8 +45,19 @@ ENV TOMCAT_ASC_URLS \
 
 RUN set -eux; \
   # CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
-  yum install -y apr apr-devel apr-util apr-util-devel openssl-$OPENSSL_VERSION openssl-devel-$OPENSSL_VERSION \
-     wget gcc automake autoconf ; \
+	# We're version-pinning to improve the chances of repeatable builds. [DEPLOY-433] \
+	# openssl's version is always the same as the openssl-libs RPM already installed \
+  yum install -y \
+		apr-1.4.8-3.el7_4.1 \
+		apr-devel \
+		apr-util-1.5.2-6.el7 \
+		apr-util-devel \
+		openssl \
+		openssl-devel \
+		wget-1.14-15.el7_4.1 \
+		gcc-4.8.5-28.el7_5.1 \
+		automake-1.13.4-3.el7 \
+		autoconf-2.69-11.el7 ; \
   # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
 	success=; \
 	for url in $TOMCAT_TGZ_URLS; do \
