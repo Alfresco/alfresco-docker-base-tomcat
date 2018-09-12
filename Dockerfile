@@ -18,23 +18,11 @@ ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
 
 # see https://www.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/KEYS
 # see also "update.sh" (https://github.com/docker-library/tomcat/blob/master/update.sh)
-# During DEPLOY-580: Work around keyservers randomly not responding
 ENV GPG_KEYS 05AB33110949707C93A279E3D3EFE6B686867BA6 07E48665A34DCAFAE522E5E6266191C37C037D42 47309207D818FFD8DCD3F83F1931D684307A10A5 541FBE7D8F78B25E055DDEE13C370389288584E7 61B832AC2F1C5A90F0F9B00A1C506407564C17A3 713DA88BE50911535FE716F5208B0AB1D63011C7 79F7026C690BAA50B92CD8B66A3AD3F4F22C4FED 9BA44C2621385CB966EBA586F72C284D731FABEE A27677289986DB50844682F8ACB77FC2E86E29AC A9C5DF4D22E99998D9875A5110C01C5A2F6059E7 DCFD35E0BF8CA7344752DE8B6FB21E8933C60243 F3A04C595DB5B6A5F1ECA43E3B7BBB100D811BBE F7DA48BB64BCB84ECBA7EE6935CD23C10D498E23
-RUN set -ex; \
-	for key in $GPG_KEYS; do \
-		for i in $(seq 1 4); do \
-			[ $i -lt 4 ] && set +e ; \
-			gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-			retval=$? ; \
-			set -e ; \
-			[ $retval = 0 ] && break ; \
-		done \
-	done
 
 ENV TOMCAT_MAJOR 8
-ENV TOMCAT_VERSION 8.5.33
-ENV TOMCAT_SHA512 bb6b3c27284697a835d1625bf63921b6147f98f3e1167b896d28b05bbcf7d6c71baa0aef35d8405ad41f897985dacf288f3a403b7d65bd726808637d97bfad11
-
+ENV TOMCAT_VERSION 8.5.34
+ENV TOMCAT_SHA512 131dfe23918f33fb24cefa7a03286c786304151f95f7bc0b6e34dfb6b0d1e65fe606e48b85c60c8a522938d1a01a36b540e69c94f36973321858e229731cda82
 
 ENV TOMCAT_TGZ_URLS \
 # https://issues.apache.org/jira/browse/INFRA-8753?focusedCommentId=14735394#comment-14735394
@@ -66,6 +54,17 @@ RUN set -eux; \
 		gcc-4.8.5-28.el7_5.1 \
 		automake-1.13.4-3.el7 \
 		autoconf-2.69-11.el7 ; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		# During DEPLOY-580: Work around keyservers randomly not returning valid data \
+		for i in $(seq 1 4); do \
+			[ $i -lt 4 ] && set +e ; \
+			gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+			retval=$? ; \
+			set -e ; \
+			[ $retval = 0 ] && break ; \
+		done; \
+	done; \
   # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
 	success=; \
 	for url in $TOMCAT_TGZ_URLS; do \
@@ -91,18 +90,22 @@ RUN set -eux; \
 	tar -xvf tomcat.tar.gz --strip-components=1; \
 	rm bin/*.bat; \
 	rm tomcat.tar.gz*; \
+	command -v gpgconf && gpgconf --kill all || :; \
+	rm -rf "$GNUPGHOME"; \
 	\
 	nativeBuildDir="$(mktemp -d)"; \
 	tar -xvf bin/tomcat-native.tar.gz -C "$nativeBuildDir" --strip-components=1; \
 	( \
 		export CATALINA_HOME="$PWD"; \
 		cd "$nativeBuildDir/native"; \
-    gnuArch="$(arch)"; \
+		gnuArch="$(arch)"; \
 		./configure \
 			--build="$gnuArch" \
 			--libdir="$TOMCAT_NATIVE_LIBDIR" \
 			--prefix="$CATALINA_HOME" \
 			--with-apr="$(which apr-1-config)" \
+			# Official OpenJDK image only
+			# --with-java-home="$(docker-java-home)" \
 			--with-ssl=yes; \
 		make -j "$(nproc)"; \
 		make install; \
@@ -112,7 +115,13 @@ RUN set -eux; \
 	\
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
-	find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' + ; \
+	find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +; \
+	\
+# fix permissions (especially for running as non-root)
+# https://github.com/docker-library/tomcat/issues/35
+	chmod -R +rX .; \
+	chmod 777 logs work ; \
+	\
 	# CentOS specific addition: Delete RPMs installed by above yum command (only) \
 	\
 	rpm -e mpfr libmpc libmnl libnfnetlink libnetfilter_conntrack iptables iproute \
