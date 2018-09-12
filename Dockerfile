@@ -1,6 +1,6 @@
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat/blob/master/8.5/jre8/Dockerfile
-FROM quay.io/alfresco/alfresco-base-java:8u161-oracle-centos-7-ce1a67232405
+FROM quay.io/alfresco/alfresco-base-java:8u181-oracle-centos-7-fbda83b9c4da	
 
 LABEL name="Alfresco Base Tomcat" \
     vendor="Alfresco" \
@@ -25,8 +25,9 @@ RUN set -ex; \
 	done
 
 ENV TOMCAT_MAJOR 8
-ENV TOMCAT_VERSION 8.5.28
-ENV TOMCAT_SHA1 d1555c86ec84824da6785aa875fc6f28298c51cd
+ENV TOMCAT_VERSION 8.5.33
+ENV TOMCAT_SHA512 bb6b3c27284697a835d1625bf63921b6147f98f3e1167b896d28b05bbcf7d6c71baa0aef35d8405ad41f897985dacf288f3a403b7d65bd726808637d97bfad11
+
 
 ENV TOMCAT_TGZ_URLS \
 # https://issues.apache.org/jira/browse/INFRA-8753?focusedCommentId=14735394#comment-14735394
