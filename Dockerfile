@@ -1,11 +1,11 @@
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat/blob/master/8.5/jre8/Dockerfile
-FROM quay.io/alfresco/alfresco-base-java:8u181-oracle-centos-7-fbda83b9c4da	
+ARG ALFRESCO_BASE_JAVA
+FROM ${ALFRESCO_BASE_JAVA}
 
-LABEL name="Alfresco Base Tomcat" \
-    vendor="Alfresco" \
-    license="Various" \
-    build-date="unset"
+LABEL org.label-schema.schema-version="1.0" \
+    org.label-schema.name="Alfresco Base Tomcat" \
+    org.label-schema.vendor="Alfresco"
 
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
@@ -57,12 +57,13 @@ RUN set -eux; \
 	export GNUPGHOME="$(mktemp -d)"; \
 	for key in $GPG_KEYS; do \
 		# During DEPLOY-580: Work around keyservers randomly not returning valid data \
-		for i in $(seq 1 4); do \
-			[ $i -lt 4 ] && set +e ; \
+		for i in {1..20}; do \
+			[ $i -lt 20 ] && set +e ; \
 			gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
 			retval=$? ; \
 			set -e ; \
 			[ $retval = 0 ] && break ; \
+			sleep 1; \
 		done; \
 	done; \
   # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
