@@ -25,7 +25,6 @@ export base_image='alfresco/alfresco-base-java'
 
 export -A java_8=(
   [base_tag]=8u181-oracle-centos-7-33e0cd92ffd0
-  [short_tag]='true'
 )
 
 export -A java_11=(
