@@ -25,12 +25,11 @@ export base_image='alfresco/alfresco-base-java'
 
 export -A java_8=(
   [base_tag]=8u181-oracle-centos-7-33e0cd92ffd0
-  if [ $(tomcat::docker::is_short "${java}" ) = 'true' ]; then
-    [short_tag]='true'
-  fi
+  [short_tag]='true'
 )
 
 export -A java_11=(
   [base_tag]=11-openjdk-centos-7-95536c8b599f
+  [short_tag]='true'
 )
 
