@@ -36,15 +36,17 @@ main () {
         docker_image_tag="${tomcat_version}-java-${java_major_version}-${java_vendor}-${docker_image_tag_suffix}"
 
         # Get the short tag (java major version)
-        # This variable is used by release-docker-tags.sh
-        local DOCKER_IMAGE_TAG_SHORT_NAME
-        DOCKER_IMAGE_TAG_SHORT_NAME="${short_name}"
+        if [ "$(tomcat::docker::is_short "${java}")" = 'true' ]; then
+            # This variable is used by release-docker-tags.sh
+            local DOCKER_IMAGE_TAG_SHORT_NAME
+            DOCKER_IMAGE_TAG_SHORT_NAME="${short_name}"
 
-        local private_repo_tag
-        private_repo_tag="${registry}/${namespace}/${docker_image_repository}:${docker_image_tag}"
+            local private_repo_tag
+            private_repo_tag="${registry}/${namespace}/${docker_image_repository}:${docker_image_tag}"
         
-        export private_repo_tag
-        export DOCKER_IMAGE_TAG_SHORT_NAME
+            export private_repo_tag
+            export DOCKER_IMAGE_TAG_SHORT_NAME
+        fi    
 
         ./docker-tools/bin/release-docker-tags.sh
 

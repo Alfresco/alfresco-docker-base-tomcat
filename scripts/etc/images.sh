@@ -7,7 +7,7 @@
 # shellcheck disable=SC2034,SC2148
 
 export docker_image_tag_suffix='centos-7'
-export docker_image_repository'=alfresco-base-tomcat'
+export docker_image_repository='alfresco-base-tomcat'
 
 # Actual version of tomcat we're going to build
 export tomcat_version=8.5.34
@@ -25,10 +25,10 @@ export base_image='alfresco/alfresco-base-java'
 
 export -A java_8=(
   [base_tag]=8u181-oracle-centos-7-33e0cd92ffd0
-  [short_tag]='true'
 )
 
 export -A java_11=(
   [base_tag]=11-openjdk-centos-7-95536c8b599f
+  [short_tag]='true'
 )
 
