@@ -35,6 +35,11 @@ main () {
         local docker_image_tag
         docker_image_tag="${tomcat_version}-java-${java_major_version}-${java_vendor}-${docker_image_tag_suffix}"
 
+        local private_repo_tag
+        private_repo_tag="${registry}/${namespace}/${docker_image_repository}:${docker_image_tag}"
+    
+        export private_repo_tag
+        
         # Get the short tag (java major version)
         # shellcheck disable=SC2091
         if $(tomcat::docker::is_short "${java}"); then
@@ -42,10 +47,6 @@ main () {
             local DOCKER_IMAGE_TAG_SHORT_NAME
             DOCKER_IMAGE_TAG_SHORT_NAME="${short_name}"
 
-            local private_repo_tag
-            private_repo_tag="${registry}/${namespace}/${docker_image_repository}:${docker_image_tag}"
-        
-            export private_repo_tag
             export DOCKER_IMAGE_TAG_SHORT_NAME
         fi    
 
