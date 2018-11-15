@@ -19,4 +19,5 @@ tomcat::docker::is_short () {
 
     # shellcheck disable=SC2154
     [ -z "${java[short_tag]}" ] && return 1
+    return 0
 }

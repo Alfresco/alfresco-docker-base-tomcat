@@ -39,10 +39,11 @@ main () {
         private_repo_tag="${registry}/${namespace}/${docker_image_repository}:${docker_image_tag}"
     
         export private_repo_tag
-        
+
         # Get the short tag (java major version)
         # shellcheck disable=SC2091
         if $(tomcat::docker::is_short "${java}"); then
+            echo "${java} is short. Use ${short_name}." 
             # This variable is used by release-docker-tags.sh
             local DOCKER_IMAGE_TAG_SHORT_NAME
             DOCKER_IMAGE_TAG_SHORT_NAME="${short_name}"
