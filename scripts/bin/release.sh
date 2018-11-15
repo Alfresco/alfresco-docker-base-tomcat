@@ -36,7 +36,8 @@ main () {
         docker_image_tag="${tomcat_version}-java-${java_major_version}-${java_vendor}-${docker_image_tag_suffix}"
 
         # Get the short tag (java major version)
-        if [ "$(tomcat::docker::is_short "${java}")" = 'true' ]; then
+        # shellcheck disable=SC2091
+        if $(tomcat::docker::is_short "${java}"); then
             # This variable is used by release-docker-tags.sh
             local DOCKER_IMAGE_TAG_SHORT_NAME
             DOCKER_IMAGE_TAG_SHORT_NAME="${short_name}"

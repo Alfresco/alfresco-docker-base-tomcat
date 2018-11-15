@@ -18,5 +18,5 @@ tomcat::docker::is_short () {
     eval "declare -A java="${java_as_str#*=}
 
     # shellcheck disable=SC2154
-    [ -z "${java[short_tag]}" ] && echo 'true'
+    [ -z "${java[short_tag]}" ] && return 1
 }
