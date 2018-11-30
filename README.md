@@ -105,5 +105,11 @@ volumes are all specified.
 ```bash
 VOLUME [ "/usr/local/tomcat/logs", "/usr/local/tomcat/work", "/usr/local/tomcat/conf/Catalina", "/usr/local/tomcat/temp" ]
 ```
+### Notes
+
+The Tomcat in this image is running with Security Manager switched on. This may impact performance. The Security Manager can be disabled by overriding the startup command to:
+```bash
+CMD ["catalina.sh", "run"]
+```
 
 <!-- markdownlint-enable MD013 -->
