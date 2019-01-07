@@ -138,8 +138,6 @@ RUN set -eux; \
     # Security improvements:
     # Remove server banner
     sed -i "s/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"\n\               Server=\" \"/g" /usr/local/tomcat/conf/server.xml ; \
-    # Add httpOnly flag to Cookies
-    sed -i "s/\    <\/session-config>/\        <cookie-config>\n\            <http-only>true<\/http-only> \n\            <secure>true<\/secure>\n\        <\/cookie-config>\n\    <\/session-config>/g" /usr/local/tomcat/conf/web.xml ; \
     # Removal of default/unwanted Applications
     rm -f -r -d /usr/local/tomcat/webapps/* ; \
     # Change SHUTDOWN port and command.
