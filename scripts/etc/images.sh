@@ -28,7 +28,7 @@ export -A java_8=(
 )
 
 export -A java_11=(
-  [base_tag]=11.0.1-openjdk-centos-7-1fd3c4475374
+  [base_tag]=11.0.1-openjdk-centos-7-1d70ffa003cb
   [short_tag]='true'
 )
 
