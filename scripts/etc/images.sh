@@ -17,9 +17,9 @@ export short_name=8.5
 # The image built will be ${docker_image_repository}:${tomcat_version}-java-${java_major_version}-${java_vendor}-${docker_image_tag_suffix}
 
 # For general builds:
-export base_image='alfresco/alfresco-base-java'
+#export base_image='alfresco/alfresco-base-java'
 # If basing off unreleased quay builds:
-# export base_image='quay.io/alfresco/alfresco-base-java'
+export base_image='quay.io/alfresco/alfresco-base-java'
 
 # short_tag is 'true' if you get to be alfresco-base-tomcat:${DOCKER_IMAGE_TAG_SHORT_NAME}
 
