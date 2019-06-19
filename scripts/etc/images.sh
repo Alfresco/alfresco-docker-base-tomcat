@@ -24,11 +24,11 @@ export base_image='quay.io/alfresco/alfresco-base-java'
 # short_tag is 'true' if you get to be alfresco-base-tomcat:${DOCKER_IMAGE_TAG_SHORT_NAME}
 
 export -A java_8=(
-  [base_tag]=8u181-oracle-centos-7-DEPLOY-709
+  [base_tag]=8u181-oracle-centos-7-f9e2a9f2770a
 )
 
 export -A java_11=(
-  [base_tag]=11.0.1-openjdk-centos-7-DEPLOY-709
+  [base_tag]=11.0.1-openjdk-centos-7-601b2156ffd2
   [short_tag]='true'
 )
 
