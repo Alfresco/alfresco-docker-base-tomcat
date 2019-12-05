@@ -44,14 +44,14 @@ RUN set -eux; \
 	# We're version-pinning to improve the chances of repeatable builds. [DEPLOY-433] \
 	# openssl's version is always the same as the openssl-libs RPM already installed \
   yum install -y \
-		apr-1.4.8-3.el7_4.1 \
+		apr-1.4.8-5.el7 \
 		apr-devel \
 		apr-util-1.5.2-6.el7 \
 		apr-util-devel \
 		openssl \
 		openssl-devel \
-		wget-1.14-18.el7.x86_64 \
-		gcc-4.8.5-36.el7.x86_64 \
+		wget-1.14-18.el7_6.1 \
+		gcc-4.8.5-39.el7 \
 		automake-1.13.4-3.el7 \
 		autoconf-2.69-11.el7 ; \
 	export GNUPGHOME="$(mktemp -d)"; \
