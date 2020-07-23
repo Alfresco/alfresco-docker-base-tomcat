@@ -10,7 +10,7 @@ export docker_image_tag_suffix='centos-7'
 export docker_image_repository='alfresco-base-tomcat'
 
 # Actual version of tomcat we're going to build
-export tomcat_version=8.5.43
+export tomcat_version=8.5.51
 # Short tag we'll apply to
 export short_name=8.5
 
@@ -31,4 +31,3 @@ export -A java_11=(
   [base_tag]=11.0.7-openjdk-centos-7-9448dd21de19
   [short_tag]='true'
 )
-
