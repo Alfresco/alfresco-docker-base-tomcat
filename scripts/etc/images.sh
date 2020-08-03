@@ -28,6 +28,6 @@ export -A java_8=(
 )
 
 export -A java_11=(
-  [base_tag]=11.0.7-openjdk-centos-7-dcd8edf6cb70
+  [base_tag]=11.0.8-openjdk-centos-7-d292b7de4cfb
   [short_tag]='true'
 )
