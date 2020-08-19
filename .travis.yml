@@ -1,0 +1,55 @@
+language: ruby
+
+services:
+  - docker
+
+env:
+  global:
+    - java_8_version=8u181
+    - java_11_version=11.0.8
+    - registry=quay.io
+    - namespace=alfresco
+    - DOCKER_IMAGE_JAVA_BASE_TAG_8=${java_8_version}-oracle-centos-7
+    - DOCKER_IMAGE_JAVA_BASE_TAG_11=${java_11_version}-openjdk-centos-7
+    - base_java_tag_8=${DOCKER_IMAGE_JAVA_BASE_TAG_8}-57fa546cc13b
+    - base_java_tag_11=${DOCKER_IMAGE_JAVA_BASE_TAG_11}-d292b7de4cfb
+    - DOCKER_IMAGE_REPOSITORY=alfresco-base-tomcat
+    - ALFRESCO_BASE_JAVA=quay.io/alfresco/alfresco-base-java
+    - tomcat_version=8.5.51
+    - tomcat_short_name=8.5
+    - DOCKER_IMAGE_TAG_8=${tomcat_version}-java-8-oracle-centos-7
+    - DOCKER_IMAGE_TAG_11=${tomcat_version}-java-11-oracle-centos-7
+
+
+jobs:
+  include:
+    - stage: Download and build tomcat java 8
+      name: "Build8"
+      before_script:
+      - echo "${DOCKER_PASSWORD_QUAY}" | docker login ${registry} -u "${DOCKER_USERNAME_QUAY}" --password-stdin
+      script:
+      - |
+        if [[ $TRAVIS_BRANCH == master ]]; then
+        echo "JAVA 8"  && \
+        docker build -t "${DOCKER_IMAGE_REPOSITORY}" . --build-arg ALFRESCO_BASE_JAVA=${ALFRESCO_BASE_JAVA}:${base_java_tag_8} --no-cache && \
+
+        docker tag "${DOCKER_IMAGE_REPOSITORY}" "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}" && \
+        docker tag "${DOCKER_IMAGE_REPOSITORY}" "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}-${TRAVIS_JOB_ID}" && \
+        docker tag "${DOCKER_IMAGE_REPOSITORY}" "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${tomcat_short_name}" && \
+        docker images && \
+        docker push "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}" && \
+        docker push "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}-${TRAVIS_JOB_ID}" && \
+        docker push "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${tomcat_short_name}" && \
+        if [[ $TRAVIS_COMMIT_MESSAGE == *"release"* ]]; then
+           docker tag "${DOCKER_IMAGE_REPOSITORY}" "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}-release-candidate" && \
+           docker push "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}-release-candidate" && \
+           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && \
+           docker push "alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}" && \
+           docker push "alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}-${TRAVIS_JOB_ID}" && \
+           docker push "alfresco/${DOCKER_IMAGE_REPOSITORY}:${tomcat_short_name}"; fi
+        else
+        docker tag "${DOCKER_IMAGE_REPOSITORY}" "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}-${TRAVIS_BRANCH}" && \
+        docker push "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}-${TRAVIS_BRANCH}";
+        fi
+
+
