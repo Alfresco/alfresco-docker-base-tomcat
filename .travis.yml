@@ -22,7 +22,7 @@ env:
 
 jobs:
   include:
-    - stage: Download and build tomcat java 8
+    - stage: Build and Push Docker Tomcat Images
       name: "Build8"
       before_script:
       - echo "${DOCKER_PASSWORD_QUAY}" | docker login ${registry} -u "${DOCKER_USERNAME_QUAY}" --password-stdin
@@ -55,9 +55,7 @@ jobs:
         docker tag "${DOCKER_IMAGE_REPOSITORY}" "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}-${TRAVIS_BRANCH}"
         docker push "${registry}/alfresco/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG_8}-${TRAVIS_BRANCH}";
         fi
-
-    - stage: Download and build tomcat java 11
-      name: "Build11"
+    - name: "Build11"
       before_script:
       - echo "${DOCKER_PASSWORD_QUAY}" | docker login ${registry} -u "${DOCKER_USERNAME_QUAY}" --password-stdin
       script:
