@@ -18,7 +18,7 @@ env:
     - tomcat_version=8.5.51
     - tomcat_short_name=8.5
     - DOCKER_IMAGE_TAG_8=${tomcat_version}-java-8-oracle-centos-7
-    - DOCKER_IMAGE_TAG_11=${tomcat_version}-java-11-oracle-centos-7
+    - DOCKER_IMAGE_TAG_11=${tomcat_version}-java-11-openjdk-centos-7
 
 jobs:
   include:
