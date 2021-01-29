@@ -1,5 +1,7 @@
 # Welcome to Alfresco Docker Base Tomcat
 
+[![Build Status](https://travis-ci.com/Alfresco/alfresco-docker-base-tomcat.svg?branch=master)](https://travis-ci.com/Alfresco/alfresco-docker-base-tomcat)
+
 ## Introduction
 
 This repository contains the Dockerfile used to create the parent Tomcat image that
@@ -16,11 +18,11 @@ Build-pinning is available on quay to ensure an exact build artifact is used.
 
 ## How to Build
 
-This image depends on the
-[alfresco-docker-base-java](https://github.com/Alfresco/alfresco-docker-base-java)
-image, which is also available (privately) on
-[Quay](https://quay.io/repository/alfresco/alfresco-base-java) and (publicly) on
-[Docker Hub](https://hub.docker.com/r/alfresco/alfresco-base-java/).
+This image depends on the [alfresco-docker-base-java](https://github.com/Alfresco/alfresco-docker-base-java) image,
+which is available:
+
+* (privately) on [Quay](https://quay.io/repository/alfresco/alfresco-base-java)
+* (publicly) on [Docker Hub](https://hub.docker.com/r/alfresco/alfresco-base-java/).
 
 To build this image, run the following script:
 
@@ -30,21 +32,30 @@ docker build -t alfresco/alfresco-base-tomcat .
 
 ## Pulling released images
 
-Builds are available from
-[Docker Hub](https://hub.docker.com/r/alfresco/alfresco-base-tomcat)
+Builds are available from [Docker Hub](https://hub.docker.com/r/alfresco/alfresco-base-tomcat)
 
 ```bash
-docker pull alfresco/alfresco-base-tomcat:8.5
-docker pull alfresco/alfresco-base-tomcat:8.5.28-java-8-oracle-centos-7
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION 
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION-$SHORT_SHA256
 ```
 
-The builds are identical to those stored in the private repo on Quay,
-(which also supports build-pinning versions).
+where:
+* TOMCAT_MAJOR_MINOR_VERSION is 8.5
+* TOMCAT_VERSION is 8.5.51
+* JAVA_MAJOR_VERSION is 8 or 11
+* JAVA_VENDOR is `oracle` for 8 and `openjdk` for 11
+* CENTOS_MAJOR_VERSION is 7 or 8
+* SHORT_SHA256 is the 12 digit SHA256 of the image as available from the registry
+
+*NOTE* The default image with $TOMCAT_MAJOR_MINOR_VERSION as tag uses CentOS 8 and Java 11.
+
+The builds are identical to those stored in the private repo on Quay, which also supports build-pinning versions.
 
 ```bash
-docker pull quay.io/alfresco/alfresco-base-tomcat:8.5
-docker pull quay.io/alfresco/alfresco-base-tomcat:8.5.28-java-8-oracle-centos-7
-docker pull quay.io/alfresco/alfresco-base-tomcat:8.5.28-java-8-oracle-centos-7-f7b1278cc0eb
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION-$SHORT_SHA256
 ```
 
 ## Usage
@@ -64,12 +75,9 @@ With the supplied tomcat configuration, the following should all be mounted on v
 
 ### Parent Image
 
-Web Applications, Tomcat configuration, etc. can all be supplied by various
-methods. We recommend using this as a
-[parent image](https://docs.docker.com/glossary/?term=parent%20image),
-and then following the
-recommended practices for passing configuration and secrets for your orchestrator
-and use case.
+Web Applications, Tomcat configuration, etc. can all be supplied by various  methods.
+We recommend using this as a [parent image](https://docs.docker.com/glossary/?term=parent%20image),
+and then following the  recommended practices for passing configuration and secrets for your orchestrator and use case.
 
 For reference, see the documentation on
 [layers](https://docs.docker.com/storage/storagedriver/#container-and-layers),
@@ -86,13 +94,13 @@ and
 Example from a Dockerfile using a public, parent image in Docker Hub.
 
 ```bash
-FROM alfresco/alfresco-base-tomcat:8.5
+FROM alfresco/alfresco-base-tomcat:9.0
 ```
 
 Example from a Dockerfile using a private, parent image in Quay:
 
 ```bash
-FROM quay.io/alfresco/alfresco-base-tomcat:8.5.28-java-8-oracle-centos-7-f7b1278cc0eb
+FROM quay.io/alfresco/alfresco-base-tomcat:9.0.41-java-11-oracle-centos-7-f7b1278cc0eb
 ```
 
 ### Minimum volume configuration
@@ -113,3 +121,14 @@ CMD ["catalina.sh", "run"]
 ```
 
 <!-- markdownlint-enable MD013 -->
+
+## CI/CD
+
+Running on Travis, requires the following environment variable to be set:
+
+| Name | Description |
+|------|-------------|
+| DOCKER_USERNAME | Docker Hub username |
+| DOCKER_PASSWORD | Docker Hub password/token |
+| QUAY_USERNAME | Quay username |
+| QUAY_PASSWORD | Quay password/token |
