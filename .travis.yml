@@ -6,13 +6,13 @@ services:
 env:
   global:
     - java_8_version=8u181
-    - java_11_version=11.0.8
+    - java_11_version=11.0.10
     - registry=quay.io
     - namespace=alfresco
     - DOCKER_IMAGE_JAVA_BASE_TAG_8=${java_8_version}-oracle-centos-7
     - DOCKER_IMAGE_JAVA_BASE_TAG_11=${java_11_version}-openjdk-centos-7
-    - base_java_tag_8=${DOCKER_IMAGE_JAVA_BASE_TAG_8}-ac78b55bf4cd
-    - base_java_tag_11=${DOCKER_IMAGE_JAVA_BASE_TAG_11}-df938d426177
+    - base_java_tag_8=${DOCKER_IMAGE_JAVA_BASE_TAG_8}-fdef2ed275c9
+    - base_java_tag_11=${DOCKER_IMAGE_JAVA_BASE_TAG_11}-9da90416ab19
     - DOCKER_IMAGE_REPOSITORY=alfresco-base-tomcat
     - ALFRESCO_BASE_JAVA=quay.io/alfresco/alfresco-base-java
     - tomcat_version=8.5.51

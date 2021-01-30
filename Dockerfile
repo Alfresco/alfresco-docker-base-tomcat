@@ -40,36 +40,20 @@ ENV TOMCAT_ASC_URLS \
 	https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc
 
 RUN set -eux; \
-  # CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
+    # CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
 	# We're version-pinning to improve the chances of repeatable builds. [DEPLOY-433] \
 	# openssl's version is always the same as the openssl-libs RPM already installed \
-  yum install -y \
-		apr-1.4.8-5.el7 \
-		apr-devel \
-		apr-util-1.5.2-6.el7 \
-		apr-util-devel \
-		openssl \
-		openssl-devel \
-		wget-1.14-18.el7_6.1 \
-		gcc-4.8.5-39.el7 \
-		automake-1.13.4-3.el7 \
-		autoconf-2.69-11.el7 ; \
-	export GNUPGHOME="$(mktemp -d)"; \
+    yum install -y \
+		apr-1.4.8-7.el7 \
+		openssl-1.0.2k-21.el7_9 \
+		; \
 	for key in $GPG_KEYS; do \
-		# During DEPLOY-580: Work around keyservers randomly not returning valid data \
-		for i in {1..20}; do \
-			[ $i -lt 20 ] && set +e ; \
-			gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-			retval=$? ; \
-			set -e ; \
-			[ $retval = 0 ] && break ; \
-			sleep 1; \
-		done; \
+		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
 	done; \
   # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
 	success=; \
 	for url in $TOMCAT_TGZ_URLS; do \
-		if wget -O tomcat.tar.gz "$url"; then \
+		if curl -fsSLo tomcat.tar.gz "$url"; then \
 			success=1; \
 			break; \
 		fi; \
@@ -80,7 +64,7 @@ RUN set -eux; \
 	\
 	success=; \
 	for url in $TOMCAT_ASC_URLS; do \
-		if wget -O tomcat.tar.gz.asc "$url"; then \
+		if curl -fsSLo tomcat.tar.gz.asc "$url"; then \
 			success=1; \
 			break; \
 		fi; \
@@ -91,17 +75,21 @@ RUN set -eux; \
 	tar -xvf tomcat.tar.gz --strip-components=1; \
 	rm bin/*.bat; \
 	rm tomcat.tar.gz*; \
-	command -v gpgconf && gpgconf --kill all || :; \
-	rm -rf "$GNUPGHOME"; \
 	\
 	nativeBuildDir="$(mktemp -d)"; \
 	tar -xvf bin/tomcat-native.tar.gz -C "$nativeBuildDir" --strip-components=1; \
+	nativeBuildDeps=" \
+		openssl-devel-1.0.2k-21.el7_9 \
+		openssl-libs-1.0.2k-21.el7_9 \
+		gcc-4.8.5-44.el7 \
+		apr-devel-1.4.8-7.el7 \
+		make-3.82-24.el7 \
+	"; \
+	yum install -y $nativeBuildDeps; \
 	( \
 		export CATALINA_HOME="$PWD"; \
 		cd "$nativeBuildDir/native"; \
-		gnuArch="$(arch)"; \
 		./configure \
-			--build="$gnuArch" \
 			--libdir="$TOMCAT_NATIVE_LIBDIR" \
 			--prefix="$CATALINA_HOME" \
 			--with-apr="$(which apr-1-config)" \
@@ -111,6 +99,8 @@ RUN set -eux; \
 		make -j "$(nproc)"; \
 		make install; \
 	); \
+	yum history -y rollback last-1; \
+	find /etc -mindepth 2 -name *.rpmsave -exec rm -v '{}' +; \
 	rm -rf "$nativeBuildDir"; \
 	rm bin/tomcat-native.tar.gz; \
 	\
@@ -123,18 +113,6 @@ RUN set -eux; \
 	chmod -R +rX .; \
 	chmod 777 logs work ; \
 	\
-	# CentOS specific addition: Delete RPMs installed by above yum command (only) \
-	\
-	rpm -e mpfr libmpc libmnl libnfnetlink libnetfilter_conntrack iptables iproute \
-      apr-util apr-devel cpp libdb-devel m4 groff-base perl-parent perl-HTTP-Tiny perl-podlators \
-      perl-Pod-Perldoc perl-Text-ParseWords perl-Pod-Escapes perl-Encode perl-Pod-Usage perl-macros \
-      perl-libs perl-Socket perl-Time-HiRes perl-Exporter perl-constant perl-Filter perl-Carp \
-      perl-Storable perl-PathTools perl-Scalar-List-Utils perl-Time-Local perl-File-Temp perl-File-Path \
-      perl-threads-shared perl-threads perl-Pod-Simple perl-Getopt-Long perl perl-Test-Harness \
-      perl-Thread-Queue perl-Data-Dumper autoconf libkadm5 libgomp sysvinit-tools initscripts cyrus-sasl \
-      cyrus-sasl-devel openldap-devel make kernel-headers glibc-headers glibc-devel libsepol-devel \
-      pcre-devel libselinux-devel libcom_err-devel libverto-devel expat-devel keyutils-libs-devel \
-      krb5-devel zlib-devel openssl-devel apr-util-devel gcc openssl automake wget ; \
     # Security improvements:
     # Remove server banner
     sed -i "s/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"\n\               Server=\" \"/g" /usr/local/tomcat/conf/server.xml ; \
@@ -147,7 +125,7 @@ RUN set -eux; \
     sed -i -e "\$a\    <error-page\>\n\        <error-code\>404<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>403<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>500<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\n\<\/web-app\>" /usr/local/tomcat/conf/web.xml ; \
     #Turn off loggin by the VersionLoggerListener
     sed -i "s/\  <Listener\ className=\"org.apache.catalina.startup.VersionLoggerListener\"/\  <Listener\ className=\"org.apache.catalina.startup.VersionLoggerListener\"\ logArgs=\"false\"/g" /usr/local/tomcat/conf/server.xml ; \
-   yum clean all
+    yum clean all
 
 # verify Tomcat Native is working properly
 RUN set -e \
