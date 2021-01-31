@@ -46,7 +46,7 @@ before_script:
         ;;
     esac
   - |-
-    export TOMCAT_VERSION=8.5.51
+    export TOMCAT_VERSION=$(grep "ENV TOMCAT_VERSION" Dockerfile | cut -d ' ' -f 3)
     export IMAGE_REGISTRY_NAMESPACE=alfresco
     export IMAGE_REPOSITORY=alfresco-base-tomcat
     export IMAGE_TAG=$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION

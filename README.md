@@ -41,8 +41,8 @@ docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSI
 ```
 
 where:
-* TOMCAT_MAJOR_MINOR_VERSION is 8.5
-* TOMCAT_VERSION is 8.5.51
+* TOMCAT_MAJOR_MINOR_VERSION is 9.0
+* TOMCAT_VERSION is 9.0.41
 * JAVA_MAJOR_VERSION is 8 or 11
 * JAVA_VENDOR is `oracle` for 8 and `openjdk` for 11
 * CENTOS_MAJOR_VERSION is 7 or 8
