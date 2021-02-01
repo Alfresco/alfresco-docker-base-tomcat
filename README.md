@@ -36,16 +36,16 @@ Builds are available from [Docker Hub](https://hub.docker.com/r/alfresco/alfresc
 
 ```bash
 docker pull alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION 
-docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION
-docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION-$SHORT_SHA256
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$JAVA_VENDOR-centos-$CENTOS_MAJOR
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$JAVA_VENDOR-centos-$CENTOS_MAJOR-$SHORT_SHA256
 ```
 
 where:
 * TOMCAT_MAJOR_MINOR_VERSION is 9.0
 * TOMCAT_VERSION is 9.0.41
-* JAVA_MAJOR_VERSION is 8 or 11
+* JAVA_MAJOR is 8 or 11
 * JAVA_VENDOR is `oracle` for 8 and `openjdk` for 11
-* CENTOS_MAJOR_VERSION is 7 or 8
+* CENTOS_MAJOR is 7 or 8
 * SHORT_SHA256 is the 12 digit SHA256 of the image as available from the registry
 
 *NOTE* The default image with $TOMCAT_MAJOR_MINOR_VERSION as tag uses CentOS 8 and Java 11.
@@ -54,8 +54,8 @@ The builds are identical to those stored in the private repo on Quay, which also
 
 ```bash
 docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION
-docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION
-docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION-$SHORT_SHA256
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$JAVA_VENDOR-centos-$CENTOS_MAJOR
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$JAVA_VENDOR-centos-$CENTOS_MAJOR-$SHORT_SHA256
 ```
 
 ## Usage

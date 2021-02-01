@@ -8,31 +8,35 @@ branches:
     - master
 
 env:
-  - CENTOS_MAJOR_VERSION=7 JAVA_MAJOR_VERSION=8
-  - CENTOS_MAJOR_VERSION=7 JAVA_MAJOR_VERSION=11
-  - CENTOS_MAJOR_VERSION=8 JAVA_MAJOR_VERSION=8
-  - CENTOS_MAJOR_VERSION=8 JAVA_MAJOR_VERSION=11
+  - CENTOS_MAJOR=7 JAVA_MAJOR=8  TOMCAT_MAJOR=8
+  - CENTOS_MAJOR=7 JAVA_MAJOR=11 TOMCAT_MAJOR=8
+  - CENTOS_MAJOR=8 JAVA_MAJOR=11 TOMCAT_MAJOR=8
+  - CENTOS_MAJOR=8 JAVA_MAJOR=11 TOMCAT_MAJOR=9
 
 before_script:
   - export BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
   - echo $QUAY_PASSWORD | docker login quay.io -u $QUAY_USERNAME --password-stdin
   - echo $DOCKER_PASSWORD | docker login docker.io -u "$DOCKER_USERNAME" --password-stdin
   - |-
-    export TOMCAT_VERSION=$(grep "ENV TOMCAT_VERSION" Dockerfile | cut -d ' ' -f 3)
+    export TOMCAT_VERSION=$(grep "ENV TOMCAT_VERSION" Dockerfile | cut -d ' ' -f 3 | grep $TOMCAT_MAJOR)
     export IMAGE_REGISTRY_NAMESPACE=alfresco
     export IMAGE_REPOSITORY=alfresco-base-tomcat
-    export IMAGE_TAG=$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION
+    [ $JAVA_MAJOR = 8 ] && JAVA_VENDOR=oracle || JAVA_VENDOR=openjdk
+    export IMAGE_TAG=$TOMCAT_VERSION-java-$JAVA_MAJOR-$JAVA_VENDOR-centos-$CENTOS_MAJOR
 
 script:
   - |-
     set -eux
 
+    (cd java-$JAVA_MAJOR/centos-$CENTOS_MAJOR && docker build -t java-$JAVA_MAJOR-centos-$CENTOS_MAJOR .)
     docker build -t $IMAGE_REPOSITORY . \
-      --build-arg CENTOS_MAJOR_VERSION=$CENTOS_MAJOR_VERSION \
-      --build-arg JAVA_MAJOR_VERSION=$JAVA_MAJOR_VERSION \
-      --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+      --build-arg CENTOS_MAJOR=$CENTOS_MAJOR \
+      --build-arg JAVA_MAJOR=$JAVA_MAJOR \
+      --build-arg TOMCAT_MAJOR=$TOMCAT_MAJOR \
+      --build-arg REVISION=$TRAVIS_COMMIT \
+      --build-arg CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
       --no-cache
-    [[ $BRANCH == master ]] && IMAGE_TAG_SUFFIX=release-candidate || IMAGE_TAG_SUFFIX=$BRANCH
+    [ $BRANCH = master ] && IMAGE_TAG_SUFFIX=release-candidate || IMAGE_TAG_SUFFIX=${BRANCH//\//-}
     IMAGE=quay.io/$IMAGE_REGISTRY_NAMESPACE/$IMAGE_REPOSITORY:$IMAGE_TAG-$IMAGE_TAG_SUFFIX
     docker tag $IMAGE_REPOSITORY $IMAGE
     docker push $IMAGE
@@ -43,7 +47,7 @@ script:
       export SHORT_SHA256=$(docker image inspect -f '{{ printf "%.12s" (index (split (index .RepoDigests 0) ":") 1) }}' $IMAGE_REPOSITORY)
       echo SHORT_SHA256=$SHORT_SHA256
       TAGS=($IMAGE_TAG $IMAGE_TAG-$SHORT_SHA256)
-      [[ $CENTOS_MAJOR_VERSION == 8 && $JAVA_MAJOR_VERSION = 11 ]] && TAGS+=${TOMCAT_VERSION%.*}
+      [[ $CENTOS_MAJOR_VERSION = 8 && $JAVA_MAJOR_VERSION = 11 ]] && TAGS+=${TOMCAT_VERSION%.*}
       for IMAGE_REGISTRY in quay.io docker.io
       do
         echo "tagging and pushing to $IMAGE_REGISTRY"
