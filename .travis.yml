@@ -18,48 +18,18 @@ before_script:
   - echo $QUAY_PASSWORD | docker login quay.io -u $QUAY_USERNAME --password-stdin
   - echo $DOCKER_PASSWORD | docker login docker.io -u "$DOCKER_USERNAME" --password-stdin
   - |-
-    case $JAVA_MAJOR_VERSION in
-      8)
-        export JAVA_VERSION=8u181
-        export JAVA_VENDOR=oracle
-        case $CENTOS_MAJOR_VERSION in
-          7)
-            export ALFRESCO_BASE_JAVA_SHORT_SHA256=fdef2ed275c9
-            ;;
-          8)
-            export ALFRESCO_BASE_JAVA_SHORT_SHA256=c8891876c209
-            ;;
-        esac
-        ;;
-      11)
-        export JAVA_VERSION=11.0.10
-        export JAVA_VENDOR=openjdk
-        case $CENTOS_MAJOR_VERSION in
-          7)
-            export ALFRESCO_BASE_JAVA_SHORT_SHA256=9da90416ab19
-            ;;
-          8)
-            export ALFRESCO_BASE_JAVA_SHORT_SHA256=0cbf1ceb612b
-            export DEFAULT_IMAGE=true
-            ;;
-        esac
-        ;;
-    esac
-  - |-
     export TOMCAT_VERSION=$(grep "ENV TOMCAT_VERSION" Dockerfile | cut -d ' ' -f 3)
     export IMAGE_REGISTRY_NAMESPACE=alfresco
     export IMAGE_REPOSITORY=alfresco-base-tomcat
     export IMAGE_TAG=$TOMCAT_VERSION-java-$JAVA_MAJOR_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION
-    export ALFRESCO_BASE_JAVA_IMAGE_REPOSITORY=quay.io/alfresco/alfresco-base-java
-    export ALFRESCO_BASE_JAVA_IMAGE_TAG=$JAVA_VERSION-$JAVA_VENDOR-centos-$CENTOS_MAJOR_VERSION-$ALFRESCO_BASE_JAVA_SHORT_SHA256
 
 script:
   - |-
-    set -e
+    set -eux
 
     docker build -t $IMAGE_REPOSITORY . \
-      --build-arg ALFRESCO_BASE_JAVA=$ALFRESCO_BASE_JAVA_IMAGE_REPOSITORY:$ALFRESCO_BASE_JAVA_IMAGE_TAG \
       --build-arg CENTOS_MAJOR_VERSION=$CENTOS_MAJOR_VERSION \
+      --build-arg JAVA_MAJOR_VERSION=$JAVA_MAJOR_VERSION \
       --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
       --no-cache
     [[ $BRANCH == master ]] && IMAGE_TAG_SUFFIX=release-candidate || IMAGE_TAG_SUFFIX=$BRANCH
@@ -73,7 +43,7 @@ script:
       export SHORT_SHA256=$(docker image inspect -f '{{ printf "%.12s" (index (split (index .RepoDigests 0) ":") 1) }}' $IMAGE_REPOSITORY)
       echo SHORT_SHA256=$SHORT_SHA256
       TAGS=($IMAGE_TAG $IMAGE_TAG-$SHORT_SHA256)
-      [[ $DEFAULT_IMAGE == true ]] && TAGS+=${TOMCAT_VERSION%.*}
+      [[ $CENTOS_MAJOR_VERSION == 8 && $JAVA_MAJOR_VERSION = 11 ]] && TAGS+=${TOMCAT_VERSION%.*}
       for IMAGE_REGISTRY in quay.io docker.io
       do
         echo "tagging and pushing to $IMAGE_REGISTRY"

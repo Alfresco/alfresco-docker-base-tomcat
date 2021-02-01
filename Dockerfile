@@ -1,7 +1,12 @@
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat/blob/master/8.5/jre8/Dockerfile
-ARG ALFRESCO_BASE_JAVA
-FROM ${ALFRESCO_BASE_JAVA}
+ARG JAVA_MAJOR_VERSION
+ARG CENTOS_MAJOR_VERSION
+FROM alfresco/alfresco-base-java:8u181-oracle-centos-7-34c4657a9671 AS centos-7-java-8
+FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-7-954752c611bf AS centos-7-java-11
+FROM alfresco/alfresco-base-java:8u181-oracle-centos-8-61912e6231c0 AS centos-8-java-8
+FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-8-2491c369ed9a AS centos-8-java-11
+FROM centos-${CENTOS_MAJOR_VERSION}-java-${JAVA_MAJOR_VERSION}
 
 LABEL org.label-schema.schema-version="1.0" \
 	org.label-schema.name="Alfresco Base Tomcat Image" \
