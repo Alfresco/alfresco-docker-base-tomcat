@@ -26,8 +26,8 @@ LABEL org.label-schema.schema-version="1.0" \
 	org.label-schema.build-date="$CREATED" \
 	org.opencontainers.image.title="Alfresco Base Tomcat Image" \
 	org.opencontainers.image.vendor="Alfresco" \
-    org.opencontainers.image.revision="$REVISION" \
-    org.opencontainers.image.source="https://github.com/Alfresco/alfresco-docker-base-tomcat" \
+	org.opencontainers.image.revision="$REVISION" \
+	org.opencontainers.image.source="https://github.com/Alfresco/alfresco-docker-base-tomcat" \
 	org.opencontainers.image.created="$CREATED"
 
 ENV CATALINA_HOME /usr/local/tomcat
@@ -55,7 +55,7 @@ ENV TOMCAT_ASC_URLS \
 	https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc
 
 RUN set -eux; \
-    # CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
+	# CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
 	# We're version-pinning to improve the chances of repeatable builds. [DEPLOY-433] \
 	# openssl's version is always the same as the openssl-libs RPM already installed \
 	[ ${CENTOS_MAJOR} = 7 ] && deps=" \
@@ -68,7 +68,7 @@ RUN set -eux; \
 	"; \
 	yum install -y $deps; \
 	curl -fsSL https://www.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; \
-    # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
+	# Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
 	success=; \
 	for url in $TOMCAT_TGZ_URLS; do \
 		if curl -fsSLo tomcat.tar.gz "$url"; then \
@@ -106,7 +106,7 @@ RUN set -eux; \
 		apr-devel-1.6.3-11.el8 \
 		gcc-8.3.1-5.1.el8 \
 		make-4.2.1-10.el8 \
-	    openssl-devel-1.1.1g-12.el8_3 \
+		openssl-devel-1.1.1g-12.el8_3 \
 		redhat-rpm-config-123-1.el8 \
 		glibc-all-langpacks-2.28-127.el8 \
 	"; \
