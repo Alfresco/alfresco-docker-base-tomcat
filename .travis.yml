@@ -26,7 +26,7 @@ before_script:
 
 script:
   - |-
-    set -eux
+    set -ex
 
     (cd java-$JAVA_MAJOR/centos-$CENTOS_MAJOR && docker build -t java-$JAVA_MAJOR-centos-$CENTOS_MAJOR .)
     docker build -t $IMAGE_REPOSITORY . \
