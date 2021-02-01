@@ -36,7 +36,7 @@ script:
       --build-arg REVISION=$TRAVIS_COMMIT \
       --build-arg CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
       --no-cache
-    [ $BRANCH = master ] && IMAGE_TAG_SUFFIX=release-candidate || IMAGE_TAG_SUFFIX=${BRANCH//\//-}
+    [[ $BRANCH == master ]] && IMAGE_TAG_SUFFIX=release-candidate || IMAGE_TAG_SUFFIX=${BRANCH//\//-}
     IMAGE=quay.io/$IMAGE_REGISTRY_NAMESPACE/$IMAGE_REPOSITORY:$IMAGE_TAG-$IMAGE_TAG_SUFFIX
     docker tag $IMAGE_REPOSITORY $IMAGE
     docker push $IMAGE
