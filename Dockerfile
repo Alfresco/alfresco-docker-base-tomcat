@@ -1,11 +1,34 @@
 # Alfresco Base Tomcat Image
-# see also https://github.com/docker-library/tomcat/blob/master/8.5/jre8/Dockerfile
-ARG ALFRESCO_BASE_JAVA
-FROM ${ALFRESCO_BASE_JAVA}
+# see also https://github.com/docker-library/tomcat
+ARG JAVA_MAJOR
+ARG CENTOS_MAJOR
+ARG TOMCAT_MAJOR
+
+FROM java-$JAVA_MAJOR-centos-$CENTOS_MAJOR AS tomcat-8
+ENV TOMCAT_MAJOR 8
+ENV TOMCAT_VERSION 8.5.61
+ENV TOMCAT_SHA512 55d7d0442a3c1bae7e470ba75c7473a8deeaf33c60ff66cecdc136ae0b0e852b871940c5deb720d501b444ccb00f0b8520b1930cbf564c2f46ceaf1e0367d41b
+
+FROM java-$JAVA_MAJOR-centos-$CENTOS_MAJOR AS tomcat-9
+ENV TOMCAT_MAJOR 9
+ENV TOMCAT_VERSION 9.0.41
+ENV TOMCAT_SHA512 b6450e590a37c5bccf049b1176c441f0964796995e80d4c7c7d9fb74f9ad817107c303b6b83ed3d71c9251b2b8acf334b90a4abdf9deea122e338643cece0766
+
+FROM tomcat-$TOMCAT_MAJOR
+ARG JAVA_MAJOR
+ARG CENTOS_MAJOR
+ARG CREATED
+ARG REVISION
 
 LABEL org.label-schema.schema-version="1.0" \
-    org.label-schema.name="Alfresco Base Tomcat" \
-    org.label-schema.vendor="Alfresco"
+	org.label-schema.name="Alfresco Base Tomcat Image" \
+	org.label-schema.vendor="Alfresco" \
+	org.label-schema.build-date="$CREATED" \
+	org.opencontainers.image.title="Alfresco Base Tomcat Image" \
+	org.opencontainers.image.vendor="Alfresco" \
+	org.opencontainers.image.revision="$REVISION" \
+	org.opencontainers.image.source="https://github.com/Alfresco/alfresco-docker-base-tomcat" \
+	org.opencontainers.image.created="$CREATED"
 
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
@@ -15,14 +38,6 @@ WORKDIR $CATALINA_HOME
 # let "Tomcat Native" live somewhere isolated
 ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
-
-# see https://www.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/KEYS
-# see also "update.sh" (https://github.com/docker-library/tomcat/blob/master/update.sh)
-ENV GPG_KEYS 05AB33110949707C93A279E3D3EFE6B686867BA6 07E48665A34DCAFAE522E5E6266191C37C037D42 47309207D818FFD8DCD3F83F1931D684307A10A5 541FBE7D8F78B25E055DDEE13C370389288584E7 61B832AC2F1C5A90F0F9B00A1C506407564C17A3 713DA88BE50911535FE716F5208B0AB1D63011C7 79F7026C690BAA50B92CD8B66A3AD3F4F22C4FED 9BA44C2621385CB966EBA586F72C284D731FABEE A27677289986DB50844682F8ACB77FC2E86E29AC A9C5DF4D22E99998D9875A5110C01C5A2F6059E7 DCFD35E0BF8CA7344752DE8B6FB21E8933C60243 F3A04C595DB5B6A5F1ECA43E3B7BBB100D811BBE F7DA48BB64BCB84ECBA7EE6935CD23C10D498E23
-
-ENV TOMCAT_MAJOR 8
-ENV TOMCAT_VERSION 8.5.51
-ENV TOMCAT_SHA512 bb9207d33d7b4408292186523f3556a3d1454ea172b4a6cde6e0028e2f7a5d9408615cb4ccf8d9fdb75a9f8ce227580f56f929a811eb24ef99e26f980e4bcb48
 
 ENV TOMCAT_TGZ_URLS \
 # https://issues.apache.org/jira/browse/INFRA-8753?focusedCommentId=14735394#comment-14735394
@@ -40,17 +55,20 @@ ENV TOMCAT_ASC_URLS \
 	https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc
 
 RUN set -eux; \
-    # CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
+	# CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
 	# We're version-pinning to improve the chances of repeatable builds. [DEPLOY-433] \
 	# openssl's version is always the same as the openssl-libs RPM already installed \
-    yum install -y \
+	[ ${CENTOS_MAJOR} = 7 ] && deps=" \
 		apr-1.4.8-7.el7 \
 		openssl-1.0.2k-21.el7_9 \
-		; \
-	for key in $GPG_KEYS; do \
-		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-	done; \
-  # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
+	"; \
+	[ ${CENTOS_MAJOR} = 8 ] && deps=" \
+		apr-1.6.3-11.el8 \
+	    openssl-1.1.1g-12.el8_3 \
+	"; \
+	yum install -y $deps; \
+	curl -fsSL https://www.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; \
+	# Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
 	success=; \
 	for url in $TOMCAT_TGZ_URLS; do \
 		if curl -fsSLo tomcat.tar.gz "$url"; then \
@@ -78,12 +96,19 @@ RUN set -eux; \
 	\
 	nativeBuildDir="$(mktemp -d)"; \
 	tar -xvf bin/tomcat-native.tar.gz -C "$nativeBuildDir" --strip-components=1; \
-	nativeBuildDeps=" \
-		openssl-devel-1.0.2k-21.el7_9 \
-		openssl-libs-1.0.2k-21.el7_9 \
-		gcc-4.8.5-44.el7 \
+	[ ${CENTOS_MAJOR} = 7 ] && nativeBuildDeps=" \
 		apr-devel-1.4.8-7.el7 \
+		gcc-4.8.5-44.el7 \
 		make-3.82-24.el7 \
+		openssl-devel-1.0.2k-21.el7_9 \
+	"; \
+	[ ${CENTOS_MAJOR} = 8 ] && nativeBuildDeps=" \
+		apr-devel-1.6.3-11.el8 \
+		gcc-8.3.1-5.1.el8 \
+		make-4.2.1-10.el8 \
+		openssl-devel-1.1.1g-12.el8_3 \
+		redhat-rpm-config-123-1.el8 \
+		glibc-all-langpacks-2.28-127.el8 \
 	"; \
 	yum install -y $nativeBuildDeps; \
 	( \
@@ -132,7 +157,7 @@ RUN set -e \
 	&& nativeLines="$(catalina.sh configtest 2>&1)" \
 	&& nativeLines="$(echo "$nativeLines" | grep 'Apache Tomcat Native')" \
 	&& nativeLines="$(echo "$nativeLines" | sort -u)" \
-	&& if ! echo "$nativeLines" | grep 'INFO: Loaded APR based Apache Tomcat Native library' >&2; then \
+	&& if ! echo "$nativeLines" | grep 'Apache Tomcat Native library' >&2; then \
 		echo >&2 "$nativeLines"; \
 		exit 1; \
 	fi
