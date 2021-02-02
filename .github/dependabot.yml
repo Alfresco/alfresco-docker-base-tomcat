@@ -5,7 +5,35 @@
 
 version: 2
 updates:
-  - package-ecosystem: "docker" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "docker"
+    directory: "/java-8/centos-7/"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "alfresco/alfresco-base-java"
+        versions:
+          - ">= 8.0.202-oracle-centos-8"
+  - package-ecosystem: "docker"
+    directory: "/java-8/centos-8/"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "alfresco/alfresco-base-java"
+        versions:
+          - ">= 11"
+  - package-ecosystem: "docker"
+    directory: "/java-11/centos-7/"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "alfresco/alfresco-base-java"
+        versions:
+          - ">= 11.0.10-openjdk-centos-8"
+  - package-ecosystem: "docker"
+    directory: "/java-11/centos-8/"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "alfresco/alfresco-base-java"
+        versions:
+          - ">= 12"
