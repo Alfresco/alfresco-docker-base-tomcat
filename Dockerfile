@@ -64,7 +64,7 @@ RUN set -eux; \
 	"; \
 	[ ${CENTOS_MAJOR} = 8 ] && deps=" \
 		apr-1.6.3-11.el8 \
-	    openssl-1.1.1g-12.el8_3 \
+	    openssl-1.1.1g-15.el8_3 \
 	"; \
 	yum install -y $deps; \
 	curl -fsSL https://www.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; \
@@ -106,7 +106,7 @@ RUN set -eux; \
 		apr-devel-1.6.3-11.el8 \
 		gcc-8.3.1-5.1.el8 \
 		make-4.2.1-10.el8 \
-		openssl-devel-1.1.1g-12.el8_3 \
+		openssl-devel-1.1.1g-15.el8_3 \
 		redhat-rpm-config-123-1.el8 \
 		glibc-all-langpacks-2.28-127.el8 \
 	"; \
