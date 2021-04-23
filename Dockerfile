@@ -55,6 +55,7 @@ ENV TOMCAT_ASC_URLS \
 	https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc
 
 RUN set -eux; \
+	yum makecache; \
 	# CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
 	# We're version-pinning to improve the chances of repeatable builds. [DEPLOY-433] \
 	# openssl's version is always the same as the openssl-libs RPM already installed \
@@ -109,6 +110,7 @@ RUN set -eux; \
 		openssl-devel-1.1.1g-15.el8_3 \
 		redhat-rpm-config-123-1.el8 \
 		glibc-all-langpacks-2.28-127.el8 \
+		zlib-1.2.11-16.2.el8_3 \
 	"; \
 	yum install -y $nativeBuildDeps; \
 	( \
@@ -124,7 +126,7 @@ RUN set -eux; \
 		make -j "$(nproc)"; \
 		make install; \
 	); \
-	yum history -y rollback last; \
+	yum history -y rollback last-1; \
 	find /etc -mindepth 2 -name *.rpmsave -exec rm -v '{}' +; \
 	rm -rf "$nativeBuildDir"; \
 	rm bin/tomcat-native.tar.gz; \
