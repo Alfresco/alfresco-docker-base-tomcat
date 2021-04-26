@@ -100,7 +100,6 @@ RUN set -eux; \
 		openssl-devel-1.1.1g-15.el8_3 \
 		redhat-rpm-config-123-1.el8 \
 		glibc-all-langpacks-2.28-127.el8 \
-		zlib-1.2.11-16.2.el8_3 \
 	"; \
 	yum install -y $nativeBuildDeps; \
 	( \
