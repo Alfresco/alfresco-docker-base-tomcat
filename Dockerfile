@@ -116,6 +116,7 @@ RUN set -eux; \
 		make install; \
 	); \
 	yum remove -y $nativeBuildDeps; \
+	yum autoremove -y; \
 	find /etc -mindepth 2 -name *.rpmsave -exec rm -v '{}' +; \
 	rm -rf "$nativeBuildDir"; \
 	rm bin/tomcat-native.tar.gz; \
