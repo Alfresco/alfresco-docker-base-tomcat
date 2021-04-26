@@ -116,7 +116,7 @@ RUN set -eux; \
 		make -j "$(nproc)"; \
 		make install; \
 	); \
-	yum uninstall -y $nativeBuildDeps; \
+	yum remove -y $nativeBuildDeps; \
 	find /etc -mindepth 2 -name *.rpmsave -exec rm -v '{}' +; \
 	rm -rf "$nativeBuildDir"; \
 	rm bin/tomcat-native.tar.gz; \
