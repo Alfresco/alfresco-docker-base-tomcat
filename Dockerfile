@@ -109,8 +109,7 @@ RUN set -eux; \
 			--libdir="$TOMCAT_NATIVE_LIBDIR" \
 			--prefix="$CATALINA_HOME" \
 			--with-apr="$(which apr-1-config)" \
-			# Official OpenJDK image only
-			# --with-java-home="$(docker-java-home)" \
+			--with-java-home="$(docker-java-home)" \
 			--with-ssl=yes; \
 		make -j "$(nproc)"; \
 		make install; \

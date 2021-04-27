@@ -1,2 +1,2 @@
 # Java 11 Centos 8 Base Image for Alfresco Base Tomcat Image
-FROM alfresco/alfresco-base-java:11.0.10-openjdk-centos-8@sha256:91f0239ffe194c05031ec79baf7f4cce726da0676583736edbd660532742e7e1
+FROM alfresco/alfresco-base-java:11.0.11-centos-8@sha256:a44bdfb520a6d1813714cee98a28e828fdcc96d2dd3543e62892c2d9b727b80f
