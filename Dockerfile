@@ -109,7 +109,6 @@ RUN set -eux; \
 			--libdir="$TOMCAT_NATIVE_LIBDIR" \
 			--prefix="$CATALINA_HOME" \
 			--with-apr="$(which apr-1-config)" \
-			--with-java-home=/usr/lib/jvm/jre \
 			--with-ssl=yes; \
 		make -j "$(nproc)"; \
 		make install; \
