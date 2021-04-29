@@ -60,11 +60,9 @@ RUN set -eux; \
 	# openssl's version is always the same as the openssl-libs RPM already installed \
 	[ ${CENTOS_MAJOR} = 7 ] && deps=" \
 		apr-1.4.8-7.el7 \
-		openssl-1.0.2k-21.el7_9 \
 	"; \
 	[ ${CENTOS_MAJOR} = 8 ] && deps=" \
 		apr-1.6.3-11.el8 \
-	    openssl-1.1.1g-12.el8_3 \
 	"; \
 	yum install -y $deps; \
 	curl -fsSL https://www.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; \
@@ -106,7 +104,7 @@ RUN set -eux; \
 		apr-devel-1.6.3-11.el8 \
 		gcc-8.3.1-5.1.el8 \
 		make-4.2.1-10.el8 \
-		openssl-devel-1.1.1g-12.el8_3 \
+		openssl-devel-1.1.1g-15.el8_3 \
 		redhat-rpm-config-123-1.el8 \
 		glibc-all-langpacks-2.28-127.el8 \
 	"; \
@@ -118,8 +116,6 @@ RUN set -eux; \
 			--libdir="$TOMCAT_NATIVE_LIBDIR" \
 			--prefix="$CATALINA_HOME" \
 			--with-apr="$(which apr-1-config)" \
-			# Official OpenJDK image only
-			# --with-java-home="$(docker-java-home)" \
 			--with-ssl=yes; \
 		make -j "$(nproc)"; \
 		make install; \
@@ -138,19 +134,19 @@ RUN set -eux; \
 	chmod -R +rX .; \
 	chmod 777 logs work ; \
 	\
-    # Security improvements:
-    # Remove server banner
-    sed -i "s/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"\n\               Server=\" \"/g" /usr/local/tomcat/conf/server.xml ; \
-    # Removal of default/unwanted Applications
-    rm -f -r -d /usr/local/tomcat/webapps/* ; \
-    # Change SHUTDOWN port and command.
-    #     sed -i "s/<Server\ port=\"8005\"\ shutdown=\"SHUTDOWN\">/<Server\ port=\"ShutDownPort\"\ shutdown=\"ShutDownCommand\">/g" /usr/local/tomcat/conf/server.xml ; \
-    # Replace default 404,403,500 page
-    sed -i "$ d" /usr/local/tomcat/conf/web.xml ; \
-    sed -i -e "\$a\    <error-page\>\n\        <error-code\>404<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>403<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>500<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\n\<\/web-app\>" /usr/local/tomcat/conf/web.xml ; \
-    #Turn off loggin by the VersionLoggerListener
-    sed -i "s/\  <Listener\ className=\"org.apache.catalina.startup.VersionLoggerListener\"/\  <Listener\ className=\"org.apache.catalina.startup.VersionLoggerListener\"\ logArgs=\"false\"/g" /usr/local/tomcat/conf/server.xml ; \
-    yum clean all
+	# Security improvements:
+	# Remove server banner
+	sed -i "s/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"\n\               Server=\" \"/g" /usr/local/tomcat/conf/server.xml ; \
+	# Removal of default/unwanted Applications
+	rm -f -r -d /usr/local/tomcat/webapps/* ; \
+	# Change SHUTDOWN port and command.
+	#     sed -i "s/<Server\ port=\"8005\"\ shutdown=\"SHUTDOWN\">/<Server\ port=\"ShutDownPort\"\ shutdown=\"ShutDownCommand\">/g" /usr/local/tomcat/conf/server.xml ; \
+	# Replace default 404,403,500 page
+	sed -i "$ d" /usr/local/tomcat/conf/web.xml ; \
+	sed -i -e "\$a\    <error-page\>\n\        <error-code\>404<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>403<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>500<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\n\<\/web-app\>" /usr/local/tomcat/conf/web.xml ; \
+	#Turn off loggin by the VersionLoggerListener
+	sed -i "s/\  <Listener\ className=\"org.apache.catalina.startup.VersionLoggerListener\"/\  <Listener\ className=\"org.apache.catalina.startup.VersionLoggerListener\"\ logArgs=\"false\"/g" /usr/local/tomcat/conf/server.xml ; \
+	yum clean all
 
 # verify Tomcat Native is working properly
 RUN set -e \

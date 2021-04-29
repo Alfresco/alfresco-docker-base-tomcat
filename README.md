@@ -45,8 +45,8 @@ Builds are available from [Docker Hub](https://hub.docker.com/r/alfresco/alfresc
 
 ```bash
 docker pull alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION 
-docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$JAVA_VENDOR-centos-$CENTOS_MAJOR
-docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$JAVA_VENDOR-centos-$CENTOS_MAJOR-$SHORT_SHA256
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR-$SHORT_SHA256
 ```
 
 where:
@@ -54,7 +54,6 @@ where:
 * JAVA_MAJOR is 8 or 11
 * TOMCAT_MAJOR_MINOR_VERSION is 8.5 or 9.0
 * TOMCAT_VERSION is 8.5.61 or 9.0.41
-* JAVA_VENDOR is `oracle` for 8 and `openjdk` for 11
 * SHORT_SHA256 is the 12 digit SHA256 of the image as available from the registry
 
 *NOTE*
@@ -65,8 +64,8 @@ The builds are identical to those stored in the private repo on Quay, which also
 
 ```bash
 docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION
-docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$JAVA_VENDOR-centos-$CENTOS_MAJOR
-docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$JAVA_VENDOR-centos-$CENTOS_MAJOR-$SHORT_SHA256
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR-$SHORT_SHA256
 ```
 
 ## Usage
@@ -110,7 +109,7 @@ FROM alfresco/alfresco-base-tomcat:9.0
 Example from a Dockerfile using a private, parent image in Quay:
 
 ```bash
-FROM quay.io/alfresco/alfresco-base-tomcat:9.0.41-java-11-oracle-centos-7-f7b1278cc0eb
+FROM quay.io/alfresco/alfresco-base-tomcat:9.0.41-java-11-centos-7-f7b1278cc0eb
 ```
 
 ### Minimum volume configuration

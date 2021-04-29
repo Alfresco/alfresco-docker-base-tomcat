@@ -12,7 +12,7 @@ updates:
     ignore:
       - dependency-name: "alfresco/alfresco-base-java"
         versions:
-          - ">= 8.0.202-oracle-centos-8"
+          - ">= 8.0.292-centos-8"
   - package-ecosystem: "docker"
     directory: "/java-8/centos-8/"
     schedule:
@@ -28,7 +28,7 @@ updates:
     ignore:
       - dependency-name: "alfresco/alfresco-base-java"
         versions:
-          - ">= 11.0.10-openjdk-centos-8"
+          - ">= 11.0.11-centos-8"
   - package-ecosystem: "docker"
     directory: "/java-11/centos-8/"
     schedule:
