@@ -58,6 +58,13 @@ RUN set -eux; \
 	# CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
 	# We're version-pinning to improve the chances of repeatable builds. [DEPLOY-433] \
 	# openssl's version is always the same as the openssl-libs RPM already installed \
+	[ ${CENTOS_MAJOR} = 7 ] && deps=" \
+		apr-1.4.8-7.el7 \
+	"; \
+	[ ${CENTOS_MAJOR} = 8 ] && deps=" \
+		apr-1.6.3-11.el8 \
+	"; \
+	yum install -y $deps; \
 	curl -fsSL https://www.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; \
 	# Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
 	success=; \
