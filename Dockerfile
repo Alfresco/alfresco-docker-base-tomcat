@@ -61,6 +61,7 @@ RUN set -eux; \
 	[ ${CENTOS_MAJOR} = 7 ] && deps=" \
 		apr-1.4.8-7.el7 \
 	"; \
+	[ ${CENTOS_MAJOR} = 8 ] && yum update -y; \
 	[ ${CENTOS_MAJOR} = 8 ] && deps=" \
 		apr-1.6.3-11.el8 \
 	"; \
