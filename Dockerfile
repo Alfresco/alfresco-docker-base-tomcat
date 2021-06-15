@@ -61,6 +61,7 @@ RUN set -eux; \
 	[ ${CENTOS_MAJOR} = 7 ] && deps=" \
 		apr-1.4.8-7.el7 \
 	"; \
+	[ ${CENTOS_MAJOR} = 8 ] && yum update -y; \
 	[ ${CENTOS_MAJOR} = 8 ] && deps=" \
 		apr-1.6.3-11.el8 \
 	"; \
@@ -102,11 +103,11 @@ RUN set -eux; \
 	"; \
 	[ ${CENTOS_MAJOR} = 8 ] && nativeBuildDeps=" \
 		apr-devel-1.6.3-11.el8 \
-		gcc-8.3.1-5.1.el8 \
+		gcc-8.4.1-1.el8 \
 		make-4.2.1-10.el8 \
 		openssl-devel-1.1.1g-15.el8_3 \
-		redhat-rpm-config-123-1.el8 \
-		glibc-all-langpacks-2.28-127.el8 \
+		redhat-rpm-config-125-1.el8 \
+		glibc-all-langpacks-2.28-151.el8 \
 	"; \
 	yum install -y $nativeBuildDeps; \
 	( \
