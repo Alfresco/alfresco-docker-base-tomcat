@@ -20,7 +20,9 @@ before_script:
   - echo $QUAY_PASSWORD | docker login quay.io -u $QUAY_USERNAME --password-stdin
   - echo $DOCKER_PASSWORD | docker login docker.io -u "$DOCKER_USERNAME" --password-stdin
   - |-
-    export TOMCAT_VERSION=$(grep "ENV TOMCAT_VERSION" Dockerfile | cut -d ' ' -f 3 | grep $TOMCAT_MAJOR)
+    set -ex
+
+    export TOMCAT_VERSION=$(grep "ENV TOMCAT_VERSION $TOMCAT_MAJOR" Dockerfile | cut -d ' ' -f 3)
     export IMAGE_REGISTRY_NAMESPACE=alfresco
     export IMAGE_REPOSITORY=alfresco-base-tomcat
     export IMAGE_TAG=$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR
