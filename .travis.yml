@@ -13,13 +13,16 @@ env:
   - CENTOS_MAJOR=8 JAVA_MAJOR=8  TOMCAT_MAJOR=8
   - CENTOS_MAJOR=8 JAVA_MAJOR=11 TOMCAT_MAJOR=8
   - CENTOS_MAJOR=8 JAVA_MAJOR=11 TOMCAT_MAJOR=9
+  - CENTOS_MAJOR=8 JAVA_MAJOR=11 TOMCAT_MAJOR=10
 
 before_script:
   - export BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
   - echo $QUAY_PASSWORD | docker login quay.io -u $QUAY_USERNAME --password-stdin
   - echo $DOCKER_PASSWORD | docker login docker.io -u "$DOCKER_USERNAME" --password-stdin
   - |-
-    export TOMCAT_VERSION=$(grep "ENV TOMCAT_VERSION" Dockerfile | cut -d ' ' -f 3 | grep $TOMCAT_MAJOR)
+    set -ex
+
+    export TOMCAT_VERSION=$(grep "ENV TOMCAT_VERSION $TOMCAT_MAJOR" Dockerfile | cut -d ' ' -f 3)
     export IMAGE_REGISTRY_NAMESPACE=alfresco
     export IMAGE_REPOSITORY=alfresco-base-tomcat
     export IMAGE_TAG=$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR
@@ -37,7 +40,7 @@ script:
       --build-arg CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
       --no-cache
     [[ $BRANCH == master ]] && IMAGE_TAG_SUFFIX=release-candidate || IMAGE_TAG_SUFFIX=${BRANCH//\//-}
-    IMAGE=quay.io/$IMAGE_REGISTRY_NAMESPACE/$IMAGE_REPOSITORY:$IMAGE_TAG-$IMAGE_TAG_SUFFIX
+    IMAGE=quay.io/${IMAGE_REGISTRY_NAMESPACE}/${IMAGE_REPOSITORY}:${IMAGE_TAG}-${IMAGE_TAG_SUFFIX}
     docker tag $IMAGE_REPOSITORY $IMAGE
     docker push $IMAGE
     docker images
