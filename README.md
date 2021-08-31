@@ -9,7 +9,7 @@ other internal groups in the organisation, customers and partners to create Tomc
 
 ## Versioning
 
-Images are available for latest Tomcat 8.5.65, 9.0.45 and 10.0.8 (last two are CentOS 8 and Java 11 only).
+Images are available for latest Tomcat 8.5.65, 9.0.45 and 10.0.8 (last two are Java 11 only).
 
 ## How to Build
 
@@ -23,15 +23,17 @@ To build this image, run the following script:
 
 ```bash
 IMAGE_REPOSITORY=alfresco/alfresco-base-tomcat
-(cd java-$JAVA_MAJOR/centos-$CENTOS_MAJOR && docker build -t java-$JAVA_MAJOR-centos-$CENTOS_MAJOR .)
+(cd java-$JAVA_MAJOR/$DIST_NAME-$DIST_MAJOR && docker build -t java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR .)
 docker build -t $IMAGE_REPOSITORY . \
-  --build-arg CENTOS_MAJOR=$CENTOS_MAJOR \
+  --build-arg DIST_NAME=$DIST_NAME \
+  --build-arg DIST_MAJOR=$DIST_MAJOR \
   --build-arg JAVA_MAJOR=$JAVA_MAJOR \
   --build-arg TOMCAT_MAJOR=$TOMCAT_MAJOR \
   --no-cache
 ```
 where:
-* CENTOS_MAJOR is 7 or 8
+* DIST_NAME is centos
+* DIST_MAJOR is 7
 * JAVA_MAJOR is 8 or 11
 * TOMCAT_MAJOR is 8, 9 or 10
 
@@ -45,27 +47,28 @@ Builds are available from [Docker Hub](https://hub.docker.com/r/alfresco/alfresc
 
 ```bash
 docker pull alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION 
-docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR
-docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR-$SHORT_SHA256
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR-$SHORT_SHA256
 ```
 
 where:
-* CENTOS_MAJOR is 7 or 8
+* DIST_NAME is centos
+* DIST_MAJOR is 7
 * JAVA_MAJOR is 8 or 11
 * TOMCAT_MAJOR_MINOR_VERSION is 8.5 or 9.0
 * TOMCAT_VERSION is 8.5.65, 9.0.45 or 10.0.8
 * SHORT_SHA256 is the 12 digit SHA256 of the image as available from the registry
 
 *NOTE*
-The default image with $TOMCAT_MAJOR_MINOR_VERSION as tag uses CentOS 8 and Java 11.
+The default image with $TOMCAT_MAJOR_MINOR_VERSION as tag uses CentOS 7 and Java 11.
 Tomcat 9 images are available with CentOS 8 and Java 11 only.
 
 The builds are identical to those stored in the private repo on Quay, which also supports build-pinning versions.
 
 ```bash
 docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION
-docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR
-docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-centos-$CENTOS_MAJOR-$SHORT_SHA256
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR-$SHORT_SHA256
 ```
 
 ## Usage
@@ -109,7 +112,7 @@ FROM alfresco/alfresco-base-tomcat:10.0
 Example from a Dockerfile using a private parent image in Quay:
 
 ```bash
-FROM quay.io/alfresco/alfresco-base-tomcat:10.0.8-java-11-centos-8-94fdb78396b6
+FROM quay.io/alfresco/alfresco-base-tomcat:10.0.8-java-11-centos-7-94fdb78396b6
 ```
 
 ### Minimum volume configuration

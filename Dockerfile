@@ -1,27 +1,28 @@
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat
 ARG JAVA_MAJOR
-ARG CENTOS_MAJOR
+ARG DIST_NAME
+ARG DIST_MAJOR
 ARG TOMCAT_MAJOR
 
-FROM java-$JAVA_MAJOR-centos-$CENTOS_MAJOR AS tomcat-8
+FROM java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR AS tomcat-8
 ENV TOMCAT_MAJOR 8
 ENV TOMCAT_VERSION 8.5.65
 ENV TOMCAT_SHA512 eb5a77d75a46496f7de39c1cba5f4fc4991ec7da7717e7b37ad48b4ca2ea334aeabfd094f64977477b4b2352637b56e30e5d9acfcdf7ccd5f4269a824829dd39
 
-FROM java-$JAVA_MAJOR-centos-$CENTOS_MAJOR AS tomcat-9
+FROM java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR AS tomcat-9
 ENV TOMCAT_MAJOR 9
 ENV TOMCAT_VERSION 9.0.45
 ENV TOMCAT_SHA512 81bfbd1f13dabc178635a2841c1566d080e209dff36170f6f4f354e3b2b3878f603fc8978c0c132655fca3653166e68094d61c3dcfc5edf07bc7e5419d20c0d1
 
-FROM java-$JAVA_MAJOR-centos-$CENTOS_MAJOR AS tomcat-10
+FROM java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR AS tomcat-10
 ENV TOMCAT_MAJOR 10
 ENV TOMCAT_VERSION 10.0.8
 ENV TOMCAT_SHA512 188fb84f86ae5f5b88ddbe6f38c8dec6ec733a5ef166c5875e1c6728701e49f9d01f494a419186fd8da80ab21576e0a056382d59f7fe17695c4ec63aaf543897
 
 FROM tomcat-$TOMCAT_MAJOR
 ARG JAVA_MAJOR
-ARG CENTOS_MAJOR
+ARG DIST_MAJOR
 ARG CREATED
 ARG REVISION
 
@@ -63,11 +64,11 @@ RUN set -eux; \
 	# CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
 	# We're version-pinning to improve the chances of repeatable builds. [DEPLOY-433] \
 	# openssl's version is always the same as the openssl-libs RPM already installed \
-	[ ${CENTOS_MAJOR} = 7 ] && deps=" \
+	[ ${DIST_MAJOR} = 7 ] && deps=" \
 		apr-1.4.8-7.el7 \
 	"; \
-	[ ${CENTOS_MAJOR} = 8 ] && yum update -y; \
-	[ ${CENTOS_MAJOR} = 8 ] && deps=" \
+	[ ${DIST_MAJOR} = 8 ] && yum update -y; \
+	[ ${DIST_MAJOR} = 8 ] && deps=" \
 		apr-1.6.3-11.el8 \
 	"; \
 	yum install -y $deps; \
@@ -100,13 +101,13 @@ RUN set -eux; \
 	\
 	nativeBuildDir="$(mktemp -d)"; \
 	tar -xvf bin/tomcat-native.tar.gz -C "$nativeBuildDir" --strip-components=1; \
-	[ ${CENTOS_MAJOR} = 7 ] && nativeBuildDeps=" \
+	[ ${DIST_MAJOR} = 7 ] && nativeBuildDeps=" \
 		apr-devel-1.4.8-7.el7 \
 		gcc-4.8.5-44.el7 \
 		make-3.82-24.el7 \
 		openssl-devel-1.0.2k-21.el7_9 \
 	"; \
-	[ ${CENTOS_MAJOR} = 8 ] && nativeBuildDeps=" \
+	[ ${DIST_MAJOR} = 8 ] && nativeBuildDeps=" \
 		apr-devel-1.6.3-11.el8 \
 		gcc-8.4.1-1.el8 \
 		make-4.2.1-10.el8 \
