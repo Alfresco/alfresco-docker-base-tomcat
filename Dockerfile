@@ -161,13 +161,8 @@ RUN set -eux; \
 
 # verify Tomcat Native is working properly
 RUN set -e \
-	&& nativeLines="$(catalina.sh configtest 2>&1)" \
-	&& nativeLines="$(echo "$nativeLines" | grep 'Apache Tomcat Native')" \
-	&& nativeLines="$(echo "$nativeLines" | sort -u)" \
-	&& if ! echo "$nativeLines" | grep 'Apache Tomcat Native library' >&2; then \
-		echo >&2 "$nativeLines"; \
-		exit 1; \
-	fi
+	&& nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')"; \
+	&& test $nativeLines -ge 1 || exit 1
 
 EXPOSE 8080
 # Starting tomcat with Security Manager
