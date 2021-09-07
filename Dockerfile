@@ -161,7 +161,7 @@ RUN set -eux; \
 
 # verify Tomcat Native is working properly
 RUN set -e \
-	&& nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')"; \
+	&& nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" \
 	&& test $nativeLines -ge 1 || exit 1
 
 EXPOSE 8080
