@@ -100,6 +100,8 @@ RUN set -eux; \
 	rm tomcat.tar.gz*; \
 	\
 	nativeBuildDir="$(mktemp -d)"; \
+	[ ${JAVA_MAJOR} == 8 ] && JAVA_MAJOR_PKG=1.8.0; \
+	JRE_PKG_VERSION=$(rpm -qa java-${JAVA_MAJOR_PKG:-$JAVA_MAJOR}-openjdk-headless --queryformat "%{RPMTAG_VERSION}"); \
 	tar -xvf bin/tomcat-native.tar.gz -C "$nativeBuildDir" --strip-components=1; \
 	[ ${DIST_MAJOR} = 7 ] && nativeBuildDeps=" \
 		apr-devel-1.4.8-7.el7 \
@@ -115,6 +117,7 @@ RUN set -eux; \
 		redhat-rpm-config-125-1.el8 \
 		glibc-all-langpacks-2.28-151.el8 \
 	"; \
+	nativeBuildDeps="$nativeBuildDeps java-${JAVA_MAJOR_PKG:-$JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}"; \
 	yum install -y $nativeBuildDeps; \
 	( \
 		export CATALINA_HOME="$PWD"; \
