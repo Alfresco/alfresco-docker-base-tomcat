@@ -160,7 +160,6 @@ RUN set -eux; \
 	yum clean all
 
 # verify Tomcat Native is working properly
-RUN catalina.sh configtest 2>&1
 RUN set -e \
 	&& nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" \
 	&& test $nativeLines -ge 1 || exit 1
