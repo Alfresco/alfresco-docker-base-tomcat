@@ -8,10 +8,10 @@ branches:
     - master
 
 env:
-  - DIST_NAME=centos DIST_MAJOR=7 JAVA_MAJOR=8  TOMCAT_MAJOR=8
-  - DIST_NAME=centos DIST_MAJOR=7 JAVA_MAJOR=11 TOMCAT_MAJOR=8
-  - DIST_NAME=centos DIST_MAJOR=7 JAVA_MAJOR=11 TOMCAT_MAJOR=9
-  - DIST_NAME=centos DIST_MAJOR=7 JAVA_MAJOR=11 TOMCAT_MAJOR=10
+  - DISTRIB_NAME=centos DISTRIB_MAJOR=7 JAVA_MAJOR=8  TOMCAT_MAJOR=8
+  - DISTRIB_NAME=centos DISTRIB_MAJOR=7 JAVA_MAJOR=11 TOMCAT_MAJOR=8
+  - DISTRIB_NAME=centos DISTRIB_MAJOR=7 JAVA_MAJOR=11 TOMCAT_MAJOR=9
+  - DISTRIB_NAME=centos DISTRIB_MAJOR=7 JAVA_MAJOR=11 TOMCAT_MAJOR=10
 
 before_script:
   - export BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
@@ -23,16 +23,16 @@ before_script:
     export TOMCAT_VERSION=$(grep "ENV TOMCAT_VERSION $TOMCAT_MAJOR" Dockerfile | cut -d ' ' -f 3)
     export IMAGE_REGISTRY_NAMESPACE=alfresco
     export IMAGE_REPOSITORY=alfresco-base-tomcat
-    export IMAGE_TAG=$TOMCAT_VERSION-java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR
+    export IMAGE_TAG=$TOMCAT_VERSION-java-$JAVA_MAJOR-$DISTRIB_NAME-$DISTRIB_MAJOR
 
 script:
   - |-
     set -ex
 
-    (cd java-$JAVA_MAJOR/$DIST_NAME-$DIST_MAJOR && docker build -t java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR .)
+    (cd java-$JAVA_MAJOR/$DISTRIB_NAME-$DISTRIB_MAJOR && docker build -t java-$JAVA_MAJOR-$DISTRIB_NAME-$DISTRIB_MAJOR .)
     docker build -t $IMAGE_REPOSITORY . \
-      --build-arg DIST_NAME=$DIST_NAME \
-      --build-arg DIST_MAJOR=$DIST_MAJOR \
+      --build-arg DISTRIB_NAME=$DISTRIB_NAME \
+      --build-arg DISTRIB_MAJOR=$DISTRIB_MAJOR \
       --build-arg JAVA_MAJOR=$JAVA_MAJOR \
       --build-arg TOMCAT_MAJOR=$TOMCAT_MAJOR \
       --build-arg REVISION=$TRAVIS_COMMIT \
@@ -49,7 +49,7 @@ script:
       export SHORT_SHA256=$(docker image inspect -f '{{ printf "%.12s" (index (split (index .RepoDigests 0) ":") 1) }}' $IMAGE_REPOSITORY)
       echo SHORT_SHA256=$SHORT_SHA256
       TAGS=($IMAGE_TAG $IMAGE_TAG-$SHORT_SHA256)
-      [[ $DISTRIB_NAME == 'centos' && $DIST_MAJOR == 7 && $JAVA_VERSION == 11 ]] && TAGS+=(${TOMCAT_VERSION%.*})
+      [[ $DISTRIB_NAME == 'centos' && $DISTRIB_MAJOR == 7 && $JAVA_VERSION == 11 ]] && TAGS+=(${TOMCAT_VERSION%.*})
       for IMAGE_REGISTRY in quay.io docker.io
       do
         echo "tagging and pushing to $IMAGE_REGISTRY"
