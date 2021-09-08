@@ -23,17 +23,17 @@ To build this image, run the following script:
 
 ```bash
 IMAGE_REPOSITORY=alfresco/alfresco-base-tomcat
-(cd java-$JAVA_MAJOR/$DIST_NAME-$DIST_MAJOR && docker build -t java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR .)
+(cd java-$JAVA_MAJOR/$DISTRIB_NAME-$DISTRIB_MAJOR && docker build -t java-$JAVA_MAJOR-$DISTRIB_NAME-$DISTRIB_MAJOR .)
 docker build -t $IMAGE_REPOSITORY . \
-  --build-arg DIST_NAME=$DIST_NAME \
-  --build-arg DIST_MAJOR=$DIST_MAJOR \
+  --build-arg DISTRIB_NAME=$DISTRIB_NAME \
+  --build-arg DISTRIB_MAJOR=$DISTRIB_MAJOR \
   --build-arg JAVA_MAJOR=$JAVA_MAJOR \
   --build-arg TOMCAT_MAJOR=$TOMCAT_MAJOR \
   --no-cache
 ```
 where:
-* DIST_NAME is centos
-* DIST_MAJOR is 7
+* DISTRIB_NAME is centos
+* DISTRIB_MAJOR is 7
 * JAVA_MAJOR is 8 or 11
 * TOMCAT_MAJOR is 8, 9 or 10
 
@@ -47,13 +47,13 @@ Builds are available from [Docker Hub](https://hub.docker.com/r/alfresco/alfresc
 
 ```bash
 docker pull alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION 
-docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR
-docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR-$SHORT_SHA256
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DISTRIB_NAME-$DISTRIB_MAJOR
+docker pull alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DISTRIB_NAME-$DISTRIB_MAJOR-$SHORT_SHA256
 ```
 
 where:
-* DIST_NAME is centos
-* DIST_MAJOR is 7
+* DISTRIB_NAME is centos
+* DISTRIB_MAJOR is 7
 * JAVA_MAJOR is 8 or 11
 * TOMCAT_MAJOR_MINOR_VERSION is 8.5 or 9.0
 * TOMCAT_VERSION is 8.5.65, 9.0.45 or 10.0.8
@@ -67,8 +67,8 @@ The builds are identical to those stored in the private repo on Quay, which also
 
 ```bash
 docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_MAJOR_MINOR_VERSION
-docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR
-docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DIST_NAME-$DIST_MAJOR-$SHORT_SHA256
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DISTRIB_NAME-$DISTRIB_MAJOR
+docker pull quay.io/alfresco/alfresco-base-tomcat:$TOMCAT_VERSION-java-$JAVA_MAJOR-$DISTRIB_NAME-$DISTRIB_MAJOR-$SHORT_SHA256
 ```
 
 ## Usage
