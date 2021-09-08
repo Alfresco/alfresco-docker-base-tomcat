@@ -114,6 +114,7 @@ RUN set -eux; \
 		export CATALINA_HOME="$PWD"; \
 		cd "$nativeBuildDir/native"; \
 		./configure \
+			--with-java-home="$JDK_HOME" \
 			--libdir="$TOMCAT_NATIVE_LIBDIR" \
 			--prefix="$CATALINA_HOME" \
 			--with-apr="$(which apr-1-config)" \
