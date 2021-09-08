@@ -9,7 +9,7 @@ other internal groups in the organisation, customers and partners to create Tomc
 
 ## Versioning
 
-Images are available for latest Tomcat 8.5.65, 9.0.45 and 10.0.8 (last two are Java 11 only).
+Images are available for latest Tomcat 8.5.70, 9.0.52 and 10.0.10 (last two are Java 11 only).
 
 ## How to Build
 
@@ -56,7 +56,7 @@ where:
 * DISTRIB_MAJOR is 7
 * JAVA_MAJOR is 8 or 11
 * TOMCAT_MAJOR_MINOR_VERSION is 8.5 or 9.0
-* TOMCAT_VERSION is 8.5.65, 9.0.45 or 10.0.8
+* TOMCAT_VERSION is 8.5.70, 9.0.52 or 10.0.10
 * SHORT_SHA256 is the 12 digit SHA256 of the image as available from the registry
 
 *NOTE*
