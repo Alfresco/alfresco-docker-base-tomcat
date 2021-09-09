@@ -108,7 +108,7 @@ RUN set -eux; \
 		make-3.82-24.el7 \
 		openssl-devel-1.0.2k-21.el7_9 \
 	"; \
-	nativeBuildDeps="$nativeBuildDeps java-${JAVA_MAJOR_PKG:-$JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}"; \
+	yum install -y "java-${JAVA_MAJOR_PKG:-$JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}"; \
 	yum install -y $nativeBuildDeps; \
 	( \
 		export CATALINA_HOME="$PWD"; \
