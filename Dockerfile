@@ -64,7 +64,7 @@ RUN set -eux; \
 	# CentOS specific addition: Install RPMs needed to build Tomcat Native Library \
 	# We're version-pinning to improve the chances of repeatable builds. \
 	# openssl's version is always the same as the openssl-libs RPM already installed \
-	[[ ${DISTRIB_MAJOR} = 7 && ${JAVA_MAJOR} = 8 || ${JAVA_MAJOR} = 11 ]] && deps="\
+	[[ ${DISTRIB_MAJOR} = 7 && (${JAVA_MAJOR} = 8 || ${JAVA_MAJOR} = 11) ]] && deps="\
 		apr-1.4.8-7.el7 \
 	"; \
 	yum install -y $deps; \
