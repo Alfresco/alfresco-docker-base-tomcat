@@ -7,20 +7,11 @@ ARG DISTRIB_NAME
 ARG DISTRIB_MAJOR
 ARG TOMCAT_MAJOR
 
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS tomcat8
-ENV TOMCAT_MAJOR 8
-ENV TOMCAT_VERSION 8.5.72
-ENV TOMCAT_SHA512 41d7eb83120f210d238d8653d729bfb2be32f3666e6c04e73607c05f066c4136b0719f8107cf66673333548c82dc5b9c0357e91fc0ac845e64f055b598f27049
-
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS tomcat9
-ENV TOMCAT_MAJOR 9
-ENV TOMCAT_VERSION 9.0.54
-ENV TOMCAT_SHA512 83430f24d42186ce2ff51eeef2f7a5517048f37d9050c45cac1e3dba8926d61a1f7f5aba122a34a11ac1dbdd3c1f6d98671841047df139394d43751263de57c3
-
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS tomcat10
-ENV TOMCAT_MAJOR 10
-ENV TOMCAT_VERSION 10.0.12
-ENV TOMCAT_SHA512 e084fc0cc243c0a9ac7de85ffd4b96d00b40b5493ed7ef276d91373fe8036bc953406cd3c48db6b5ae116f2af162fd1bfb13ecdddf5d64523fdd69a9463de8a3
+FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS debian11
+ARG JAVA_MAJOR
+ENV DEBIAN_FRONTEND=noninteractive
+ENV BUILD_DEP="gcc make libssl-dev libexpat1-dev curl gpg"
+RUN apt-get -y update; apt-get -qqy install $BUILD_DEP openjdk-${JAVA_MAJOR}-jdk
 
 FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS centos7
 ARG JAVA_MAJOR
@@ -28,7 +19,22 @@ ENV BUILD_DEP="gcc make openssl-devel expat-devel"
 RUN JRE_PKG_VERSION=$(rpm -qa java-${JAVA_MAJOR}-openjdk-headless --queryformat "%{RPMTAG_VERSION}"); \
     yum install -y $BUILD_DEP java-${JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}
 
-FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS tcnative_build
+FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS tomcat8
+ENV TOMCAT_MAJOR 8
+ENV TOMCAT_VERSION 8.5.72
+ENV TOMCAT_SHA512 41d7eb83120f210d238d8653d729bfb2be32f3666e6c04e73607c05f066c4136b0719f8107cf66673333548c82dc5b9c0357e91fc0ac845e64f055b598f27049
+
+FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS tomcat9
+ENV TOMCAT_MAJOR 9
+ENV TOMCAT_VERSION 9.0.54
+ENV TOMCAT_SHA512 83430f24d42186ce2ff51eeef2f7a5517048f37d9050c45cac1e3dba8926d61a1f7f5aba122a34a11ac1dbdd3c1f6d98671841047df139394d43751263de57c3
+
+FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS tomcat10
+ENV TOMCAT_MAJOR 10
+ENV TOMCAT_VERSION 10.0.12
+ENV TOMCAT_SHA512 e084fc0cc243c0a9ac7de85ffd4b96d00b40b5493ed7ef276d91373fe8036bc953406cd3c48db6b5ae116f2af162fd1bfb13ecdddf5d64523fdd69a9463de8a3
+
+FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS TCNATIVE_BUILD
 ARG TCNATIVE_VERSION=1.2.31
 ARG TCNATIVE_SHA512=2aaa93f0acf3eb780d39faeda3ece3cf053d3b6e2918462f7183070e8ab32232e035e9062f7c07ceb621006d727d3596d9b4b948f4432b4f625327b72fdb0e49
 ARG APR_VERSION=1.7.0
@@ -42,10 +48,10 @@ ENV TCNATIVE_MIRRORS \
         https://archive.apache.org/dist \
         https://www-us.apache.org/dist \
         https://www.apache.org/dist
+SHELL ["/bin/bash","-c"]
 RUN mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/{tcnative,libapr,apr-util}
 WORKDIR $BUILD_DIR
 RUN set -eux; \
-	success=; \
         for mirror in $TCNATIVE_MIRRORS; do \
 	        if curl -fsSL https://www.apache.org/dist/tomcat/tomcat-connectors/KEYS | gpg --import; then \
 			curl -fsSL https://www.apache.org/dist/apr/KEYS | gpg --import; \
@@ -98,7 +104,7 @@ RUN ./configure \
     make -j "$(nproc)"; \
     make install
 
-FROM tomcat${TOMCAT_MAJOR} AS tomcat_build
+FROM tomcat${TOMCAT_MAJOR} AS TOMCAT_BUILD
 RUN mkdir -p /build
 # let "Tomcat Native" live somewhere isolated
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
@@ -166,7 +172,7 @@ RUN \
 	sed -i "$ d" conf/web.xml ; \
 	sed -i -e "\$a\    <error-page\>\n\        <error-code\>404<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>403<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>500<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\n\<\/web-app\>" conf/web.xml 
 
-FROM tomcat${TOMCAT_MAJOR} AS TOMCAT_BASE_IMAGE
+FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS TOMCAT_BASE_IMAGE
 ARG JAVA_MAJOR
 ARG DISTRIB_MAJOR
 ARG CREATED
@@ -186,14 +192,15 @@ ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
 ENV PATH $CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
-COPY --from=tomcat_build /build $CATALINA_HOME
-COPY --from=tcnative_build /usr/local/apr /usr/local/apr
-COPY --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
+COPY --from=TOMCAT_BUILD /build $CATALINA_HOME
+COPY --from=TCNATIVE_BUILD /usr/local/apr /usr/local/apr
+COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 # verify Tomcat Native is working properly
 RUN set -e \
-	echo -e "/usr/local/apr/lib\n$TOMCAT_NATIVE_LIBDIR" >> /etc/ld.so.conf.d/tomcat.conf && \
-	nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
-	test $nativeLines -ge 1 || exit 1
+	echo -e "/usr/local/apr/lib\n$TOMCAT_NATIVE_LIBDIR" >> /etc/ld.so.conf.d/tomcat.conf
+	#echo -e "/usr/local/apr/lib\n$TOMCAT_NATIVE_LIBDIR" >> /etc/ld.so.conf.d/tomcat.conf && \
+	#nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
+	#test $nativeLines -ge 1 || exit 1
 EXPOSE 8080
 # Starting tomcat with Security Manager
 CMD ["catalina.sh", "run", "-security"]
