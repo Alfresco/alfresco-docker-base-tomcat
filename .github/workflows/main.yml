@@ -61,6 +61,7 @@ jobs:
             echo "::set-output name=image_tag::${IMAGE_BASE_NAME}-release-candidate"
           fi
           echo "::set-output name=image_created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "::set-output name=image_anchor::$(date -u +'%Y%m%d%H%M')"
       - id: q_login
         name: Login to Quay.io
         uses: docker/login-action@v1
@@ -89,7 +90,9 @@ jobs:
             TOMCAT_MAJOR=${{ matrix.tomcat_major }}
             REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
-          tags: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
+          tags:
+            - ${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.image_anchor }}
+            - quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
           target: TOMCAT_BASE_IMAGE
       - id: dh_push
         if: contains(github.event.head_commit.message, '[release]') && github.ref_name == 'master'
@@ -107,5 +110,7 @@ jobs:
             REVISION=${{ github.run_number }}
             REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
-          tags: ${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
+          tags:
+            - ${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.image_anchor }}
+            - ${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
           target: TOMCAT_BASE_IMAGE
