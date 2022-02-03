@@ -13,11 +13,23 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV BUILD_DEP="gcc make libssl-dev libexpat1-dev curl gpg"
 RUN apt-get -y update; apt-get -qqy install $BUILD_DEP openjdk-${JAVA_MAJOR}-jdk
 
+FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS ubuntu20.04
+ARG JAVA_MAJOR
+ENV DEBIAN_FRONTEND=noninteractive
+ENV BUILD_DEP="gcc make libssl-dev libexpat1-dev curl gpg"
+RUN apt-get -y update; apt-get -qqy install $BUILD_DEP openjdk-${JAVA_MAJOR}-jdk
+
 FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS centos7
 ARG JAVA_MAJOR
 ENV BUILD_DEP="gcc make openssl-devel expat-devel"
 RUN JRE_PKG_VERSION=$(rpm -qa java-${JAVA_MAJOR}-openjdk-headless --queryformat "%{RPMTAG_VERSION}"); \
     yum install -y $BUILD_DEP java-${JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}
+
+FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS ubi8
+ARG JAVA_MAJOR
+ENV BUILD_DEP="gzip gcc make openssl-devel expat-devel"
+USER root
+RUN microdnf --setopt=install_weak_deps=0 --setopt=tsflags=nodocs install -y $BUILD_DEP java-${JAVA_MAJOR}-openjdk-devel
 
 FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS tomcat8
 ENV TOMCAT_MAJOR 8
@@ -145,7 +157,7 @@ RUN set -eux; \
 	[ -n "$success" ]; \
 	\
 	gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
-	tar -xvf tomcat.tar.gz -C /build --strip-components=1
+	tar -zxf tomcat.tar.gz -C /build --strip-components=1
 
 WORKDIR /build
 RUN \
@@ -195,12 +207,12 @@ WORKDIR $CATALINA_HOME
 COPY --from=TOMCAT_BUILD /build $CATALINA_HOME
 COPY --from=TCNATIVE_BUILD /usr/local/apr /usr/local/apr
 COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
+USER root
 # verify Tomcat Native is working properly
 RUN set -e \
-	echo -e "/usr/local/apr/lib\n$TOMCAT_NATIVE_LIBDIR" >> /etc/ld.so.conf.d/tomcat.conf
-	#echo -e "/usr/local/apr/lib\n$TOMCAT_NATIVE_LIBDIR" >> /etc/ld.so.conf.d/tomcat.conf && \
-	#nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
-	#test $nativeLines -ge 1 || exit 1
+	echo -e "/usr/local/apr/lib\n$TOMCAT_NATIVE_LIBDIR" >> /etc/ld.so.conf.d/tomcat.conf; \
+	nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
+	test $nativeLines -ge 1 || exit 1
 EXPOSE 8080
 # Starting tomcat with Security Manager
 CMD ["catalina.sh", "run", "-security"]
