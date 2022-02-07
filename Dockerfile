@@ -7,7 +7,7 @@ ARG DISTRIB_NAME
 ARG DISTRIB_MAJOR
 ARG TOMCAT_MAJOR
 
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS debian11
+FROM quay.io/alfresco/alfresco-base-java:${JDIST}${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS debian11
 ARG JAVA_MAJOR
 ENV DEBIAN_FRONTEND=noninteractive
 ENV BUILD_DEP="gcc make libssl-dev libexpat1-dev curl gpg"
