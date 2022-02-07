@@ -2,11 +2,11 @@ name: Alfresco tomcat base Docker image
 on:
   push:
     branches:
-      #TODO add master when confident
       - opsexp-[0-9]+**
+      - master
 
 env:
-  IMAGE_REGISTRY_NAMESPACE: alxgomz
+  IMAGE_REGISTRY_NAMESPACE: alfresco
   IMAGE_REPOSITORY: alfresco-base-tomcat
 jobs:
   docker_images:
