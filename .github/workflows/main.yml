@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - opsexp-[0-9]+**
-      - dependabot/**
       - master
 
 env:
@@ -35,6 +34,12 @@ jobs:
               flavor: centos
               major: 7
             java_major: 8
+            jdist: jdk
+          - tomcat_major: 9
+            base_image:
+              flavor: centos
+              major: 7
+            java_major: 11
             jdist: jdk
           - tomcat_major: 8
             base_image:
