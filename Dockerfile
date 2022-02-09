@@ -7,25 +7,25 @@ ARG DISTRIB_NAME
 ARG DISTRIB_MAJOR
 ARG TOMCAT_MAJOR
 
-FROM quay.io/alfresco/alfresco-base-java:${JDIST}${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS debian11
+FROM quay.io/alfresco/alfresco-base-java:${JDIST}${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS debian11
 ARG JAVA_MAJOR
 ENV DEBIAN_FRONTEND=noninteractive
 ENV BUILD_DEP="gcc make libssl-dev libexpat1-dev curl gpg"
 RUN apt-get -y update; apt-get -qqy install $BUILD_DEP openjdk-${JAVA_MAJOR}-jdk
 
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS ubuntu20.04
+FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS ubuntu20.04
 ARG JAVA_MAJOR
 ENV DEBIAN_FRONTEND=noninteractive
 ENV BUILD_DEP="gcc make libssl-dev libexpat1-dev curl gpg"
 RUN apt-get -y update; apt-get -qqy install $BUILD_DEP openjdk-${JAVA_MAJOR}-jdk
 
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS centos7
+FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS centos7
 ARG JAVA_MAJOR
 ENV BUILD_DEP="gcc make openssl-devel expat-devel"
 RUN JRE_PKG_VERSION=$(rpm -qa java-${JAVA_MAJOR}-openjdk-headless --queryformat "%{RPMTAG_VERSION}"); \
     yum install -y $BUILD_DEP java-${JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}
 
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS ubi8
+FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS ubi8
 ARG JAVA_MAJOR
 ENV BUILD_DEP="gzip gcc make openssl-devel expat-devel"
 USER root
@@ -55,7 +55,7 @@ ARG APR_UTIL_VERSION=1.6.1
 ARG APR_UTIL_SHA256=b65e40713da57d004123b6319828be7f1273fbc6490e145874ee1177e112c459
 ENV BUILD_DIR=/build
 ENV INSTALL_DIR=/usr/local
-ENV TCNATIVE_MIRRORS \
+ENV APACHE_MIRRORS \
         https://www.apache.org/dyn/closer.cgi?action=download&filename= \
         https://archive.apache.org/dist \
         https://www-us.apache.org/dist \
@@ -64,9 +64,9 @@ SHELL ["/bin/bash","-c"]
 RUN mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/{tcnative,libapr,apr-util}
 WORKDIR $BUILD_DIR
 RUN set -eux; \
-        for mirror in $TCNATIVE_MIRRORS; do \
-	        if curl -fsSL https://www.apache.org/dist/tomcat/tomcat-connectors/KEYS | gpg --import; then \
-			curl -fsSL https://www.apache.org/dist/apr/KEYS | gpg --import; \
+        for mirror in $APACHE_MIRRORS; do \
+	        if curl -fsSL ${mirror}/tomcat/tomcat-connectors/KEYS | gpg --import; then \
+			curl -fsSL ${mirror}/apr/KEYS | gpg --import; \
 			active_mirror=$mirror; \
 			break; \
 		fi; \
@@ -74,35 +74,33 @@ RUN set -eux; \
 	[ -n "active_mirror" ]; \
 	\
 	for filetype in '.tar.gz' '.tar.gz.asc'; do \
-	   	curl -fsSLo tcnative${filetype} "${active_mirror}/tomcat/tomcat-connectors/native/${TCNATIVE_VERSION}/source/tomcat-native-${TCNATIVE_VERSION}-src${filetype}"; \
-	   	curl -fsSLo libapr${filetype} "${active_mirror}/apr/apr-${APR_VERSION}${filetype}"; \
-	   	curl -fsSLo apr-util${filetype} "${active_mirror}/apr/apr-util-${APR_UTIL_VERSION}${filetype}"; \
+		curl -fsSLo tcnative-${TCNATIVE_VERSION}-src${filetype} "${active_mirror}/tomcat/tomcat-connectors/native/${TCNATIVE_VERSION}/source/tomcat-native-${TCNATIVE_VERSION}-src${filetype}"; \
+		curl -fsSLo apr-${APR_VERSION}${filetype} "${active_mirror}/apr/apr-${APR_VERSION}${filetype}"; \
+		curl -fsSLo apr-util-${APR_VERSION}${filetype} "${active_mirror}/apr/apr-util-${APR_UTIL_VERSION}${filetype}"; \
 	done; \
 	\
-	echo "$TCNATIVE_SHA512 *tcnative.tar.gz" | sha512sum -c -; \
-	echo "$APR_SHA256 *libapr.tar.gz" | sha256sum -c -; \
-	echo "$APR_UTIL_SHA256 *apr-util.tar.gz" | sha256sum -c -; \
+	echo "$TCNATIVE_SHA512 *tcnative-${TCNATIVE_VERSION}-src.tar.gz" | sha512sum -c -; \
+	echo "$APR_SHA256 *apr-${APR_VERSION}.tar.gz" | sha256sum -c -; \
+	echo "$APR_UTIL_SHA256 *apr-util-${APR_VERSION}.tar.gz" | sha256sum -c -; \
 	\
-	gpg --batch --verify tcnative.tar.gz.asc tcnative.tar.gz && \
-        tar -zxf tcnative.tar.gz --strip-components=1 -C ${BUILD_DIR}/tcnative; \
-	# signing keys seem unavailable.... \
-	#if gpg --batch --verify libapr.tar.gz.asc libapr.tar.gz; then \
-	#	echo signature checked; \
-	#else \
-	#	keyID=$(gpg --batch --verify libapr.tar.gz.asc libapr.tar.gz 2>&1 | awk '/RSA\ /{print $NF}'); \
-	#	gpg --server hkp://keys.gnupg.net --recv-keys "$keyID"; \
-	#	gpg --batch --verify libapr.tar.gz.asc libapr.tar.gz; \
-	#fi && \
-        tar -zxf libapr.tar.gz --strip-components=1 -C ${BUILD_DIR}/libapr; \
-	# signing keys seem unavailable.... \
-	#if gpg --batch --verify apr-util.tar.gz.asc apr-util.tar.gz; then \
-	#	echo signature checked; \
-	#else \
-	#	keyID=$(gpg --batch --verify apr-util.tar.gz.asc apr-util.tar.gz 2>&1 | awk '/RSA\ /{print $NF}'); \
-	#	gpg --server hkp://keys.gnupg.net --recv-keys "$keyID"; \
-	#	gpg --batch --verify apr-util.tar.gz.asc apr-util.tar.gz; \
-	#fi && \
-        tar -zxf apr-util.tar.gz --strip-components=1 -C ${BUILD_DIR}/apr-util
+	gpg --verify tcnative-${TCNATIVE_VERSION}-src.tar.gz.asc && \
+        tar -zxf tcnative-${TCNATIVE_VERSION}-src.tar.gz --strip-components=1 -C ${BUILD_DIR}/tcnative; \
+	if gpg --verify apr-${APR_VERSION}.tar.gz.asc; then \
+		echo signature checked; \
+	else \
+		keyID=$(gpg --verify apr-${APR_VERSION}.tar.gz.asc 2>&1 | awk '/RSA\ /{print $NF}'); \
+		gpg --keyserver pgp.mit.edu --recv-keys "0x$keyID"; \
+		gpg --verify apr-${APR_VERSION}.tar.gz.asc; \
+	fi && \
+        tar -zxf apr-${APR_VERSION}.tar.gz --strip-components=1 -C ${BUILD_DIR}/libapr; \
+	if gpg --verify apr-util-${APR_VERSION}.tar.gz.asc; then \
+		echo signature checked; \
+	else \
+		keyID=$(gpg --batch --verify apr-util-${APR_VERSION}.tar.gz.asc 2>&1 | awk '/RSA\ /{print $NF}'); \
+		gpg --keyserver pgp.mit.edu --recv-keys "0x$keyID"; \
+		gpg --verify apr-util-${APR_VERSION}.tar.gz.asc; \
+	fi && \
+        tar -zxf apr-util-${APR_VERSION}.tar.gz --strip-components=1 -C ${BUILD_DIR}/apr-util
 WORKDIR ${BUILD_DIR}/libapr
 RUN ./configure --prefix=${INSTALL_DIR}/apr  && make && make install
 WORKDIR ${BUILD_DIR}/apr-util
@@ -184,7 +182,7 @@ RUN \
 	sed -i "$ d" conf/web.xml ; \
 	sed -i -e "\$a\    <error-page\>\n\        <error-code\>404<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>403<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>500<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\n\<\/web-app\>" conf/web.xml 
 
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR}-opsexp-1046-java-base-msb AS TOMCAT_BASE_IMAGE
+FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS TOMCAT_BASE_IMAGE
 ARG JAVA_MAJOR
 ARG DISTRIB_MAJOR
 ARG CREATED
