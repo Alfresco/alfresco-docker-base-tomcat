@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - opsexp-[0-9]+**
+      - dependabot/**
       - master
 
 env:
