@@ -6,10 +6,6 @@
 version: 2
 updates:
   - package-ecosystem: "docker"
-    directory: "/java-8/centos-7/"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "docker"
-    directory: "/java-11/centos-7/"
+    directory: "/"
     schedule:
       interval: "daily"
