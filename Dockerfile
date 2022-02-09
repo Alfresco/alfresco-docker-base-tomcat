@@ -166,7 +166,7 @@ RUN \
 # fix permissions (especially for running as non-root)
 # https://github.com/docker-library/tomcat/issues/35
 	chmod -R +rX .; \
-	chmod 330 logs work ; \
+	chmod 770 logs work ; \
 	\
 	# Security improvements:
 	# Remove server banner, Turn off loggin by the VersionLoggerListener, enable remoteIP valve so we know who we're talking to
