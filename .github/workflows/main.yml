@@ -1,8 +1,8 @@
-name: Alfresco tomcat base Docker image
+name: build
 on:
   push:
     branches:
-      - opsexp-[0-9]+**
+      - OPSEXP-[0-9]+**
       - master
 
 env:
