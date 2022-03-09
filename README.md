@@ -9,7 +9,7 @@ other internal groups in the organisation, customers and partners to create Tomc
 
 ## Versioning
 
-Images are available for latest Tomcat 8.5.76, 9.0.59 and 10.0.17 (last two are Java 11 only).
+Images are available for latest Tomcat 8.5.76 and 9.0.59 (last two are Java 11 only).
 
 ## How to Build
 
@@ -35,7 +35,7 @@ where:
 * DISTRIB_NAME is centos
 * DISTRIB_MAJOR is 7
 * JAVA_MAJOR is 8 or 11
-* TOMCAT_MAJOR is 8, 9 or 10
+* TOMCAT_MAJOR is 8 or 9
 
 ## Release
 
@@ -56,7 +56,7 @@ where:
 * DISTRIB_MAJOR is 7
 * JAVA_MAJOR is 8 or 11
 * TOMCAT_MAJOR_MINOR_VERSION is 8.5 or 9.0
-* TOMCAT_VERSION is 8.5.72, 9.0.54 or 10.0.12
+* TOMCAT_VERSION is 8.5.76 or 9.0.59
 * SHORT_SHA256 is the 12 digit SHA256 of the image as available from the registry
 
 *NOTE*
@@ -106,13 +106,13 @@ and
 Example from a Dockerfile using a public parent image in Docker Hub.
 
 ```bash
-FROM alfresco/alfresco-base-tomcat:10.0
+FROM alfresco/alfresco-base-tomcat:9.0.54-java-11-centos-7-f8f2fa827d9e
 ```
 
 Example from a Dockerfile using a private parent image in Quay:
 
 ```bash
-FROM quay.io/alfresco/alfresco-base-tomcat:10.0.8-java-11-centos-7-94fdb78396b6
+FROM quay.io/alfresco/alfresco-base-tomcat:9.0.54-java-11-centos-7-f8f2fa827d9e
 ```
 
 ### Minimum volume configuration
