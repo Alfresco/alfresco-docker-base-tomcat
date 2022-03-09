@@ -9,7 +9,7 @@ other internal groups in the organisation, customers and partners to create Tomc
 
 ## Versioning
 
-Images are available for latest Tomcat 8.5.72, 9.0.54 and 10.0.12 (last two are Java 11 only).
+Images are available for latest Tomcat 8.5.76, 9.0.59 and 10.0.17 (last two are Java 11 only).
 
 ## How to Build
 
