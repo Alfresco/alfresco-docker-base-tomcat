@@ -19,8 +19,8 @@ Tomcat version | Java version | Java flavour | OS       | Image tag             
 9              | 11           | jdk          | Centos 7 | tomcat9-jdk11-centos7 | ![tomcat9-jdk11-centos7 size][2]
 8              | 11           | jre          | Centos 7 | tomcat8-jre11-centos7 | ![tomcat8-jre11-centos7 size][3]
 8              | 11           | jdk          | Centos 7 | tomcat8-jdk11-centos7 | ![tomcat8-jdk11-centos7 size][4]
-9              | 11           | jre          | Ubi 8    | tomcat9-jre11-ubi8    | ![tomcat9-jre11-ubi8 size][5]
-8              | 11           | jre          | Ubi 8    | tomcat8-jre11-ubi8    | ![tomcat8-jre11-ubi8 size][6]
+9              | 11           | jre          | UBI 8    | tomcat9-jre11-ubi8    | ![tomcat9-jre11-ubi8 size][5]
+8              | 11           | jre          | UBI 8    | tomcat8-jre11-ubi8    | ![tomcat8-jre11-ubi8 size][6]
 
 [1]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-centos7
 [2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jdk11-centos7
