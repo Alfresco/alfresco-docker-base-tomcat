@@ -13,8 +13,8 @@ This image depends on the [alfresco-docker-base-java](https://github.com/Alfresc
 
 Choose between one of the available flavours built from this repository:
 
-Tomcat version | Java version | Java flavour | OS       | Image tag     | Size
----------------|--------------|--------------|----------|---------------|-------------------------
+Tomcat version | Java version | Java flavour | OS       | Image tag             | Size
+---------------|--------------|--------------|----------|-----------------------|---------------------------------
 9              | 11           | jre          | Centos 7 | tomcat9-jre11-centos7 | ![tomcat9-jre11-centos7 size][1]
 9              | 11           | jdk          | Centos 7 | tomcat9-jdk11-centos7 | ![tomcat9-jdk11-centos7 size][2]
 8              | 11           | jre          | Centos 7 | tomcat8-jre11-centos7 | ![tomcat8-jre11-centos7 size][3]
