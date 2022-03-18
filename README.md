@@ -34,38 +34,26 @@ Tomcat version | Java version | Java flavour | OS       | Image tag             
 
 Example final image: `alfresco/alfresco-base-tomcat:tomcat9-jre11-centos7`
 
-> If you are using this base image in a public repository, please stick to the DockerHub published image.
+> If you are using this base image in a public repository, please stick to the Docker Hub published image.
 
 ### Image pinning
 
 The [pinning suggestions provided in alfresco-base-java](https://github.com/Alfresco/alfresco-docker-base-java/blob/master/README.md#image-pinning) are valid for this image too.
 
-### Minimum volume configuration
-
-Used as parent image and with the default configuration, ensure the following
-volumes are all specified.
-
-```bash
-VOLUME [ "/usr/local/tomcat/logs", "/usr/local/tomcat/work", "/usr/local/tomcat/conf/Catalina", "/usr/local/tomcat/temp" ]
-```
-
 ## Usage
 
-### Standalone
+The image can be used via `docker run` to run java applications with `--read-only` set.
 
-The image can be used via `docker run` to run java applications with `--read-only` set,
-without any loss of functionality providing the various directories tomcat writes to are volumes.
-
-With the supplied tomcat configuration, the following should all be mounted on volumes:
+Depending on your use case, you may want to set the following path as volumes:
 
 * `/usr/local/tomcat/logs`
 * `/usr/local/tomcat/work`
-* `/usr/local/tomcat/conf/Catalina`
 * `/usr/local/tomcat/temp`
+* `/usr/local/tomcat/conf/Catalina`
 
-### Disabling Security Manager
-
-The Tomcat in this image is running with Security Manager switched on. This may impact performance. The Security Manager can be disabled by overriding the startup command to:
+The Tomcat in this image is running with Security Manager switched on. This may
+impact performance. The Security Manager can be disabled by overriding the
+startup command to:
 
 ```bash
 CMD ["catalina.sh", "run"]
