@@ -1,13 +1,16 @@
 name: build
+
 on:
   push:
     branches:
+      - opsexp-[0-9]+**
       - OPSEXP-[0-9]+**
       - master
 
 env:
   IMAGE_REGISTRY_NAMESPACE: alfresco
   IMAGE_REPOSITORY: alfresco-base-tomcat
+
 jobs:
   docker_images:
     strategy:
@@ -42,6 +45,7 @@ jobs:
       - id: co
         name: checkout project
         uses: actions/checkout@v2
+
       - id: vars
         name: compute image tag
         env:
@@ -50,14 +54,12 @@ jobs:
           if [[ "${{ github.ref_name }}" != "master" ]]
           then
             echo "::set-output name=image_tag::${IMAGE_BASE_NAME}-${GITHUB_REF_NAME//\//-}"
-          elif [[ "${{ github.event.head_commit.message }}" =~ .*\[release\].* ]]
-          then
-            echo "::set-output name=image_tag::$IMAGE_BASE_NAME"
           else
-            echo "::set-output name=image_tag::${IMAGE_BASE_NAME}-release-candidate"
+            echo "::set-output name=image_tag::$IMAGE_BASE_NAME"
           fi
           echo "::set-output name=image_created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           echo "::set-output name=image_anchor::$(date -u +'%Y%m%d%H%M')"
+
       - id: q_login
         name: Login to Quay.io
         uses: docker/login-action@v1
@@ -65,13 +67,15 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
+
       - id: dh_login
-        if: contains(github.event.head_commit.message, '[release]') && github.ref_name == 'master'
+        if: github.ref_name == 'master'
         name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
       - id: q_push
         name: Build and push to Quay.io
         uses: docker/build-push-action@v2.8.0
@@ -84,14 +88,15 @@ jobs:
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
             JAVA_MAJOR=${{ matrix.java_major }}
             TOMCAT_MAJOR=${{ matrix.tomcat_major }}
-            REVISION=${{ github.run_number }}
+            REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
           tags: |
             quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.image_anchor }}
             quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
           target: TOMCAT_BASE_IMAGE
+
       - id: dh_push
-        if: contains(github.event.head_commit.message, '[release]') && github.ref_name == 'master'
+        if: github.ref_name == 'master'
         name: Build and push to Docker Hub
         uses: docker/build-push-action@v2.8.0
         with:
@@ -103,8 +108,8 @@ jobs:
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
             JAVA_MAJOR=${{ matrix.java_major }}
             TOMCAT_MAJOR=${{ matrix.tomcat_major }}
-            REVISION=${{ github.run_number }}
-            REVISION=${{ github.run_number }}
+            REVISION=${{ github.run_number }}
+            REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
           tags: |
             ${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.image_anchor }}

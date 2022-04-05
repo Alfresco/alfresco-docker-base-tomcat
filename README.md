@@ -91,4 +91,7 @@ where:
 
 ### Release
 
-Just push a commit on the default branch including `[release]` in the message to trigger a release on Travis CI.
+Every build on master overwrite the main tags listed in
+[Quickstart](#quickstart) plus a tag with a timestamp.
+
+Branches push tags with the branch name in it.
