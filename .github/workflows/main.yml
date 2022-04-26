@@ -18,7 +18,7 @@ jobs:
         base_image:
           - flavor: centos
             major: 7
-          - flavor: ubi
+          - flavor: rockylinux
             major: 8
         java_major:
           - 11

@@ -1,4 +1,3 @@
-#
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat
 ARG JDIST
@@ -13,11 +12,11 @@ ENV BUILD_DEP="gcc make openssl-devel expat-devel"
 RUN JRE_PKG_VERSION=$(rpm -qa java-${JAVA_MAJOR}-openjdk-headless --queryformat "%{RPMTAG_VERSION}"); \
   yum install -y $BUILD_DEP java-${JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}
 
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS ubi8
+FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS rockylinux8
 ARG JAVA_MAJOR
-ENV BUILD_DEP="gzip gcc make openssl-devel expat-devel"
-USER root
-RUN microdnf --setopt=install_weak_deps=0 --setopt=tsflags=nodocs install -y $BUILD_DEP java-${JAVA_MAJOR}-openjdk-devel
+ENV BUILD_DEP="gcc make openssl-devel expat-devel"
+RUN JRE_PKG_VERSION=$(rpm -qa java-${JAVA_MAJOR}-openjdk-headless --queryformat "%{RPMTAG_VERSION}"); \
+  yum install -y $BUILD_DEP java-${JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}
 
 FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS tomcat8
 ENV TOMCAT_MAJOR 8
