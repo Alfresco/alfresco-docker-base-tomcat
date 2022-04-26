@@ -7,12 +7,6 @@ ARG DISTRIB_NAME
 ARG DISTRIB_MAJOR
 ARG TOMCAT_MAJOR
 
-FROM quay.io/alfresco/alfresco-base-java:${JDIST}${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS debian11
-ARG JAVA_MAJOR
-ENV DEBIAN_FRONTEND=noninteractive
-ENV BUILD_DEP="gcc make libssl-dev libexpat1-dev curl gpg"
-RUN apt-get -y update; apt-get -qqy install $BUILD_DEP openjdk-${JAVA_MAJOR}-jdk
-
 FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS ubuntu20.04
 ARG JAVA_MAJOR
 ENV DEBIAN_FRONTEND=noninteractive
