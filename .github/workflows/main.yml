@@ -31,7 +31,14 @@ jobs:
               major: 7
             java_major: 17
         include:
-          - base_image:
+          - tomcat_major: 8
+            base_image:
+              flavor: centos
+              major: 7
+            java_major: 11
+            jdist: jdk
+          - tomcat_major: 9
+            base_image:
               flavor: centos
               major: 7
             java_major: 11
