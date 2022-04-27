@@ -22,6 +22,7 @@ jobs:
             major: 8
         java_major:
           - 11
+          - 17
         jdist:
           - jre
         include:
