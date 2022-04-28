@@ -5,7 +5,7 @@ Tomcat image that will be used by Alfresco engineering teams, other internal
 groups in the organization, customers and partners to create Tomcat bases
 application images from.
 
-Images are available for latest Tomcat 8.5.x, 9.0.x (Java 11 only).
+Images are available for latest Tomcat 8.5.x and 9.0.x.
 
 This image depends on the [alfresco-docker-base-java](https://github.com/Alfresco/alfresco-docker-base-java).
 
@@ -21,6 +21,8 @@ Tomcat version | Java version | Java flavour | OS               | Image tag     
 8              | 11           | jdk          | Centos 7         | tomcat8-jdk11-centos7        | ![tomcat8-jdk11-centos7 size][4]
 9              | 11           | jre          | Rocky Linux 8    | tomcat9-jre11-rockylinux8    | ![tomcat9-jre11-rockylinux8 size][5]
 8              | 11           | jre          | Rocky Linux 8    | tomcat8-jre11-rockylinux8    | ![tomcat8-jre11-rockylinux8 size][6]
+9              | 17           | jre          | Rocky Linux 8    | tomcat9-jre17-rockylinux8    | ![tomcat9-jre17-rockylinux8 size][7]
+8              | 17           | jre          | Rocky Linux 8    | tomcat8-jre17-rockylinux8    | ![tomcat8-jre17-rockylinux8 size][8]
 
 [1]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-centos7
 [2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jdk11-centos7
@@ -28,6 +30,8 @@ Tomcat version | Java version | Java flavour | OS               | Image tag     
 [4]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat8-jdk11-centos7
 [5]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-rockylinux8
 [6]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat8-jre11-rockylinux8
+[7]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre17-rockylinux8
+[8]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat8-jre17-rockylinux8
 
 * [Docker Hub](https://hub.docker.com/r/alfresco/alfresco-base-tomcat) image name: `alfresco/alfresco-base-tomcat`
 * [Quay](https://quay.io/repository/alfresco/alfresco-base-tomcat) image name: `quay.io/alfresco/alfresco-base-tomcat`
@@ -84,11 +88,11 @@ docker build -t $IMAGE_REPOSITORY . \
 
 where:
 
-* DISTRIB_NAME is centos
-* DISTRIB_MAJOR is 7
-* JAVA_MAJOR is 8 or 11
-* TOMCAT_MAJOR is 8, 9 or 10
+* DISTRIB_NAME is centos or rockylinux
+* DISTRIB_MAJOR is 7 for centos or 8 for rockylinux
+* JAVA_MAJOR is 11 or 17 for rockylinux only
+* TOMCAT_MAJOR is 8 or 9
 
 ### Release
 
-Just push a commit on the default branch including `[release]` in the message to trigger a release on Travis CI.
+Just push a commit on the default branch including `[release]` in the message to trigger a release on the CI.
