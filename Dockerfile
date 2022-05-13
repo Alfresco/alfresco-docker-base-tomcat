@@ -16,7 +16,7 @@ ENV TOMCAT_MAJOR 9
 ENV TOMCAT_VERSION 9.0.59
 ENV TOMCAT_SHA512 74902b522abda04afb2be24d7410d4d93966d20fd07dde8f03bb281cdc714866f648babe1ff1ae85d663774779235f1cb9d701d5ce8884052f1f5efca7b62c68
 
-FROM quay.io/alfresco/alfresco-base-java:jdk${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS TCNATIVE_BUILD
+FROM ${DISTRIB_NAME}:${DISTRIB_MAJOR} AS TCNATIVE_BUILD
 ARG JAVA_MAJOR
 ARG TCNATIVE_VERSION=1.2.33
 ARG TCNATIVE_SHA512=b9ffe0ecfd14482ed8c752caf2c28d880ab5fca1f5ea1d5b2a8330d26a14266406bdecda714644603ba2d4ca78c22ec5fc2341afd09172d073f21cf5a1099a0f
@@ -24,6 +24,7 @@ ARG APR_VERSION=1.7.0
 ARG APR_SHA256=48e9dbf45ae3fdc7b491259ffb6ccf7d63049ffacbc1c0977cced095e4c2d5a2
 ARG APR_UTIL_VERSION=1.6.1
 ARG APR_UTIL_SHA256=b65e40713da57d004123b6319828be7f1273fbc6490e145874ee1177e112c459
+ENV JAVA_HOME /etc/alternatives/jre
 ENV BUILD_DIR=/build
 ENV INSTALL_DIR=/usr/local
 ENV APACHE_MIRRORS \
@@ -34,7 +35,7 @@ SHELL ["/bin/bash","-c"]
 RUN mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/{tcnative,libapr,apr-util}
 WORKDIR $BUILD_DIR
 RUN set -eux; \
-  BUILD_DEP="gcc make openssl-devel expat-devel"; \
+  BUILD_DEP="gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel"; \
   yum install -y $BUILD_DEP; \
   for mirror in $APACHE_MIRRORS; do \
     if curl -fsSL ${mirror}/tomcat/tomcat-connectors/KEYS | gpg --import; then \
