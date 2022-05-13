@@ -6,17 +6,24 @@ ARG DISTRIB_NAME
 ARG DISTRIB_MAJOR
 ARG TOMCAT_MAJOR
 
-FROM quay.io/alfresco/alfresco-base-java:${JDIST}${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS tomcat8
+FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS tomcat
+ENV TOMCAT_PATH tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}
+ENV APACHE_MIRRORS \
+  https://archive.apache.org/dist \
+  https://dlcdn.apache.org \
+  https://downloads.apache.org
+
+FROM tomcat AS tomcat8
 ENV TOMCAT_MAJOR 8
 ENV TOMCAT_VERSION 8.5.76
 ENV TOMCAT_SHA512 7b84a311b2ba3b6c92eea5739275b45686ed893bc000c16ead0a3cfe7c166b12d42485e9eb9c40fe279d207a293c4de65db3107602794f2b8e6071bc4d2b53ed
 
-FROM quay.io/alfresco/alfresco-base-java:${JDIST}${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS tomcat9
+FROM tomcat AS tomcat9
 ENV TOMCAT_MAJOR 9
 ENV TOMCAT_VERSION 9.0.59
 ENV TOMCAT_SHA512 74902b522abda04afb2be24d7410d4d93966d20fd07dde8f03bb281cdc714866f648babe1ff1ae85d663774779235f1cb9d701d5ce8884052f1f5efca7b62c68
 
-FROM ${DISTRIB_NAME}:${DISTRIB_MAJOR} AS TCNATIVE_BUILD
+FROM tomcat AS TCNATIVE_BUILD
 ARG JAVA_MAJOR
 ARG TCNATIVE_VERSION=1.2.33
 ARG TCNATIVE_SHA512=b9ffe0ecfd14482ed8c752caf2c28d880ab5fca1f5ea1d5b2a8330d26a14266406bdecda714644603ba2d4ca78c22ec5fc2341afd09172d073f21cf5a1099a0f
@@ -27,10 +34,6 @@ ARG APR_UTIL_SHA256=b65e40713da57d004123b6319828be7f1273fbc6490e145874ee1177e112
 ENV JAVA_HOME /etc/alternatives/jre
 ENV BUILD_DIR=/build
 ENV INSTALL_DIR=/usr/local
-ENV APACHE_MIRRORS \
-  https://dlcdn.apache.org \
-  https://archive.apache.org/dist \
-  https://downloads.apache.org
 SHELL ["/bin/bash","-c"]
 RUN mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/{tcnative,libapr,apr-util}
 WORKDIR $BUILD_DIR
@@ -95,17 +98,10 @@ FROM tomcat${TOMCAT_MAJOR} AS TOMCAT_BUILD
 RUN mkdir -p /build
 # let "Tomcat Native" live somewhere isolated
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}${TOMCAT_NATIVE_LIBDIR}
-ENV APACHE_MIRRORS \
-  https://archive.apache.org/dist \
-  https://dlcdn.apache.org \
-  https://downloads.apache.org
-ENV TOMCAT_TGZ_PATH tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz
-ENV TOMCAT_ASC_PATH ${TOMCAT_TGZ_PATH}.asc
 RUN set -eux; \
-  # Official tomcat Dockerfile section: Download, build and remove source of Tomcat Native Library \
   success=; \
   for mirror in $APACHE_MIRRORS; do \
-    if curl -fsSLo tomcat.tar.gz $mirror/$TOMCAT_TGZ_PATH; then \
+    if curl -fsSLo tomcat.tar.gz $mirror/${TOMCAT_PATH}.tar.gz; then \
       success=1; \
       curl -fsSL $mirror/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; \
       break; \
@@ -117,7 +113,7 @@ RUN set -eux; \
   \
   success=; \
   for mirror in $APACHE_MIRRORS; do \
-    if curl -fsSLo tomcat.tar.gz.asc $mirror/$TOMCAT_ASC_PATH; then \
+    if curl -fsSLo tomcat.tar.gz.asc $mirror/${TOMCAT_PATH}.tar.gz.asc; then \
       success=1; \
       break; \
     fi; \
