@@ -23,12 +23,31 @@ ENV TOMCAT_VERSION 9.0.59
 ENV TOMCAT_SHA512 74902b522abda04afb2be24d7410d4d93966d20fd07dde8f03bb281cdc714866f648babe1ff1ae85d663774779235f1cb9d701d5ce8884052f1f5efca7b62c68
 
 FROM tomcat${TOMCAT_MAJOR} AS tomcat
-ENV TOMCAT_PATH tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}
+ARG APACHE_MIRRORS
+RUN \
+  set -eux; \
+  mkdir -p /build/tomcat; \
+  active_mirror=; \
+  for mirror in $APACHE_MIRRORS; do \
+    if curl -fsSL ${mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; then \
+      active_mirror=$mirror; \
+      break; \
+    fi; \
+  done; \
+  [ -n "active_mirror" ]; \
+  \
+  echo "Using mirror ${active_mirror}"; \
+  for filetype in '.tar.gz' '.tar.gz.asc'; do \
+    curl -fsSLo tomcat${filetype} ${active_mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}${filetype}; \
+  done; \
+  \
+  echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c -; \
+  \
+  gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
+  tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1
 
 FROM tomcat AS TCNATIVE_BUILD
 ARG JAVA_MAJOR
-ARG TCNATIVE_VERSION=1.2.33
-ARG TCNATIVE_SHA512=b9ffe0ecfd14482ed8c752caf2c28d880ab5fca1f5ea1d5b2a8330d26a14266406bdecda714644603ba2d4ca78c22ec5fc2341afd09172d073f21cf5a1099a0f
 ARG APR_VERSION=1.7.0
 ARG APR_SHA256=48e9dbf45ae3fdc7b491259ffb6ccf7d63049ffacbc1c0977cced095e4c2d5a2
 ARG APR_UTIL_VERSION=1.6.1
@@ -40,12 +59,10 @@ SHELL ["/bin/bash","-c"]
 RUN mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/{tcnative,libapr,apr-util}
 WORKDIR $BUILD_DIR
 RUN set -eux; \
-  BUILD_DEP="gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel"; \
-  yum install -y $BUILD_DEP; \
+  tar -zxf tomcat/bin/tomcat-native.tar.gz --strip-components=1 -C tcnative; \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
-    if curl -fsSL ${mirror}/tomcat/tomcat-connectors/KEYS | gpg --import; then \
-      curl -fsSL ${mirror}/apr/KEYS | gpg --import; \
+    if curl -fsSL ${mirror}/apr/KEYS | gpg --import; then \
       active_mirror=$mirror; \
       break; \
     fi; \
@@ -54,17 +71,13 @@ RUN set -eux; \
   \
   echo "Using mirror ${active_mirror}"; \
   for filetype in '.tar.gz' '.tar.gz.asc'; do \
-    curl -fsSLo tcnative-src${filetype} "${active_mirror}/tomcat/tomcat-connectors/native/${TCNATIVE_VERSION}/source/tomcat-native-${TCNATIVE_VERSION}-src${filetype}" ; \
     curl -fsSLo apr${filetype} "${active_mirror}/apr/apr-${APR_VERSION}${filetype}"; \
     curl -fsSLo apr-util${filetype} "${active_mirror}/apr/apr-util-${APR_UTIL_VERSION}${filetype}"; \
   done; \
   \
-  echo "$TCNATIVE_SHA512 *tcnative-src.tar.gz" | sha512sum -c -; \
   echo "$APR_SHA256 *apr.tar.gz" | sha256sum -c -; \
   echo "$APR_UTIL_SHA256 apr-util.tar.gz" | sha256sum -c -; \
   \
-  gpg --verify tcnative-src.tar.gz.asc && \
-    tar -zxf tcnative-src.tar.gz --strip-components=1 -C ${BUILD_DIR}/tcnative; \
 # NOTE: disabling signature check as it's broken
 #  if gpg --verify apr.tar.gz.asc; then \
 #    echo signature checked; \
@@ -82,9 +95,11 @@ RUN set -eux; \
 #    gpg --keyserver pgp.mit.edu --recv-keys "0x$keyID"; \
 #    gpg --verify apr-util.tar.gz.asc; \
 #  fi && \
-    tar -zxf apr-util.tar.gz --strip-components=1 -C ${BUILD_DIR}/apr-util
+  tar -zxf apr-util.tar.gz --strip-components=1 -C ${BUILD_DIR}/apr-util; \
+  BUILD_DEP="gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel"; \
+  yum install -y $BUILD_DEP;
 WORKDIR ${BUILD_DIR}/libapr
-RUN ./configure --prefix=${INSTALL_DIR}/apr  && make && make install
+RUN ./configure --prefix=${INSTALL_DIR}/apr && make && make install
 WORKDIR ${BUILD_DIR}/apr-util
 RUN ./configure  --prefix=${INSTALL_DIR}/apr --with-apr=${INSTALL_DIR}/apr && make && make install
 WORKDIR ${BUILD_DIR}/tcnative/native
@@ -98,30 +113,7 @@ RUN \
   make install
 
 FROM tomcat AS TOMCAT_BUILD
-RUN mkdir -p /build
-# let "Tomcat Native" live somewhere isolated
-ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}${TOMCAT_NATIVE_LIBDIR}
-RUN set -eux; \
-  active_mirror=; \
-  for mirror in $APACHE_MIRRORS; do \
-    if curl -fsSL ${mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; then \
-      active_mirror=$mirror; \
-      break; \
-    fi; \
-  done; \
-  [ -n "active_mirror" ]; \
-  \
-  echo "Using mirror ${active_mirror}"; \
-  for filetype in '.tar.gz' '.tar.gz.asc'; do \
-    curl -fsSLo tomcat${filetype} ${active_mirror}/${TOMCAT_PATH}${filetype}; \
-  done; \
-  \
-  echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c -; \
-  \
-  gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
-  tar -zxf tomcat.tar.gz -C /build --strip-components=1
-
-WORKDIR /build
+WORKDIR /build/tomcat
 RUN \
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
@@ -166,7 +158,7 @@ ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
 ENV PATH $CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
-COPY --from=TOMCAT_BUILD /build $CATALINA_HOME
+COPY --from=TOMCAT_BUILD /build/tomcat $CATALINA_HOME
 COPY --from=TCNATIVE_BUILD /usr/local/apr /usr/local/apr
 COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 USER root
