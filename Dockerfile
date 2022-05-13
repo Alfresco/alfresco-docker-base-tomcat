@@ -6,29 +6,18 @@ ARG DISTRIB_NAME
 ARG DISTRIB_MAJOR
 ARG TOMCAT_MAJOR
 
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS centos7
-ARG JAVA_MAJOR
-ENV BUILD_DEP="gcc make openssl-devel expat-devel"
-RUN JRE_PKG_VERSION=$(rpm -qa java-${JAVA_MAJOR}-openjdk-headless --queryformat "%{RPMTAG_VERSION}"); \
-  yum install -y $BUILD_DEP java-${JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}
-
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS rockylinux8
-ARG JAVA_MAJOR
-ENV BUILD_DEP="gcc make openssl-devel expat-devel"
-RUN JRE_PKG_VERSION=$(rpm -qa java-${JAVA_MAJOR}-openjdk-headless --queryformat "%{RPMTAG_VERSION}"); \
-  yum install -y $BUILD_DEP java-${JAVA_MAJOR}-openjdk-devel-${JRE_PKG_VERSION}
-
-FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS tomcat8
+FROM ${DISTRIB_NAME}${DISTRIB_MAJOR} AS tomcat8
 ENV TOMCAT_MAJOR 8
 ENV TOMCAT_VERSION 8.5.76
 ENV TOMCAT_SHA512 7b84a311b2ba3b6c92eea5739275b45686ed893bc000c16ead0a3cfe7c166b12d42485e9eb9c40fe279d207a293c4de65db3107602794f2b8e6071bc4d2b53ed
 
-FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS tomcat9
+FROM ${DISTRIB_NAME}${DISTRIB_MAJOR} AS tomcat9
 ENV TOMCAT_MAJOR 9
 ENV TOMCAT_VERSION 9.0.59
 ENV TOMCAT_SHA512 74902b522abda04afb2be24d7410d4d93966d20fd07dde8f03bb281cdc714866f648babe1ff1ae85d663774779235f1cb9d701d5ce8884052f1f5efca7b62c68
 
-FROM $DISTRIB_NAME${DISTRIB_MAJOR} AS TCNATIVE_BUILD
+FROM quay.io/alfresco/alfresco-base-java:jdk${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS TCNATIVE_BUILD
+ARG JAVA_MAJOR
 ARG TCNATIVE_VERSION=1.2.33
 ARG TCNATIVE_SHA512=b9ffe0ecfd14482ed8c752caf2c28d880ab5fca1f5ea1d5b2a8330d26a14266406bdecda714644603ba2d4ca78c22ec5fc2341afd09172d073f21cf5a1099a0f
 ARG APR_VERSION=1.7.0
@@ -45,6 +34,8 @@ SHELL ["/bin/bash","-c"]
 RUN mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/{tcnative,libapr,apr-util}
 WORKDIR $BUILD_DIR
 RUN set -eux; \
+  BUILD_DEP="gcc make openssl-devel expat-devel"; \
+  yum install -y $BUILD_DEP; \
   for mirror in $APACHE_MIRRORS; do \
     if curl -fsSL ${mirror}/tomcat/tomcat-connectors/KEYS | gpg --import; then \
       curl -fsSL ${mirror}/apr/KEYS | gpg --import; \
@@ -90,7 +81,8 @@ RUN ./configure --prefix=${INSTALL_DIR}/apr  && make && make install
 WORKDIR ${BUILD_DIR}/apr-util
 RUN ./configure  --prefix=${INSTALL_DIR}/apr --with-apr=${INSTALL_DIR}/apr && make && make install
 WORKDIR ${BUILD_DIR}/tcnative/native
-RUN ./configure \
+RUN \
+  ./configure \
     --with-java-home="$JAVA_HOME" \
     --libdir="${INSTALL_DIR}/tcnative" \
     --with-apr="${INSTALL_DIR}/apr" \
@@ -159,7 +151,7 @@ RUN \
   sed -i "$ d" conf/web.xml ; \
   sed -i -e "\$a\    <error-page\>\n\        <error-code\>404<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>403<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>500<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\n\<\/web-app\>" conf/web.xml
 
-FROM quay.io/alfresco/alfresco-base-java:$JDIST${JAVA_MAJOR}-$DISTRIB_NAME${DISTRIB_MAJOR} AS TOMCAT_BASE_IMAGE
+FROM quay.io/alfresco/alfresco-base-java:${JDIST}${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS TOMCAT_BASE_IMAGE
 ARG JAVA_MAJOR
 ARG DISTRIB_MAJOR
 ARG CREATED
