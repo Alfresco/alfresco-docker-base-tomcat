@@ -78,24 +78,22 @@ RUN set -eux; \
   echo "$APR_SHA256 *apr.tar.gz" | sha256sum -c -; \
   echo "$APR_UTIL_SHA256 apr-util.tar.gz" | sha256sum -c -; \
   \
-# NOTE: disabling signature check as it's broken
-#  if gpg --verify apr.tar.gz.asc; then \
-#    echo signature checked; \
-#  else \
-#    keyID=$(gpg --verify apr.tar.gz.asc 2>&1 | awk '/RSA\ /{print $NF}'); \
-#    gpg --keyserver pgp.mit.edu --recv-keys "0x$keyID"; \
-#    gpg --verify apr.tar.gz.asc; \
-#  fi && \
+  if gpg --verify apr.tar.gz.asc; then \
+    echo signature checked; \
+  else \
+    keyID=$(gpg --verify apr.tar.gz.asc 2>&1 | awk '/RSA\ /{print $NF}'); \
+    gpg --keyserver pgp.mit.edu --recv-keys "0x$keyID"; \
+    gpg --verify apr.tar.gz.asc; \
+  fi && \
     tar -zxf apr.tar.gz --strip-components=1 -C ${BUILD_DIR}/libapr; \
-# NOTE: disabling signature check as it's broken
-#  if gpg --verify apr-util.tar.gz.asc; then \
-#    echo signature checked; \
-#  else \
-#    keyID=$(gpg --batch --verify apr-util.tar.gz.asc 2>&1 | awk '/RSA\ /{print $NF}'); \
-#    gpg --keyserver pgp.mit.edu --recv-keys "0x$keyID"; \
-#    gpg --verify apr-util.tar.gz.asc; \
-#  fi && \
-  tar -zxf apr-util.tar.gz --strip-components=1 -C ${BUILD_DIR}/apr-util; \
+  if gpg --verify apr-util.tar.gz.asc; then \
+    echo signature checked; \
+  else \
+    keyID=$(gpg --batch --verify apr-util.tar.gz.asc 2>&1 | awk '/RSA\ /{print $NF}'); \
+    gpg --keyserver pgp.mit.edu --recv-keys "0x$keyID"; \
+    gpg --verify apr-util.tar.gz.asc; \
+  fi && \
+    tar -zxf apr-util.tar.gz --strip-components=1 -C ${BUILD_DIR}/apr-util; \
   BUILD_DEP="gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel"; \
   yum install -y $BUILD_DEP;
 WORKDIR ${BUILD_DIR}/libapr
