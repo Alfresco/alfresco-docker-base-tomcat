@@ -45,12 +45,9 @@ jobs:
             jdist: jdk
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+      - uses: actions/checkout@v3
+      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-buildx-action@v2
       - id: vars
         name: Compute Image Tag
         env:
@@ -79,8 +76,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push to Quay.io
-        uses: docker/build-push-action@v2.8.0
+      - name: Build and Push Image to quay.io
+        uses: docker/build-push-action@v3.0.0
         with:
           push: true
           build-args: |
@@ -97,7 +94,7 @@ jobs:
             quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
           target: TOMCAT_BASE_IMAGE
           platforms: linux/amd64,linux/arm64/v8
-      - name: Push Image to Docker Hub
+      - name: Push Image to docker.io
         if: contains(github.event.head_commit.message, '[release]') && github.ref_name == 'master'
         uses: akhilerm/tag-push-action@v2.0.0
         with:
