@@ -48,64 +48,19 @@ RUN \
 
 FROM tomcat AS TCNATIVE_BUILD
 ARG JAVA_MAJOR
-ARG APR_VERSION=1.7.0
-ARG APR_SHA256=48e9dbf45ae3fdc7b491259ffb6ccf7d63049ffacbc1c0977cced095e4c2d5a2
-ARG APR_UTIL_VERSION=1.6.1
-ARG APR_UTIL_SHA256=b65e40713da57d004123b6319828be7f1273fbc6490e145874ee1177e112c459
 ENV JAVA_HOME /usr/lib/jvm/java-openjdk
-ENV BUILD_DIR=/build
-ENV INSTALL_DIR=/usr/local
-SHELL ["/bin/bash","-c"]
-RUN mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/{tcnative,libapr,apr-util}
-WORKDIR $BUILD_DIR
+ARG BUILD_DIR=/build
+ARG INSTALL_DIR=/usr/local
 RUN set -eux; \
+  mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/tcnative; \
+  cd $BUILD_DIR; \
   tar -zxf tomcat/bin/tomcat-native.tar.gz --strip-components=1 -C tcnative; \
-  active_mirror=; \
-  for mirror in $APACHE_MIRRORS; do \
-    if curl -fsSL ${mirror}/apr/KEYS | gpg --import; then \
-      active_mirror=$mirror; \
-      break; \
-    fi; \
-  done; \
-  [ -n "active_mirror" ]; \
-  \
-  echo "Using mirror ${active_mirror}"; \
-  for filetype in '.tar.gz' '.tar.gz.asc'; do \
-    curl -fsSLo apr${filetype} "${active_mirror}/apr/apr-${APR_VERSION}${filetype}"; \
-    curl -fsSLo apr-util${filetype} "${active_mirror}/apr/apr-util-${APR_UTIL_VERSION}${filetype}"; \
-  done; \
-  \
-  echo "$APR_SHA256 *apr.tar.gz" | sha256sum -c -; \
-  echo "$APR_UTIL_SHA256 apr-util.tar.gz" | sha256sum -c -; \
-  \
-  if gpg --verify apr.tar.gz.asc; then \
-    echo signature checked; \
-  else \
-    keyID=$(gpg --verify apr.tar.gz.asc 2>&1 | awk '/RSA\ /{print $NF}'); \
-    gpg --keyserver pgp.mit.edu --recv-keys "0x$keyID"; \
-    gpg --verify apr.tar.gz.asc; \
-  fi && \
-    tar -zxf apr.tar.gz --strip-components=1 -C ${BUILD_DIR}/libapr; \
-  if gpg --verify apr-util.tar.gz.asc; then \
-    echo signature checked; \
-  else \
-    keyID=$(gpg --batch --verify apr-util.tar.gz.asc 2>&1 | awk '/RSA\ /{print $NF}'); \
-    gpg --keyserver pgp.mit.edu --recv-keys "0x$keyID"; \
-    gpg --verify apr-util.tar.gz.asc; \
-  fi && \
-    tar -zxf apr-util.tar.gz --strip-components=1 -C ${BUILD_DIR}/apr-util; \
-  BUILD_DEP="gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel"; \
-  yum install -y $BUILD_DEP;
-WORKDIR ${BUILD_DIR}/libapr
-RUN ./configure --prefix=${INSTALL_DIR}/apr && make && make install
-WORKDIR ${BUILD_DIR}/apr-util
-RUN ./configure  --prefix=${INSTALL_DIR}/apr --with-apr=${INSTALL_DIR}/apr && make && make install
-WORKDIR ${BUILD_DIR}/tcnative/native
-RUN \
+  yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config; \
+  cd tcnative/native; \
   ./configure \
+    --libdir=${INSTALL_DIR}/tcnative \
+    --with-apr=/usr/bin/apr-1-config \
     --with-java-home="$JAVA_HOME" \
-    --libdir="${INSTALL_DIR}/tcnative" \
-    --with-apr="${INSTALL_DIR}/apr" \
     --with-ssl=yes; \
   make -j "$(nproc)"; \
   make install
@@ -150,19 +105,18 @@ LABEL org.label-schema.schema-version="1.0" \
   org.opencontainers.image.revision="$REVISION" \
   org.opencontainers.image.source="https://github.com/Alfresco/alfresco-docker-base-tomcat" \
   org.opencontainers.image.created="$CREATED"
-ENV CATALINA_HOME /usr/local/tomcat
 # let "Tomcat Native" live somewhere isolated
+ENV CATALINA_HOME /usr/local/tomcat
 ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
 ENV PATH $CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
 COPY --from=TOMCAT_BUILD /build/tomcat $CATALINA_HOME
-COPY --from=TCNATIVE_BUILD /usr/local/apr /usr/local/apr
 COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
-USER root
-# verify Tomcat Native is working properly
-RUN set -e \
-  echo -e "/usr/local/apr/lib\n$TOMCAT_NATIVE_LIBDIR" >> /etc/ld.so.conf.d/tomcat.conf; \
+RUN \
+  set -eux; \
+  yum install -y apr; \
+  # verify Tomcat Native is working properly
   nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
   test $nativeLines -ge 1 || exit 1
 EXPOSE 8080
