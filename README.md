@@ -77,11 +77,11 @@ To build this image, run the following script:
 
 ```bash
 IMAGE_REPOSITORY=alfresco/alfresco-base-tomcat
-(cd java-$JAVA_MAJOR/$DISTRIB_NAME-$DISTRIB_MAJOR && docker build -t java-$JAVA_MAJOR-$DISTRIB_NAME-$DISTRIB_MAJOR .)
-docker build -t $IMAGE_REPOSITORY . \
+docker buildx build -t $IMAGE_REPOSITORY . \
   --build-arg DISTRIB_NAME=$DISTRIB_NAME \
   --build-arg DISTRIB_MAJOR=$DISTRIB_MAJOR \
   --build-arg JAVA_MAJOR=$JAVA_MAJOR \
+  --build-arg JDIST=$JDIST \
   --build-arg TOMCAT_MAJOR=$TOMCAT_MAJOR \
   --no-cache
 ```
@@ -91,6 +91,7 @@ where:
 * DISTRIB_NAME is centos or rockylinux
 * DISTRIB_MAJOR is 7 for centos or 8 for rockylinux
 * JAVA_MAJOR is 11 or 17 for rockylinux only
+* JDIST is jre or jdk
 * TOMCAT_MAJOR is 8 or 9
 
 ### Release
