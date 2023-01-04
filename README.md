@@ -1,4 +1,4 @@
-# Alfresco Docker Base Tomcat [![Build Status](https://img.shields.io/github/workflow/status/Alfresco/alfresco-docker-base-tomcat/Alfresco%20tomcat%20base%20Docker%20image)](https://github.com/Alfresco/alfresco-docker-base-tomcat/actions/workflows/main.yml)
+# Alfresco Docker Base Tomcat [![Build Status](https://img.shields.io/github/actions/workflow/status/Alfresco/alfresco-docker-base-tomcat/main.yml?branch=master)](https://github.com/Alfresco/alfresco-docker-base-tomcat/actions/workflows/main.yml)
 
 This repository contains the [Dockerfile](Dockerfile) used to create the parent
 Tomcat image that will be used by Alfresco engineering teams, other internal
