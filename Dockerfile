@@ -41,7 +41,7 @@ RUN \
     curl -fsSLo tomcat${filetype} ${active_mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}${filetype}; \
   done; \
   \
-  echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c -; \
+  echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c - || echo "Checksum did't match: $(sha512sum *tomcat.tar.gz)" && exit 1; \
   \
   gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
   tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1
