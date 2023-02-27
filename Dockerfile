@@ -25,7 +25,7 @@ ENV TOMCAT_SHA512 179af1d50a7d330d0842d3f1cae086bbc1b20e8f6752d66500663f3ac71d80
 FROM tomcat${TOMCAT_MAJOR} AS tomcat
 ARG APACHE_MIRRORS
 RUN \
-  set -eux; \
+  set -eu; \
   mkdir -p /build/tomcat; \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
@@ -51,7 +51,7 @@ ARG JAVA_MAJOR
 ENV JAVA_HOME /usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
-RUN set -eux; \
+RUN set -eu; \
   mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/tcnative; \
   cd $BUILD_DIR; \
   tar -zxf tomcat/bin/tomcat-native.tar.gz --strip-components=1 -C tcnative; \
@@ -114,7 +114,7 @@ WORKDIR $CATALINA_HOME
 COPY --from=TOMCAT_BUILD /build/tomcat $CATALINA_HOME
 COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 RUN \
-  set -eux; \
+  set -eu; \
   yum install -y apr; \
   # verify Tomcat Native is working properly
   nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
