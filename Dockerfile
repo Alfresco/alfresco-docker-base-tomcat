@@ -30,6 +30,7 @@ RUN \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
     if curl -fsSL ${mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; then \
+      gpg --export-ownertrust | sed 's/:[0-9]:/:6:/g' | gpg --import-ownertrust ; \
       active_mirror=$mirror; \
       break; \
     fi; \
