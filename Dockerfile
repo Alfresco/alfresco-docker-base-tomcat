@@ -25,12 +25,11 @@ ENV TOMCAT_SHA512 8c883c54ce9ce43eba37756a6404cdf3477879883a3e6d146dc8a7aa5e0425
 FROM tomcat${TOMCAT_MAJOR} AS tomcat
 ARG APACHE_MIRRORS
 RUN \
-  set -eu \
+  set -eu; \
   mkdir -p /build/tomcat; \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
     if curl -fsSL ${mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; then \
-      gpg --export-ownertrust | sed 's/:[0-9]:/:6:/g' | gpg --import-ownertrust ; \
       active_mirror=$mirror; \
       break; \
     fi; \
@@ -42,7 +41,7 @@ RUN \
     curl -fsSLo tomcat${filetype} ${active_mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}${filetype}; \
   done; \
   \
-  echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c - || echo "Checksum did't match: $(sha512sum *tomcat.tar.gz)" && exit 1; \
+  echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c - || (echo "Checksum did't match: $(sha512sum *tomcat.tar.gz)" && exit 1); \
   \
   gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
   tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1
@@ -52,7 +51,7 @@ ARG JAVA_MAJOR
 ENV JAVA_HOME /usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
-RUN set -eu \
+RUN set -eu; \
   mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/tcnative; \
   cd $BUILD_DIR; \
   tar -zxf tomcat/bin/tomcat-native.tar.gz --strip-components=1 -C tcnative; \
@@ -115,7 +114,7 @@ WORKDIR $CATALINA_HOME
 COPY --from=TOMCAT_BUILD /build/tomcat $CATALINA_HOME
 COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 RUN \
-  set -eu \
+  set -eu; \
   yum install -y apr; \
   # verify Tomcat Native is working properly
   nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
