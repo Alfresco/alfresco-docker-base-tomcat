@@ -11,6 +11,7 @@ env:
 jobs:
   docker_images:
     strategy:
+      fail-fast: false
       matrix:
         tomcat_major:
           - 8
