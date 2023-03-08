@@ -10,6 +10,7 @@ env:
   IMAGE_REPOSITORY: alfresco-base-tomcat
 jobs:
   docker_images:
+    name: Tomcat ${{ matrix.tomcat_major }} Java ${{ matrix.java_major }} on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
     strategy:
       fail-fast: false
       matrix:
@@ -80,7 +81,7 @@ jobs:
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
             JAVA_MAJOR=${{ matrix.java_major }}
             TOMCAT_MAJOR=${{ matrix.tomcat_major }}
-            REVISION=${{ github.run_number }}
+            REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
           tags: |
             quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.image_anchor }}
