@@ -14,18 +14,18 @@ ENV APACHE_MIRRORS \
 
 FROM base AS tomcat8
 ENV TOMCAT_MAJOR 8
-ENV TOMCAT_VERSION 8.5.78
-ENV TOMCAT_SHA512 b50213e64cc1fd3da2847deda1ca13bee4c26663093c11d53c5ecfe4cdec8856e743b4a1d8488e0c0cbe9bf149e755df40a4140f3b155e2195e3bc6335de3512
+ENV TOMCAT_VERSION 8.5.87
+ENV TOMCAT_SHA512 e303b45adaccef4c6c93546bd445e40caa690e0a80c850e2176178afd94dfa4402137820ffa40dc9005d625ec96c3c3b41124a6c4a1c90621a24b34932ae3b5e
 
 FROM base AS tomcat9
 ENV TOMCAT_MAJOR 9
-ENV TOMCAT_VERSION 9.0.62
-ENV TOMCAT_SHA512 179af1d50a7d330d0842d3f1cae086bbc1b20e8f6752d66500663f3ac71d80f50113bbd29931e21c8e2eccd982f9f872e193364311316fdd67349130d440c83f
+ENV TOMCAT_VERSION 9.0.73
+ENV TOMCAT_SHA512 d43fbd6c5ae00bc0ffc2559743f91abd3547c827426cb0acdc8428e060e8659b6bb41b3877deb061ab6202980de39b9558525a4256725b647d5bff93e47a5664
 
 FROM tomcat${TOMCAT_MAJOR} AS tomcat
 ARG APACHE_MIRRORS
 RUN \
-  set -eux; \
+  set -eu; \
   mkdir -p /build/tomcat; \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
@@ -41,7 +41,7 @@ RUN \
     curl -fsSLo tomcat${filetype} ${active_mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}${filetype}; \
   done; \
   \
-  echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c -; \
+  echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c - || (echo "Checksum did't match: $(sha512sum *tomcat.tar.gz)" && exit 1); \
   \
   gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
   tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1
@@ -51,7 +51,7 @@ ARG JAVA_MAJOR
 ENV JAVA_HOME /usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
-RUN set -eux; \
+RUN set -eu; \
   mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/tcnative; \
   cd $BUILD_DIR; \
   tar -zxf tomcat/bin/tomcat-native.tar.gz --strip-components=1 -C tcnative; \
@@ -114,7 +114,7 @@ WORKDIR $CATALINA_HOME
 COPY --from=TOMCAT_BUILD /build/tomcat $CATALINA_HOME
 COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 RUN \
-  set -eux; \
+  set -eu; \
   yum install -y apr; \
   # verify Tomcat Native is working properly
   nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
