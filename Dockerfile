@@ -6,7 +6,7 @@ ARG DISTRIB_NAME
 ARG DISTRIB_MAJOR
 ARG TOMCAT_MAJOR
 
-FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS base
+FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR}-OPSEXP-2136 AS base
 ENV APACHE_MIRRORS \
   https://archive.apache.org/dist \
   https://dlcdn.apache.org \
