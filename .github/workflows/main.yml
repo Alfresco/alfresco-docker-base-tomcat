@@ -1,3 +1,4 @@
+---
 name: build
 on:
   push:
@@ -10,7 +11,10 @@ env:
   IMAGE_REPOSITORY: alfresco-base-tomcat
 jobs:
   docker_images:
-    name: Tomcat ${{ matrix.tomcat_major }} Java ${{ matrix.java_major }} on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+    name: >-
+      Tomcat ${{ matrix.tomcat_major }}
+      Java ${{ matrix.java_major }}
+      on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
     strategy:
       fail-fast: false
       matrix:
@@ -70,12 +74,40 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build image for tests
+        uses: docker/build-push-action@v4.0.0
+        with:
+          load: true
+          build-args: |
+            no-cache=true
+            JDIST=${{ matrix.jdist }}
+            DISTRIB_NAME=${{ matrix.base_image.flavor }}
+            DISTRIB_MAJOR=${{ matrix.base_image.major }}
+            JAVA_MAJOR=${{ matrix.java_major }}
+            TOMCAT_MAJOR=${{ matrix.tomcat_major }}
+          tags: local/${{ env.IMAGE_REPOSITORY }}:ci
+          target: TOMCAT_BASE_IMAGE
+      - name: Test Built Image
+        run: |
+          echo -n "Checking for Tomcat config: "
+          docker run local/${{ env.IMAGE_REPOSITORY }}:ci ./bin/catalina.sh configtest 2>&1 \
+          | tail -1 | grep '^INFO: Server initialization in '
+          echo -n "Checking for tcNative libs: "
+          docker run local/${{ env.IMAGE_REPOSITORY }}:ci ./bin/catalina.sh configtest 2>&1 \
+          | grep 'Loaded Apache Tomcat Native library .* using APR version'
+          echo -n "Checking shell environment: "
+          BASH_LOGIN="$(docker run local/${{ env.IMAGE_REPOSITORY }}:ci /bin/bash 2>&1 > /dev/null || true)"
+          if [ -z "$BASH_LOGIN" ]; then
+            echo ok
+          else echo 'bash reported an error'
+            echo $BASH_LOGIN
+            exit 7
+          fi
       - name: Build and Push Image to quay.io
         uses: docker/build-push-action@v4.0.0
         with:
           push: true
           build-args: |
-            no-cache=true
             JDIST=${{ matrix.jdist }}
             DISTRIB_NAME=${{ matrix.base_image.flavor }}
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
