@@ -19,7 +19,6 @@ jobs:
       fail-fast: false
       matrix:
         tomcat_major:
-          - 8
           - 9
         base_image:
           - flavor: centos
