@@ -58,6 +58,8 @@ jobs:
           fi
           echo "image_created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
           echo "image_anchor=$(date -u +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
+          echo "tomcat_version=$(jq -r .tomcat_version tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
+          echo "tomcat_sha512=$(jq -r .tomcat_sha512 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
       - name: Login to Quay.io
         uses: docker/login-action@v2
         with:
@@ -83,6 +85,8 @@ jobs:
             TOMCAT_MAJOR=${{ matrix.tomcat_major }}
             REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
+            TOMCAT_VERSION=${{ steps.vars.outputs.tomcat_version }}
+            TOMCAT_SHA512=${{ steps.vars.outputs.tomcat_sha512 }}
           tags: |
             quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.image_anchor }}
             quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
