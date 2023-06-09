@@ -13,7 +13,7 @@ jobs:
   docker_images:
     name: >-
       Tomcat ${{ matrix.tomcat_major }}
-      Java ${{ matrix.java_major }}
+      ${{ matrix.jdist }}${{ matrix.java_major }}
       on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
     strategy:
       fail-fast: false
