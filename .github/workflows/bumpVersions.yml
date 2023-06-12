@@ -16,6 +16,7 @@ permissions:
 
 jobs:
   updatecli:
+    name: Tomcat ${{ matrix.tomcat_major }} version bump
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
