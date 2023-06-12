@@ -87,19 +87,21 @@ jobs:
           tags: local/${{ env.IMAGE_REPOSITORY }}:ci
           target: TOMCAT_BASE_IMAGE
       - name: Test Built Image
+        env:
+          CATALINA_OUT: /tmp/catalina.out
         run: |
           echo -n "Checking for Tomcat config: "
           docker run local/${{ env.IMAGE_REPOSITORY }}:ci ./bin/catalina.sh configtest 2>&1 \
-          | tail -1 | grep '^INFO: Server initialization in '
+          > ${{ env.CATALINA_OUT }}
+          tail -1 ${{ env.CATALINA_OUT }} | grep '^INFO: Server initialization in '
           echo -n "Checking for tcNative libs: "
-          docker run local/${{ env.IMAGE_REPOSITORY }}:ci ./bin/catalina.sh configtest 2>&1 \
-          | grep 'Loaded Apache Tomcat Native library .* using APR version'
+          grep 'Loaded Apache Tomcat Native library .* using APR version' ${{ env.CATALINA_OUT }}
           echo -n "Checking shell environment: "
-          BASH_LOGIN="$(docker run local/${{ env.IMAGE_REPOSITORY }}:ci /bin/bash 2>&1 > /dev/null || true)"
-          if [ -z "$BASH_LOGIN" ]; then
+          BASH_LOGIN_STDERR="$(docker run local/${{ env.IMAGE_REPOSITORY }}:ci /bin/bash 2>&1 > /dev/null || true)"
+          if [ -z "$BASH_LOGIN_STDERR" ]; then
             echo ok
           else echo 'bash reported an error'
-            echo $BASH_LOGIN
+            echo $BASH_LOGIN_STDERR
             exit 7
           fi
       - name: Build and Push Image to quay.io
