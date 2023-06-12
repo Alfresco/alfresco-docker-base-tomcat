@@ -23,7 +23,6 @@ jobs:
       fail-fast: false
       matrix:
         tomcat_major:
-          - 8
           - 9
     steps:
       - name: Checkout
