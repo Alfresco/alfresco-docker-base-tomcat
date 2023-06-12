@@ -4,7 +4,7 @@ scms:
   tomcatGitHub:
     kind: "git"
     spec:
-        url: "git@github.com:apache/tomcat.git"
+        url: "https://github.com/apache/tomcat.git"
         branch: "main"
 
 sources:
