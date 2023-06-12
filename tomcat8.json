@@ -1,4 +1,4 @@
 {
-    "tomcat_version": "8.5.87",
-    "tomcat_sha512": "e303b45adaccef4c6c93546bd445e40caa690e0a80c850e2176178afd94dfa4402137820ffa40dc9005d625ec96c3c3b41124a6c4a1c90621a24b34932ae3b5e"
+  "tomcat_sha512": "328c6f5e9515baa1dc8c4d81db51194688be36a6dbc9fc0f6444d1a8f692ca0efb8b90555aed23cb28fe2a69ab1fd6b9b71c047212c7bbf6445bba193debbc09",
+  "tomcat_version": "8.5.89"
 }
