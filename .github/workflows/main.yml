@@ -91,8 +91,8 @@ jobs:
           CATALINA_OUT: /tmp/catalina.out
         run: |
           echo -n "Checking for Tomcat config: "
-          docker run local/${{ env.IMAGE_REPOSITORY }}:ci ./bin/catalina.sh configtest 2>&1 \
-          > ${{ env.CATALINA_OUT }}
+          docker run local/${{ env.IMAGE_REPOSITORY }}:ci ./bin/catalina.sh configtest \
+          > ${{ env.CATALINA_OUT }} 2>&1
           tail -1 ${{ env.CATALINA_OUT }} | grep '^INFO: Server initialization in '
           echo -n "Checking for tcNative libs: "
           grep 'Loaded Apache Tomcat Native library .* using APR version' ${{ env.CATALINA_OUT }}
