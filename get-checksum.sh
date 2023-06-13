@@ -4,7 +4,7 @@ CHECKSUM=$(curl -sf "https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_MAJOR}/v${T
 if [ ${#CHECKSUM} -eq 128 ]; then
     echo "$CHECKSUM"
 else
-    echo 'ERROR Looks like checksum cannot be retrived correctly. Actual contents:' >&2
+    echo -n 'ERROR Looks like checksum cannot be retrieved correctly. Actual contents: ' >&2
     echo "$CHECKSUM" >&2
     exit 1
 fi
