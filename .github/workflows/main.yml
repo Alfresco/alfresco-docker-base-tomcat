@@ -86,6 +86,8 @@ jobs:
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
             JAVA_MAJOR=${{ matrix.java_major }}
             TOMCAT_MAJOR=${{ matrix.tomcat_major }}
+            TOMCAT_VERSION=${{ steps.vars.outputs.tomcat_version }}
+            TOMCAT_SHA512=${{ steps.vars.outputs.tomcat_sha512 }}
           tags: local/${{ env.IMAGE_REPOSITORY }}:ci
           target: TOMCAT_BASE_IMAGE
       - name: Test Built Image
@@ -116,10 +118,10 @@ jobs:
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
             JAVA_MAJOR=${{ matrix.java_major }}
             TOMCAT_MAJOR=${{ matrix.tomcat_major }}
-            REVISION=${{ github.run_number }}
-            CREATED=${{ steps.vars.outputs.image_created }}
             TOMCAT_VERSION=${{ steps.vars.outputs.tomcat_version }}
             TOMCAT_SHA512=${{ steps.vars.outputs.tomcat_sha512 }}
+            REVISION=${{ github.run_number }}
+            CREATED=${{ steps.vars.outputs.image_created }}
           tags: |
             quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.image_anchor }}
             quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
