@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - bump-tomcat**
       - OPSEXP-[0-9]+**
 
 env:
