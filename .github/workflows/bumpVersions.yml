@@ -25,6 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          # Required to trigger the main workflow once this workflow creates a PR
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Install updatecli
