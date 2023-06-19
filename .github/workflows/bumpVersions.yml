@@ -12,9 +12,6 @@ on:
   schedule:
     - cron:  '0 6 * * MON'
 
-permissions:
-  contents: write
-
 jobs:
   updatecli:
     name: Tomcat ${{ matrix.tomcat_major }} version bump
@@ -27,6 +24,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          # Required to trigger the main workflow once this workflow creates a PR
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Install updatecli
         uses: updatecli/updatecli-action@v2
@@ -45,6 +45,8 @@ jobs:
           branch: bump-tomcat${{ matrix.tomcat_major }}
           create_branch: true
           push_options: '--force'
+          commit_user_name: ${{ vars.BOT_GITHUB_USERNAME }}
+          commit_user_email: ${{ vars.BOT_GITHUB_EMAIL }}
 
       - name: Retrieve current version
         if: steps.auto-commit-action.outputs.changes_detected == 'true'
