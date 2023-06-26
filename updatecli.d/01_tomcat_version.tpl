@@ -15,7 +15,7 @@ sources:
     spec:
       versionfilter:
         kind: semver
-        pattern: "~{{ requiredEnv "TOMCAT_MAJOR" }}"
+        pattern: "~{{ requiredEnv "TOMCAT_VERSION" }}"
 
 targets:
   json:
