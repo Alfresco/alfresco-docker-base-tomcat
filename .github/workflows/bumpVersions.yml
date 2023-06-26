@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/bumpVersions.yml
       - updatecli.d/**
+      - get-checksum.sh
     branches:
       - OPSEXP-**
   workflow_dispatch:
@@ -34,12 +35,14 @@ jobs:
         with:
           version: v0.54.0
 
-      - name: Run updatecli
-        env:
-          TOMCAT_MAJOR: ${{ matrix.tomcat_major }}
+      - name: Set ENV
         run: |
+          echo "TOMCAT_MAJOR=${{ matrix.tomcat_major }}" >> $GITHUB_ENV
           echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
           echo "TCNATIVE_VERSION=$(jq -r '.tcnative_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
+
+      - name: Run updatecli
+        run: |
           updatecli apply
 
       - uses: stefanzweifel/git-auto-commit-action@v4
@@ -55,7 +58,7 @@ jobs:
         if: steps.auto-commit-action.outputs.changes_detected == 'true'
         run: |
           if ! gh pr view --json url --jq .url; then
-            gh pr create --title "Bump tomcat${{ matrix.tomcat_major }} to $TOMCAT_VERSION" --body "Freshly served thanks to updatecli and GitHub Actions"
+            gh pr create --title "Bump tomcat${{ matrix.tomcat_major }}" --body "Freshly served thanks to updatecli and GitHub Actions"
           fi
         env:
           GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
