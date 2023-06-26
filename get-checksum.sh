@@ -1,6 +1,17 @@
 #!/bin/bash -e
-TOMCAT_VERSION=$(jq -r '.tomcat_version' "tomcat${TOMCAT_MAJOR}.json")
-CHECKSUM=$(curl -sf "https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz.sha512" | cut -d ' ' -f 1)
+
+case "$1" in
+    tomcat)
+        VERSION=$(jq -r '.tomcat_version' "tomcat${TOMCAT_MAJOR}.json")
+        SHA_URL="https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_MAJOR}/v${VERSION}/bin/apache-tomcat-${VERSION}.tar.gz.sha512"
+    ;;
+    tcnative)
+        VERSION=$(jq -r '.tcnative_version' "tomcat${TOMCAT_MAJOR}.json")
+        SHA_URL="https://dlcdn.apache.org/tomcat/tomcat-connectors/native/${VERSION}/source/tomcat-native-${VERSION}-src.tar.gz.sha512"
+    ;;
+esac
+
+CHECKSUM=$(curl -sf "${SHA_URL}" | cut -d ' ' -f 1)
 if [ ${#CHECKSUM} -eq 128 ]; then
     echo "$CHECKSUM"
 else

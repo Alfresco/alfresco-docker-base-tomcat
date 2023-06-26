@@ -1,19 +1,33 @@
 name: "Bump tomcat checksum"
 
 sources:
-  checksum:
-    name: Retrieve the package checksum
+  tomcatChecksum:
+    name: Retrieve the tomcat binaries archive checksum
     kind: shell
     spec:
-      command: ./get-checksum.sh
+      command: ./get-checksum.sh tomcat
+      environments:
+        - name: TOMCAT_MAJOR
+  tcnativeChecksum:
+    name: Retrieve the tomcat native libs  checksum
+    kind: shell
+    spec:
+      command: ./get-checksum.sh tcnative
       environments:
         - name: TOMCAT_MAJOR
 
 targets:
-  json:
+  tomcatJson:
     name: Update version in json target
     kind: json
-    sourceid: checksum
+    sourceid: tomcatChecksum
     spec:
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: tomcat_sha512
+  tcnativeJson:
+    name: Update version in json target
+    kind: json
+    sourceid: tcnativeChecksum
+    spec:
+      file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
+      key: tcnative_sha512
