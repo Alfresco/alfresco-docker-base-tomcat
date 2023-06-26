@@ -21,6 +21,7 @@ jobs:
       matrix:
         tomcat_major:
           - 9
+          - 10
         base_image:
           - flavor: centos
             major: 7
@@ -33,10 +34,6 @@ jobs:
           - jre
           - jdk
         exclude:
-          - base_image:
-              flavor: rockylinux
-              major: 8
-            tomcat_major: 8
           - base_image:
               flavor: centos
               major: 7
