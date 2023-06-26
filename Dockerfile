@@ -15,12 +15,14 @@ ENV APACHE_MIRRORS \
 ARG TOMCAT_MAJOR
 ARG TOMCAT_VERSION
 ARG TOMCAT_SHA512
+ARG TCNATIVE_VERSION
+ARG TCNATIVE_SHA512
 
 FROM base AS tomcat
 ARG APACHE_MIRRORS
 RUN \
   set -eu; \
-  mkdir -p /build/tomcat; \
+  mkdir -p /build/{tcnative,tomcat}; \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
     if curl -fsSL ${mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; then \
@@ -33,12 +35,16 @@ RUN \
   echo "Using mirror ${active_mirror}"; \
   for filetype in '.tar.gz' '.tar.gz.asc'; do \
     curl -fsSLo tomcat${filetype} ${active_mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}${filetype}; \
+    curl -fsSLo tcnative${filetype}  ${active_mirror}/tomcat/tomcat-connectors/native/${TCNATIVE_VERSION}/source/tomcat-native-${TCNATIVE_VERSION}-src.tar.gz; \
   done; \
   \
   echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c - || (echo "Checksum did't match: $(sha512sum *tomcat.tar.gz)" && exit 1); \
+  echo "$TCNATIVE_SHA512 *tcnative.tar.gz" | sha512sum -c - || (echo "Checksum did't match: $(sha512sum *tcnative.tar.gz)" && exit 1); \
   \
-  gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
-  tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1
+  #gpg --batch --verify tcnative.tar.gz.asc tcnative.tar.gz && \
+  #gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
+  tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1 && \
+  tar -zxf tcnative.tar.gz -C /build/tcnative --strip-components=1
 
 FROM tomcat AS TCNATIVE_BUILD
 ARG JAVA_MAJOR
@@ -46,9 +52,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
 RUN set -eu; \
-  mkdir -p {${INSTALL_DIR},${BUILD_DIR}}/tcnative; \
   cd $BUILD_DIR; \
-  tar -zxf tomcat/bin/tomcat-native.tar.gz --strip-components=1 -C tcnative; \
   yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config; \
   cd tcnative/native; \
   ./configure \
