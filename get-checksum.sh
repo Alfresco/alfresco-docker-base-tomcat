@@ -11,7 +11,7 @@ case "$1" in
     ;;
 esac
 
-CHECKSUM=$(curl -sf "${SHA_URL}" | cut -d ' ' -f 1)
+CHECKSUM=$(curl -sLf "${SHA_URL}" | cut -d ' ' -f 1)
 if [ ${#CHECKSUM} -eq 128 ]; then
     echo "$CHECKSUM"
 else
