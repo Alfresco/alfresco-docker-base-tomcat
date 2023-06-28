@@ -4,8 +4,8 @@ scms:
   tomcatGitHub:
     kind: "git"
     spec:
-      url: "https://github.com/apache/tomcat.git"
-      branch: "main"
+      url: https://github.com/apache/tomcat.git
+      branch: main
   tcnativeGitHub:
     kind: git
     spec:
@@ -44,4 +44,4 @@ targets:
     sourceid: tcnativeTag
     spec:
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
-      key: tomcat_version
+      key: tcnative_version

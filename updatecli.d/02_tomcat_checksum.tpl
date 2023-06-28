@@ -9,7 +9,7 @@ sources:
       environments:
         - name: TOMCAT_MAJOR
   tcnativeChecksum:
-    name: Retrieve the tomcat native libs  checksum
+    name: Retrieve the tomcat native libs checksum
     kind: shell
     spec:
       command: ./get-checksum.sh tcnative
