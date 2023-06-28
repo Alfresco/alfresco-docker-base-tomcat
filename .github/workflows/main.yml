@@ -6,7 +6,10 @@ on:
       - master
       - bump-tomcat**
       - OPSEXP-[0-9]+**
-
+    paths-ignore:
+      - .github/workflows/bumpVersions.yml
+      - updatecli.d/**
+      - get-checksum.sh
 env:
   IMAGE_REGISTRY_NAMESPACE: alfresco
   IMAGE_REPOSITORY: alfresco-base-tomcat
@@ -21,6 +24,7 @@ jobs:
       matrix:
         tomcat_major:
           - 9
+          - 10
         base_image:
           - flavor: centos
             major: 7
@@ -33,10 +37,6 @@ jobs:
           - jre
           - jdk
         exclude:
-          - base_image:
-              flavor: rockylinux
-              major: 8
-            tomcat_major: 8
           - base_image:
               flavor: centos
               major: 7
@@ -64,6 +64,8 @@ jobs:
           echo "image_anchor=$(date -u +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
           echo "tomcat_version=$(jq -r .tomcat_version tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
           echo "tomcat_sha512=$(jq -r .tomcat_sha512 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
+          echo "tcnative_version=$(jq -r .tcnative_version tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
+          echo "tcnative_sha512=$(jq -r .tcnative_sha512 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
       - name: Login to Quay.io
         uses: docker/login-action@v2
         with:
@@ -89,6 +91,8 @@ jobs:
             TOMCAT_MAJOR=${{ matrix.tomcat_major }}
             TOMCAT_VERSION=${{ steps.vars.outputs.tomcat_version }}
             TOMCAT_SHA512=${{ steps.vars.outputs.tomcat_sha512 }}
+            TCNATIVE_VERSION=${{ steps.vars.outputs.tcnative_version }}
+            TCNATIVE_SHA512=${{ steps.vars.outputs.tcnative_sha512 }}
           tags: local/${{ env.IMAGE_REPOSITORY }}:ci
           target: TOMCAT_BASE_IMAGE
       - name: Test Built Image
@@ -121,6 +125,8 @@ jobs:
             TOMCAT_MAJOR=${{ matrix.tomcat_major }}
             TOMCAT_VERSION=${{ steps.vars.outputs.tomcat_version }}
             TOMCAT_SHA512=${{ steps.vars.outputs.tomcat_sha512 }}
+            TCNATIVE_VERSION=${{ steps.vars.outputs.tcnative_version }}
+            TCNATIVE_SHA512=${{ steps.vars.outputs.tcnative_sha512 }}
             REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
           tags: |
