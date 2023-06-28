@@ -35,14 +35,14 @@ RUN \
   echo "Using mirror ${active_mirror}"; \
   for filetype in '.tar.gz' '.tar.gz.asc'; do \
     curl -fsSLo tomcat${filetype} ${active_mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}${filetype}; \
-    curl -fsSLo tcnative${filetype}  ${active_mirror}/tomcat/tomcat-connectors/native/${TCNATIVE_VERSION}/source/tomcat-native-${TCNATIVE_VERSION}-src.tar.gz; \
+    curl -fsSLo tcnative${filetype}  ${active_mirror}/tomcat/tomcat-connectors/native/${TCNATIVE_VERSION}/source/tomcat-native-${TCNATIVE_VERSION}-src${filetype}; \
   done; \
   \
   echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c - || (echo "Checksum did't match: $(sha512sum *tomcat.tar.gz)" && exit 1); \
   echo "$TCNATIVE_SHA512 *tcnative.tar.gz" | sha512sum -c - || (echo "Checksum did't match: $(sha512sum *tcnative.tar.gz)" && exit 1); \
   \
-  #gpg --batch --verify tcnative.tar.gz.asc tcnative.tar.gz && \
-  #gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
+  gpg --batch --verify tcnative.tar.gz.asc tcnative.tar.gz && \
+  gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
   tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1 && \
   tar -zxf tcnative.tar.gz -C /build/tcnative --strip-components=1
 
