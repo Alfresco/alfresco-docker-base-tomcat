@@ -5,7 +5,7 @@ Tomcat image that will be used by Alfresco engineering teams, other internal
 groups in the organization, customers and partners to create Tomcat bases
 application images from.
 
-Images are available for latest Tomcat 8.5.x and 9.0.x.
+Images are available for latest Tomcat 10.1.x and 9.0.x.
 
 This image depends on the [alfresco-docker-base-java](https://github.com/Alfresco/alfresco-docker-base-java).
 
