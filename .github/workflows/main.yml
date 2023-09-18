@@ -30,6 +30,8 @@ jobs:
             major: 7
           - flavor: rockylinux
             major: 8
+          - flavor: rockylinux
+            major: 9
         java_major:
           - 11
           - 17
