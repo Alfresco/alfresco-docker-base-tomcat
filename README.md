@@ -16,22 +16,16 @@ Choose between one of the available flavours built from this repository:
 Tomcat version | Java version | Java flavour | OS               | Image tag                    | Size
 ---------------|--------------|--------------|------------------|------------------------------|-------------------------------------
 9              | 11           | jre          | Centos 7         | tomcat9-jre11-centos7        | ![tomcat9-jre11-centos7 size][1]
-9              | 11           | jdk          | Centos 7         | tomcat9-jdk11-centos7        | ![tomcat9-jdk11-centos7 size][2]
-10             | 11           | jre          | Centos 7         | tomcat10-jre11-centos7       | ![tomcat10-jre11-centos7 size][3]
-10             | 11           | jdk          | Centos 7         | tomcat10-jdk11-centos7       | ![tomcat10-jdk11-centos7 size][4]
-9              | 17           | jre          | Rocky Linux 8    | tomcat9-jre17-rockylinux8    | ![tomcat9-jre17-rockylinux8 size][5]
-9              | 17           | jdk          | Rocky Linux 8    | tomcat9-jdk17-rockylinux8    | ![tomcat9-jdk17-rockylinux8 size][6]
-10             | 17           | jre          | Rocky Linux 8    | tomcat10-jre17-rockylinux8   | ![tomcat10-jre17-rockylinux8 size][7]
-10             | 17           | jdk          | Rocky Linux 8    | tomcat10-jdk17-rockylinux8   | ![tomcat10-jdk17-rockylinux8 size][8]
+10             | 11           | jre          | Centos 7         | tomcat10-jre11-centos7       | ![tomcat10-jre11-centos7 size][2]
+9              | 17           | jre          | Rocky Linux 8    | tomcat9-jre17-rockylinux8    | ![tomcat9-jre17-rockylinux8 size][3]
+10             | 17           | jre          | Rocky Linux 8    | tomcat10-jre17-rockylinux8   | ![tomcat10-jre17-rockylinux8 size][4]
+10             | 17           | jre          | Rocky Linux 9    | tomcat10-jre17-rockylinux9   | ![tomcat10-jre17-rockylinu9 size][5]
 
 [1]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-centos7
-[2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jdk11-centos7
-[3]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre11-centos7
-[4]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jdk11-centos7
-[5]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre17-rockylinux8
-[6]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jdk17-rockylinux8
-[7]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux8
-[8]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jdk17-rockylinux8
+[2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre11-centos7
+[3]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre17-rockylinux8
+[4]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux8
+[5]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux9
 
 * [Docker Hub](https://hub.docker.com/r/alfresco/alfresco-base-tomcat) image name: `alfresco/alfresco-base-tomcat`
 * [Quay](https://quay.io/repository/alfresco/alfresco-base-tomcat) image name: `quay.io/alfresco/alfresco-base-tomcat`
@@ -89,9 +83,9 @@ docker buildx build -t $IMAGE_REPOSITORY . \
 where:
 
 * DISTRIB_NAME is centos or rockylinux
-* DISTRIB_MAJOR is 7 for centos or 8 for rockylinux
+* DISTRIB_MAJOR is 7 for centos, 8 or 9 for rockylinux
 * JAVA_MAJOR is 11 or 17 for rockylinux only
-* JDIST is jre or jdk
+* JDIST is jre
 * TOMCAT_MAJOR is 8 or 9
 
 ### Release
