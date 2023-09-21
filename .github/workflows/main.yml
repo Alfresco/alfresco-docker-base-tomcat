@@ -16,17 +16,25 @@ env:
 jobs:
   docker_images:
     name: >-
-      Tomcat ${{ matrix.include.tomcat_major }}
-      jre${{ matrix.include.java_major }}
-      on ${{ matrix.include.base_image.flavor }}${{ matrix.include.base_image.major }}
+      Tomcat ${{ matrix.tomcat_major }}
+      jre${{ matrix.java_major }}
+      on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
     strategy:
       fail-fast: false
       matrix:
-        tomcat_major: [""]
-        base_image:
-          - flavor: [""]
-            major: [""]
-        java_major: [""]
+        # tomcat_major:
+        #   - 9
+        #   - 10
+        # base_image:
+        #   - flavor: centos
+        #     major: 7
+        #   - flavor: rockylinux
+        #     major: 8
+        #   - flavor: rockylinux
+        #     major: 9
+        # java_major:
+        #   - 11
+        #   - 17
         include:
           - tomcat_major: 9
             base_image:
