@@ -41,6 +41,10 @@ jobs:
               major: 7
             java_major: 17
           - base_image:
+              flavor: centos
+              major: 7
+            tomcat_major: 10
+          - base_image:
               flavor: rockylinux
               major: 9
             tomcat_major: 9
