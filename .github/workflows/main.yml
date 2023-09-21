@@ -22,19 +22,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # tomcat_major:
-        #   - 9
-        #   - 10
-        # base_image:
-        #   - flavor: centos
-        #     major: 7
-        #   - flavor: rockylinux
-        #     major: 8
-        #   - flavor: rockylinux
-        #     major: 9
-        # java_major:
-        #   - 11
-        #   - 17
         include:
           - tomcat_major: 9
             base_image:
