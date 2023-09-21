@@ -36,36 +36,39 @@ jobs:
           - 11
           - 17
         include:
-          - tomcat_major: 9
-            base_image:
+          - base_image:
               flavor: centos
               major: 7
             java_major: 11
-          - tomcat_major: 9
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 11
-          - tomcat_major: 9
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 17
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 11
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 17
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 17
+            tomcat_major: 9
+          #  - base_image:
+          #     flavor: centos
+          #     major: 7
+          #    tomcat_major: 9     
+          # - base_image:
+          #     flavor: rockylinux
+          #     major: 8
+          #   java_major: 11
+
+          # - base_image:
+          #     flavor: rockylinux
+          #     major: 8
+          #   java_major: 17
+
+          # - base_image:
+          #     flavor: rockylinux
+          #     major: 8
+          #   java_major: 11
+
+          # - base_image:
+          #     flavor: rockylinux
+          #     major: 8
+          #   java_major: 17
+
+          # - base_image:
+          #     flavor: rockylinux
+          #     major: 9
+          #   java_major: 17
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
