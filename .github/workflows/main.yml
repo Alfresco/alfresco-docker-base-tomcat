@@ -15,6 +15,10 @@ env:
   IMAGE_REPOSITORY: alfresco-base-tomcat
 jobs:
   docker_images:
+    name: >-
+      Tomcat ${{ matrix.include.tomcat_major }}
+      jre${{ matrix.include.java_major }}
+      on ${{ matrix.include.base_image.flavor }}${{ matrix.include.base_image.major }}
     strategy:
       fail-fast: false
       matrix:
@@ -54,10 +58,6 @@ jobs:
               flavor: rockylinux
               major: 9
             java_major: 17
-    name: >-
-      Tomcat ${{ matrix.tomcat_major }}
-      jre${{ matrix.java_major }}
-      on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
