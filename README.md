@@ -75,7 +75,6 @@ docker buildx build -t $IMAGE_REPOSITORY . \
   --build-arg DISTRIB_NAME=$DISTRIB_NAME \
   --build-arg DISTRIB_MAJOR=$DISTRIB_MAJOR \
   --build-arg JAVA_MAJOR=$JAVA_MAJOR \
-  --build-arg JDIST=$JDIST \
   --build-arg TOMCAT_MAJOR=$TOMCAT_MAJOR \
   --no-cache
 ```
@@ -85,7 +84,6 @@ where:
 * DISTRIB_NAME is centos or rockylinux
 * DISTRIB_MAJOR is 7 for centos, 8 or 9 for rockylinux
 * JAVA_MAJOR is 11 or 17 for rockylinux only
-* JDIST is jre
 * TOMCAT_MAJOR is 8 or 9
 
 ### Release
