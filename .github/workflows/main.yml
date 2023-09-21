@@ -24,11 +24,7 @@ jobs:
       matrix:
         tomcat_major: [""]
         base_image:
-          - flavor: centos
-            major: [""]
-          - flavor: rockylinux
-            major: [""]
-          - flavor: rockylinux
+          - flavor: [""]
             major: [""]
         java_major: [""]
         include:
