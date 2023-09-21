@@ -16,16 +16,18 @@ Choose between one of the available flavours built from this repository:
 Tomcat version | Java version | Java flavour | OS               | Image tag                    | Size
 ---------------|--------------|--------------|------------------|------------------------------|-------------------------------------
 9              | 11           | jre          | Centos 7         | tomcat9-jre11-centos7        | ![tomcat9-jre11-centos7 size][1]
-10             | 11           | jre          | Centos 7         | tomcat10-jre11-centos7       | ![tomcat10-jre11-centos7 size][2]
+9              | 11           | jre          | Rocky Linux 8    | tomcat9-jre11-rockylinux8    | ![tomcat9-jre11-rockylinux8 size][2]
 9              | 17           | jre          | Rocky Linux 8    | tomcat9-jre17-rockylinux8    | ![tomcat9-jre17-rockylinux8 size][3]
-10             | 17           | jre          | Rocky Linux 8    | tomcat10-jre17-rockylinux8   | ![tomcat10-jre17-rockylinux8 size][4]
-10             | 17           | jre          | Rocky Linux 9    | tomcat10-jre17-rockylinux9   | ![tomcat10-jre17-rockylinu9 size][5]
+10             | 11           | jre          | Rocky Linux 8    | tomcat9-jre11-rockylinux8    | ![tomcat10-jre11-rockylinux8 size][4]
+10             | 17           | jre          | Rocky Linux 8    | tomcat10-jre17-rockylinux8   | ![tomcat10-jre17-rockylinux8 size][5]
+10             | 17           | jre          | Rocky Linux 9    | tomcat10-jre17-rockylinux9   | ![tomcat10-jre17-rockylinu9 size][6]
 
 [1]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-centos7
-[2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre11-centos7
+[2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-rockylinux8
 [3]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre17-rockylinux8
-[4]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux8
-[5]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux9
+[4]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre11-rockylinux8
+[5]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux8
+[6]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux9
 
 * [Docker Hub](https://hub.docker.com/r/alfresco/alfresco-base-tomcat) image name: `alfresco/alfresco-base-tomcat`
 * [Quay](https://quay.io/repository/alfresco/alfresco-base-tomcat) image name: `quay.io/alfresco/alfresco-base-tomcat`
