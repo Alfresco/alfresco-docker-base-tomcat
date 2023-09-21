@@ -17,7 +17,7 @@ jobs:
   docker_images:
     name: >-
       Tomcat ${{ matrix.tomcat_major }}
-      ${{ matrix.jdist }}${{ matrix.java_major }}
+      jre${{ matrix.java_major }}
       on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
     strategy:
       fail-fast: false
@@ -35,8 +35,6 @@ jobs:
         java_major:
           - 11
           - 17
-        jdist:
-          - jre
         exclude:
           - base_image:
               flavor: centos
@@ -58,7 +56,7 @@ jobs:
       - id: vars
         name: Compute Image Tag
         env:
-          IMAGE_BASE_NAME: tomcat${{ matrix.tomcat_major }}-${{ matrix.jdist }}${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+          IMAGE_BASE_NAME: tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
         run: |
           if [[ "${{ github.ref_name }}" != "master" ]]
           then
@@ -93,7 +91,6 @@ jobs:
           load: true
           build-args: |
             no-cache=true
-            JDIST=${{ matrix.jdist }}
             DISTRIB_NAME=${{ matrix.base_image.flavor }}
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
             JAVA_MAJOR=${{ matrix.java_major }}
@@ -127,7 +124,6 @@ jobs:
         with:
           push: true
           build-args: |
-            JDIST=${{ matrix.jdist }}
             DISTRIB_NAME=${{ matrix.base_image.flavor }}
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
             JAVA_MAJOR=${{ matrix.java_major }}
