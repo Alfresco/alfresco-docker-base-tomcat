@@ -6,6 +6,7 @@ on:
       - master
       - bump-tomcat**
       - OPSEXP-[0-9]+**
+      - opsexp-[0-9]+**
     paths-ignore:
       - .github/workflows/bumpVersions.yml
       - updatecli.d/**
