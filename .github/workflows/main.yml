@@ -6,6 +6,7 @@ on:
       - master
       - bump-tomcat**
       - OPSEXP-[0-9]+**
+      - opsexp-[0-9]+**
     paths-ignore:
       - .github/workflows/bumpVersions.yml
       - updatecli.d/**
@@ -17,29 +18,41 @@ jobs:
   docker_images:
     name: >-
       Tomcat ${{ matrix.tomcat_major }}
-      ${{ matrix.jdist }}${{ matrix.java_major }}
+      jre${{ matrix.java_major }}
       on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
     strategy:
       fail-fast: false
       matrix:
-        tomcat_major:
-          - 9
-          - 10
-        base_image:
-          - flavor: centos
-            major: 7
-          - flavor: rockylinux
-            major: 8
-        java_major:
-          - 11
-          - 17
-        jdist:
-          - jre
-          - jdk
-        exclude:
-          - base_image:
+        include:
+          - tomcat_major: 9
+            base_image:
               flavor: centos
               major: 7
+            java_major: 11
+          - tomcat_major: 9
+            base_image:
+              flavor: rockylinux
+              major: 8
+            java_major: 11
+          - tomcat_major: 9
+            base_image:
+              flavor: rockylinux
+              major: 8
+            java_major: 17
+          - tomcat_major: 10
+            base_image:
+              flavor: rockylinux
+              major: 8
+            java_major: 11
+          - tomcat_major: 10
+            base_image:
+              flavor: rockylinux
+              major: 8
+            java_major: 17
+          - tomcat_major: 10
+            base_image:
+              flavor: rockylinux
+              major: 9
             java_major: 17
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +62,7 @@ jobs:
       - id: vars
         name: Compute Image Tag
         env:
-          IMAGE_BASE_NAME: tomcat${{ matrix.tomcat_major }}-${{ matrix.jdist }}${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+          IMAGE_BASE_NAME: tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
         run: |
           if [[ "${{ github.ref_name }}" != "master" ]]
           then
@@ -84,7 +97,6 @@ jobs:
           load: true
           build-args: |
             no-cache=true
-            JDIST=${{ matrix.jdist }}
             DISTRIB_NAME=${{ matrix.base_image.flavor }}
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
             JAVA_MAJOR=${{ matrix.java_major }}
@@ -118,7 +130,6 @@ jobs:
         with:
           push: true
           build-args: |
-            JDIST=${{ matrix.jdist }}
             DISTRIB_NAME=${{ matrix.base_image.flavor }}
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
             JAVA_MAJOR=${{ matrix.java_major }}
