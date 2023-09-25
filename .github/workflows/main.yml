@@ -7,10 +7,6 @@ on:
       - bump-tomcat**
       - OPSEXP-[0-9]+**
       - opsexp-[0-9]+**
-    paths-ignore:
-      - .github/workflows/bumpVersions.yml
-      - updatecli.d/**
-      - get-checksum.sh
 env:
   IMAGE_REGISTRY_NAMESPACE: alfresco
   IMAGE_REPOSITORY: alfresco-base-tomcat
