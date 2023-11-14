@@ -130,7 +130,7 @@ jobs:
       - name: Build and Push Image to quay.io
         uses: docker/build-push-action@v5.0.0
         with:
-          push: false
+          push: "${{github.ref_name == 'master' }}"
           build-args: |
             DISTRIB_NAME=${{ matrix.base_image.flavor }}
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
