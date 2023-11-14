@@ -13,6 +13,10 @@ on:
   schedule:
     - cron:  '0 6 * * MON'
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   updatecli:
     name: Tomcat ${{ matrix.tomcat_major }} version bump

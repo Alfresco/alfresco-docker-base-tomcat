@@ -7,9 +7,15 @@ on:
       - bump-tomcat**
       - OPSEXP-[0-9]+**
       - opsexp-[0-9]+**
+
 env:
   IMAGE_REGISTRY_NAMESPACE: alfresco
   IMAGE_REPOSITORY: alfresco-base-tomcat
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   docker_images:
     name: >-
