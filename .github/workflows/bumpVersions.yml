@@ -6,7 +6,7 @@ on:
     paths:
       - .github/workflows/bumpVersions.yml
       - updatecli.d/**
-      - get-checksum.sh
+      - '*.sh'
     branches:
       - OPSEXP-**
   workflow_dispatch:

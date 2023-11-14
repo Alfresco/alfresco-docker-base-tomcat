@@ -1,11 +1,6 @@
 #!/bin/bash -e
 set -o pipefail
 
-if ! command -v htmlq &> /dev/null; then
-    echo "htmlq is required."
-    exit 1
-fi
-
 if [ -z "$TOMCAT_MAJOR" ]; then
     echo "TOMCAT_MAJOR must be set."
     exit 1
