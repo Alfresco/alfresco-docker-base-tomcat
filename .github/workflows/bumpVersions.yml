@@ -35,7 +35,7 @@ jobs:
       - name: Install updatecli
         uses: updatecli/updatecli-action@v2
         with:
-          version: v0.54.0
+          version: v0.66.0
 
       - name: Set required environment variables
         run: |
