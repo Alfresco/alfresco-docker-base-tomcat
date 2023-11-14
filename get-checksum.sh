@@ -15,7 +15,7 @@ CHECKSUM=$(curl -sLf "${SHA_URL}" | cut -d ' ' -f 1)
 if [ ${#CHECKSUM} -eq 128 ]; then
     echo "$CHECKSUM"
 else
-    echo -n "ERROR Looks like checksum cannot be retrieved correctly from ${SHA_URL}. Actual contents: " >&2
+    echo -n "ERROR Looks like checksum cannot be retrieved correctly from ${SHA_URL} - Actual contents: " >&2
     echo "$CHECKSUM" >&2
     exit 1
 fi

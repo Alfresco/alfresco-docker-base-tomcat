@@ -37,10 +37,13 @@ jobs:
         with:
           version: v0.66.0
 
+      - name: Install htmlq
+        run: |
+          brew install htmlq
+
       - name: Set required environment variables
         run: |
           echo "TOMCAT_MAJOR=${{ matrix.tomcat_major }}" >> $GITHUB_ENV
-          echo "TOMCAT_SOURCE_PATTERN=${{ matrix.tomcat_major }}" >> $GITHUB_ENV
           echo "TCNATIVE_SOURCE_PATTERN=${{ matrix.tcnative_source_pattern }}" >> $GITHUB_ENV
 
       - name: Run updatecli
