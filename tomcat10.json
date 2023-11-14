@@ -1,6 +1,6 @@
 {
-  "tcnative_sha512": "973c0dc8d241827aa98f72026d4de67928344c221570abbb7f97380fe56a9ad602b159a5448c6048d88d73fa0ade8c1ab12df293fee513d0e4896847b16206e6",
-  "tcnative_version": "1.2.38",
-  "tomcat_sha512": "406c0c367ac6ad95bb724ecc3a3c340ad7ded8c62287d657811eeec496eaaca1f5add52d2f46111da1426ae67090c543f6deccfeb5fdf4bdae32f9b39e773265",
-  "tomcat_version": "10.1.13"
+  "tcnative_sha512": "d714fb96f880d0d565c58d25bb803fa9a144a6d87e825ad8d00aeac833b40a5512f888b94b3109853f8ee28b176b24fde95fb2d2a70ce65181a51ca7fc60cdab",
+  "tcnative_version": "2.0.6",
+  "tomcat_sha512": "",
+  "tomcat_version": "10.1.16"
 }
