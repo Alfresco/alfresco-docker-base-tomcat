@@ -48,18 +48,11 @@ jobs:
       - name: Install htmlq
         run: |
           brew install htmlq
-          echo "$(brew --prefix htmlq)/bin" >> $GITHUB_PATH
 
       - name: Set required environment variables
         run: |
           echo "TOMCAT_MAJOR=${{ matrix.tomcat_major }}" >> $GITHUB_ENV
           echo "TCNATIVE_SOURCE_PATTERN=${{ matrix.tcnative_source_pattern }}" >> $GITHUB_ENV
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          # provide access to SSH user that triggered the build
-          limit-access-to-actor: true
 
       - name: Run updatecli
         run: |

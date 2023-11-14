@@ -14,6 +14,7 @@ sources:
     spec:
       command: ./get-tomcat-version.sh tomcat
       environments:
+        - name: PATH
         - name: TOMCAT_MAJOR
   tcnativeTag:
     name: Get Tomcat Native libs version
