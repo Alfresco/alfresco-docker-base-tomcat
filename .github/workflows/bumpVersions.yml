@@ -20,9 +20,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tomcat_major:
-          - 9
-          - 10
+        include:
+          - tomcat_major: 10
+            tcnative_source_pattern: 2
+          - tomcat_major: 9
+            tcnative_source_pattern: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,12 +40,16 @@ jobs:
       - name: Set required environment variables
         run: |
           echo "TOMCAT_MAJOR=${{ matrix.tomcat_major }}" >> $GITHUB_ENV
-          echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
-          echo "TCNATIVE_VERSION=$(jq -r '.tcnative_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
+          echo "TOMCAT_SOURCE_PATTERN=${{ matrix.tomcat_major }}" >> $GITHUB_ENV
+          echo "TCNATIVE_SOURCE_PATTERN=${{ matrix.tcnative_source_pattern }}" >> $GITHUB_ENV
 
       - name: Run updatecli
         run: |
           updatecli apply
+
+      - name: Set new tomcat version as env var
+        run: |
+          echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: auto-commit-action

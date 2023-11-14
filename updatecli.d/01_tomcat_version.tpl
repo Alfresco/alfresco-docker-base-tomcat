@@ -20,7 +20,7 @@ sources:
     spec:
       versionfilter:
         kind: semver
-        pattern: "~{{ requiredEnv "TOMCAT_VERSION" }}"
+        pattern: "~{{ requiredEnv "TOMCAT_SOURCE_PATTERN" }}"
   tcnativeTag:
     name: Get Tomcat Native libs version
     kind: gittag
@@ -28,7 +28,7 @@ sources:
     spec:
       versionfilter:
         kind: semver
-        pattern: "~{{ requiredEnv "TCNATIVE_VERSION" }}"
+        pattern: "~{{ requiredEnv "TCNATIVE_SOURCE_PATTERN" }}"
 
 targets:
   tomcatJson:
