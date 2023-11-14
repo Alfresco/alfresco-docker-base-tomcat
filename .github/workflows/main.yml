@@ -1,5 +1,5 @@
 ---
-name: build
+name: Build the tomcats
 on:
   push:
     branches:
