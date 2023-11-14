@@ -48,6 +48,7 @@ jobs:
       - name: Install htmlq
         run: |
           brew install htmlq
+          echo "$(brew --prefix htmlq)/bin" >> $GITHUB_PATH
 
       - name: Set required environment variables
         run: |
