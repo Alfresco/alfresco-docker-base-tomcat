@@ -26,7 +26,7 @@ jobs:
       matrix:
         include:
           - tomcat_major: 10
-            tcnative_source_pattern: 2
+            tcnative_source_pattern: 1
           - tomcat_major: 9
             tcnative_source_pattern: 1
     steps:
