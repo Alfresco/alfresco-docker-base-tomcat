@@ -7,6 +7,7 @@ sources:
     spec:
       command: ./get-checksum.sh tomcat
       environments:
+        - name: PATH
         - name: TOMCAT_MAJOR
   tcnativeChecksum:
     name: Retrieve the tomcat native libs checksum
@@ -14,6 +15,7 @@ sources:
     spec:
       command: ./get-checksum.sh tcnative
       environments:
+        - name: PATH
         - name: TOMCAT_MAJOR
 
 targets:

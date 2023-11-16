@@ -57,8 +57,7 @@ RUN set -eu; \
   ./configure \
     --libdir=${INSTALL_DIR}/tcnative \
     --with-apr=/usr/bin/apr-1-config \
-    --with-java-home="$JAVA_HOME" \
-    --with-ssl=yes; \
+    --with-java-home="$JAVA_HOME"; \
   make -j "$(nproc)"; \
   make install
 

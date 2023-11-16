@@ -13,6 +13,10 @@ on:
   schedule:
     - cron:  '0 6 * * MON'
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   updatecli:
     name: Tomcat ${{ matrix.tomcat_major }} version bump
@@ -20,9 +24,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tomcat_major:
-          - 9
-          - 10
+        include:
+          - tomcat_major: 10
+            tcnative_source_pattern: 1
+          - tomcat_major: 9
+            tcnative_source_pattern: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,17 +39,28 @@ jobs:
       - name: Install updatecli
         uses: updatecli/updatecli-action@v2
         with:
-          version: v0.54.0
+          version: v0.66.0
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@abcbd5d83bbe1a69c8da087467fcd132ca0c7a27
+
+      - name: Install htmlq
+        run: |
+          brew install htmlq
 
       - name: Set required environment variables
         run: |
           echo "TOMCAT_MAJOR=${{ matrix.tomcat_major }}" >> $GITHUB_ENV
-          echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
-          echo "TCNATIVE_VERSION=$(jq -r '.tcnative_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
+          echo "TCNATIVE_SOURCE_PATTERN=${{ matrix.tcnative_source_pattern }}" >> $GITHUB_ENV
 
       - name: Run updatecli
         run: |
           updatecli apply
+
+      - name: Set new tomcat version as env var
+        run: |
+          echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: auto-commit-action

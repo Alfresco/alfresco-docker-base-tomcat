@@ -1,11 +1,6 @@
 name: "Bump tomcat versions"
 
 scms:
-  tomcatGitHub:
-    kind: "git"
-    spec:
-      url: https://github.com/apache/tomcat.git
-      branch: main
   tcnativeGitHub:
     kind: git
     spec:
@@ -13,14 +8,14 @@ scms:
       branch: main
 
 sources:
-  tomcatTag:
-    name: Get Tomcat version
-    kind: gittag
-    scmid: tomcatGitHub
+  tomcatVersion:
+    name: Retrieve the tomcat latest version
+    kind: shell
     spec:
-      versionfilter:
-        kind: semver
-        pattern: "~{{ requiredEnv "TOMCAT_VERSION" }}"
+      command: ./get-tomcat-version.sh tomcat
+      environments:
+        - name: PATH
+        - name: TOMCAT_MAJOR
   tcnativeTag:
     name: Get Tomcat Native libs version
     kind: gittag
@@ -28,13 +23,13 @@ sources:
     spec:
       versionfilter:
         kind: semver
-        pattern: "~{{ requiredEnv "TCNATIVE_VERSION" }}"
+        pattern: "~{{ requiredEnv "TCNATIVE_SOURCE_PATTERN" }}"
 
 targets:
   tomcatJson:
     name: Update version in json target
     kind: json
-    sourceid: tomcatTag
+    sourceid: tomcatVersion
     spec:
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: tomcat_version

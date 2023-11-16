@@ -1,5 +1,5 @@
 ---
-name: build
+name: Build the tomcats
 on:
   push:
     branches:
@@ -7,9 +7,15 @@ on:
       - bump-tomcat**
       - OPSEXP-[0-9]+**
       - opsexp-[0-9]+**
+
 env:
   IMAGE_REGISTRY_NAMESPACE: alfresco
   IMAGE_REPOSITORY: alfresco-base-tomcat
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   docker_images:
     name: >-
@@ -124,7 +130,7 @@ jobs:
       - name: Build and Push Image to quay.io
         uses: docker/build-push-action@v5.0.0
         with:
-          push: true
+          push: ${{github.ref_name == 'master' }}
           build-args: |
             DISTRIB_NAME=${{ matrix.base_image.flavor }}
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
