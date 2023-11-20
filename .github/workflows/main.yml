@@ -94,7 +94,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build image for tests
-        uses: docker/build-push-action@v5.0.0
+        uses: docker/build-push-action@v5.1.0
         with:
           load: true
           build-args: |
@@ -128,7 +128,7 @@ jobs:
             exit 7
           fi
       - name: Build and Push Image to quay.io
-        uses: docker/build-push-action@v5.0.0
+        uses: docker/build-push-action@v5.1.0
         with:
           push: ${{github.ref_name == 'master' }}
           build-args: |
