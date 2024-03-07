@@ -19,7 +19,7 @@ Tomcat version | Java version | Java flavour | OS               | Image tag     
 9              | 17           | jre          | Rocky Linux 8    | tomcat9-jre17-rockylinux8    | ![tomcat9-jre17-rockylinux8 size][2]
 10             | 11           | jre          | Rocky Linux 8    | tomcat9-jre11-rockylinux8    | ![tomcat10-jre11-rockylinux8 size][3]
 10             | 17           | jre          | Rocky Linux 8    | tomcat10-jre17-rockylinux8   | ![tomcat10-jre17-rockylinux8 size][4]
-10             | 17           | jre          | Rocky Linux 9    | tomcat10-jre17-rockylinux9   | ![tomcat10-jre17-rockylinu9 size][5]
+10             | 17           | jre          | Rocky Linux 9    | tomcat10-jre17-rockylinux9   | ![tomcat10-jre17-rockylinux9 size][5]
 
 [1]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-rockylinux8
 [2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre17-rockylinux8
