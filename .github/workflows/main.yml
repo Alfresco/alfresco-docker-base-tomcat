@@ -144,7 +144,7 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
       - name: Push Image to docker.io
         if: contains(github.event.head_commit.message, '[release]') && github.ref_name == 'master'
-        uses: akhilerm/tag-push-action@85bf542f43f5f2060ef76262a67ee3607cb6db37
+        uses: akhilerm/tag-push-action@f35ff2cb99d407368b5c727adbcc14a2ed81d509
         with:
           src: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.image_anchor }}
           dst: |
