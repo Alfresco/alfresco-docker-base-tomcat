@@ -1,25 +1,22 @@
-# Alfresco Docker Base Tomcat [![Build Status](https://img.shields.io/github/actions/workflow/status/Alfresco/alfresco-docker-base-tomcat/main.yml?branch=master)](https://github.com/Alfresco/alfresco-docker-base-tomcat/actions/workflows/main.yml)
+# Alfresco Docker Base Tomcat [![Build Status](https://img.shields.io/github/actions/workflow/status/Alfresco/alfresco-docker-base-tomcat/main.yml?branch=master)](https://github.com/Alfresco/alfresco-docker-base-tomcat/actions/workflows/main.yml) ![Docker Hub Pulls](https://img.shields.io/docker/pulls/alfresco/alfresco-base-tomcat)
 
-This repository contains the [Dockerfile](Dockerfile) used to create the parent
-Tomcat image that will be used by Alfresco engineering teams, other internal
-groups in the organization, customers and partners to create Tomcat bases
-application images from.
+This repository provides the base Docker images for Tomcat 10.1.x and 9.0.x that
+are meant to be used within the Alfresco engineering to build Docker images for
+Java/Tomcat applications.
 
-Images are available for latest Tomcat 10.1.x and 9.0.x.
+This image relies on the [alfresco-docker-base-java](https://github.com/Alfresco/alfresco-docker-base-java) image.
 
-This image depends on the [alfresco-docker-base-java](https://github.com/Alfresco/alfresco-docker-base-java).
-
-## Quickstart
+## Flavours
 
 Choose between one of the available flavours built from this repository:
 
-Tomcat version | Java version | Java flavour | OS               | Image tag                    | Size
----------------|--------------|--------------|------------------|------------------------------|-------------------------------------
-9              | 11           | jre          | Rocky Linux 8    | tomcat9-jre11-rockylinux8    | ![tomcat9-jre11-rockylinux8 size][1]
-9              | 17           | jre          | Rocky Linux 8    | tomcat9-jre17-rockylinux8    | ![tomcat9-jre17-rockylinux8 size][2]
-10             | 11           | jre          | Rocky Linux 8    | tomcat9-jre11-rockylinux8    | ![tomcat10-jre11-rockylinux8 size][3]
-10             | 17           | jre          | Rocky Linux 8    | tomcat10-jre17-rockylinux8   | ![tomcat10-jre17-rockylinux8 size][4]
-10             | 17           | jre          | Rocky Linux 9    | tomcat10-jre17-rockylinux9   | ![tomcat10-jre17-rockylinux9 size][5]
+Tomcat version | Java version | OS            | Image ref                                                  | Size
+---------------|--------------|---------------|------------------------------------------------------------|--------------------------------------
+9              | 11           | Rocky Linux 8 | `alfresco/alfresco-base-tomcat:tomcat9-jre11-rockylinux8`  | ![tomcat9-jre11-rockylinux8 size][1]
+9              | 17           | Rocky Linux 8 | `alfresco/alfresco-base-tomcat:tomcat9-jre17-rockylinux8`  | ![tomcat9-jre17-rockylinux8 size][2]
+10             | 11           | Rocky Linux 8 | `alfresco/alfresco-base-tomcat:tomcat9-jre11-rockylinux8`  | ![tomcat10-jre11-rockylinux8 size][3]
+10             | 17           | Rocky Linux 8 | `alfresco/alfresco-base-tomcat:tomcat10-jre17-rockylinux8` | ![tomcat10-jre17-rockylinux8 size][4]
+10             | 17           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat10-jre17-rockylinux9` | ![tomcat10-jre17-rockylinux9 size][5]
 
 [1]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-rockylinux8
 [2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre17-rockylinux8
@@ -27,35 +24,16 @@ Tomcat version | Java version | Java flavour | OS               | Image tag     
 [4]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux8
 [5]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux9
 
-* [Docker Hub](https://hub.docker.com/r/alfresco/alfresco-base-tomcat) image name: `alfresco/alfresco-base-tomcat`
-* [Quay](https://quay.io/repository/alfresco/alfresco-base-tomcat) image name: `quay.io/alfresco/alfresco-base-tomcat`
+The images are available on:
 
-Example final image: `alfresco/alfresco-base-tomcat:tomcat10-jre17-rockylinux9`
-
-> If you are using this base image in a public repository, please stick to the Docker Hub published image.
+* [Docker Hub](https://hub.docker.com/r/alfresco/alfresco-base-tomcat), image name: `alfresco/alfresco-base-tomcat`
+* [Quay](https://quay.io/repository/alfresco/alfresco-base-tomcat) (enterprise credentials required), image name: `quay.io/alfresco/alfresco-base-tomcat`
 
 ### Image pinning
 
-The [pinning suggestions provided in alfresco-base-java](https://github.com/Alfresco/alfresco-docker-base-java/blob/master/README.md#image-pinning) are valid for this image too.
-
-## Usage
-
-The image can be used via `docker run` to run java applications with `--read-only` set.
-
-Depending on your use case, you may want to set the following path as volumes:
-
-* `/usr/local/tomcat/logs`
-* `/usr/local/tomcat/work`
-* `/usr/local/tomcat/temp`
-* `/usr/local/tomcat/conf/Catalina`
-
-The Tomcat in this image is running with Security Manager switched on. This may
-impact performance. The Security Manager can be disabled by overriding the
-startup command to:
-
-```bash
-CMD ["catalina.sh", "run"]
-```
+The pinning approach provided in
+[alfresco-base-java](https://github.com/Alfresco/alfresco-docker-base-java/blob/master/README.md#image-pinning)
+is highly suggested for this image too.
 
 ## Development
 
@@ -88,4 +66,9 @@ where:
 
 ### Release
 
-Just push a commit on the default branch including `[release]` in the message to trigger a release on the CI.
+New images are built automatically on each new commit on master and on a weekly schedule.
+
+## Downstream projects
+
+* [alfresco-community-repo](https://github.com/Alfresco/alfresco-community-repo/blob/master/packaging/docker-alfresco/Dockerfile)
+* [alfresco-community-share](https://github.com/Alfresco/alfresco-community-share/blob/master/packaging/docker/Dockerfile)
