@@ -3,6 +3,8 @@ name: Bump tomcat versions
 
 on:
   push:
+    branches-ignore:
+      - dependabot/**
     paths:
       - .github/workflows/bumpVersions.yml
       - updatecli.d/**
