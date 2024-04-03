@@ -55,7 +55,7 @@ jobs:
             java_major: 17
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
 
@@ -82,7 +82,6 @@ jobs:
           echo "tcnative_sha512=$(jq -r .tcnative_sha512 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
 
       - name: Login to quay.io
-        if: github.actor != 'dependabot[bot]'
         uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
           registry: quay.io
