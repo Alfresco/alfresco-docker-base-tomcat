@@ -82,7 +82,7 @@ jobs:
           echo "tcnative_sha512=$(jq -r .tcnative_sha512 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
 
       - name: Login to quay.io
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
@@ -90,7 +90,7 @@ jobs:
 
       - name: Login to docker.io
         if: github.ref_name == 'master'
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
