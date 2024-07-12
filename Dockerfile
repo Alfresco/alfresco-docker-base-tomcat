@@ -1,3 +1,4 @@
+# hadolint global ignore=DL3033
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat
 ARG JAVA_MAJOR
@@ -73,7 +74,7 @@ RUN chmod -R +rX . && chmod 770 logs work
 RUN mkdir -p lib/org/apache/catalina/util
 WORKDIR /build/tomcat/lib/org/apache/catalina/util
 RUN printf "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
-RUN yum install xmlstarlet -y
+RUN yum install xmlstarlet -y && yum clean all
 RUN xmlstarlet ed -L \
   # Remove comments
   -d '//comment()' \
@@ -124,9 +125,8 @@ ENV PATH $CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
 COPY --from=TOMCAT_BUILD /build/tomcat $CATALINA_HOME
 COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
-RUN \
-  set -eu; \
-  yum install -y apr; \
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+RUN yum install -y apr  && yum clean all \
   # verify Tomcat Native is working properly
   nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
   test $nativeLines -ge 1 || exit 1
