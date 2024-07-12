@@ -52,7 +52,7 @@ ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
 WORKDIR ${BUILD_DIR}/tcnative/native
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config; \
+RUN yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config && yum clean all \
   ./configure \
     --libdir=${INSTALL_DIR}/tcnative \
     --with-apr=/usr/bin/apr-1-config \
@@ -70,7 +70,7 @@ RUN find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' 
 RUN chmod -R +rX . && chmod 770 logs work
 # Security improvements:
 # Remove server banner, Turn off loggin by the VersionLoggerListener, enable remoteIP valve so we know who we're talking to
-RUN mkdir -p lib/org/apache/catalina/util && cd $_ && echo -e "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
+RUN mkdir -p lib/org/apache/catalina/util && cd $_ && echo "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
 RUN dnf install xmlstarlet -y
 RUN xmlstarlet ed -L \
   # Remove comments
