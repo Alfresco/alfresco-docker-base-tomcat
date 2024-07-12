@@ -7,10 +7,7 @@ ARG DISTRIB_MAJOR
 ARG TOMCAT_MAJOR
 
 FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS base
-ENV APACHE_MIRRORS \
-  https://archive.apache.org/dist \
-  https://dlcdn.apache.org \
-  https://downloads.apache.org
+ENV APACHE_MIRRORS="https://archive.apache.org/dist https://dlcdn.apache.org https://downloads.apache.org"
 
 ARG TOMCAT_MAJOR
 ARG TOMCAT_VERSION
@@ -48,7 +45,7 @@ RUN \
 
 FROM tomcat AS tcnative_build
 ARG JAVA_MAJOR
-ENV JAVA_HOME /usr/lib/jvm/java-openjdk
+ENV JAVA_HOME=/usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
 WORKDIR ${BUILD_DIR}/tcnative/native
@@ -119,10 +116,10 @@ LABEL org.label-schema.schema-version="1.0" \
   org.opencontainers.image.source="https://github.com/Alfresco/alfresco-docker-base-tomcat" \
   org.opencontainers.image.created="$CREATED"
 # let "Tomcat Native" live somewhere isolated
-ENV CATALINA_HOME /usr/local/tomcat
-ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
-ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
-ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_HOME=/usr/local/tomcat
+ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
+ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR
+ENV PATH=$CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
 COPY --from=tomcat_build /build/tomcat $CATALINA_HOME
 COPY --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
