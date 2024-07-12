@@ -46,7 +46,7 @@ RUN \
   tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1 && \
   tar -zxf tcnative.tar.gz -C /build/tcnative --strip-components=1
 
-FROM tomcat AS TCNATIVE_BUILD
+FROM tomcat AS tcnative_build
 ARG JAVA_MAJOR
 ENV JAVA_HOME /usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
@@ -61,7 +61,7 @@ RUN yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk
   make -j "$(nproc)"; \
   make install
 
-FROM tomcat AS TOMCAT_BUILD
+FROM tomcat AS tomcat_build
 WORKDIR /build/tomcat
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
@@ -104,7 +104,7 @@ RUN xmlstarlet ed -L \
 # Remove unwanted files from distribution
 RUN rm -fr webapps/* *.txt *.md RELEASE-NOTES
 
-FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS TOMCAT_BASE_IMAGE
+FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR}
 ARG JAVA_MAJOR
 ARG DISTRIB_MAJOR
 ARG CREATED
@@ -124,8 +124,8 @@ ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
 ENV PATH $CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
-COPY --from=TOMCAT_BUILD /build/tomcat $CATALINA_HOME
-COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
+COPY --from=tomcat_build /build/tomcat $CATALINA_HOME
+COPY --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 RUN yum install -y apr  && yum clean all; \
   # verify Tomcat Native is working properly
