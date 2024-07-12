@@ -43,9 +43,6 @@ WORKDIR /build/tomcat
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
 RUN find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +
-# fix permissions (especially for running as non-root)
-# https://github.com/docker-library/tomcat/issues/35
-RUN chmod -R +rX . && chmod 770 logs work
 # Security improvements:
 # Remove server banner, Turn off loggin by the VersionLoggerListener, enable remoteIP valve so we know who we're talking to
 RUN mkdir -p lib/org/apache/catalina/util
@@ -78,7 +75,7 @@ RUN xmlstarlet ed -L \
   -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logProps -v false \
   conf/server.xml
 # Remove unwanted files from distribution
-RUN rm -fr webapps/* *.txt *.md RELEASE-NOTES
+RUN rm -fr webapps/* *.txt *.md RELEASE-NOTES logs/ temp/ work/ bin/*.bat
 
 FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS tcnative_build-rockylinux
 ARG JAVA_MAJOR
@@ -133,12 +130,20 @@ ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR
 ENV PATH=$CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
-COPY --from=tomcat_dist /build/tomcat $CATALINA_HOME
-COPY --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
+# fix permissions (especially for running as non-root)
+# https://github.com/docker-library/tomcat/issues/35
+RUN groupadd --system tomcat && \
+  useradd -M -s /bin/false --home $CATALINA_HOME --system --gid tomcat tomcat
+COPY --chown=:tomcat --chmod=640 --from=tomcat_dist /build/tomcat $CATALINA_HOME
+COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-# verify Tomcat Native is working properly
-RUN nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
+RUN mkdir -m 770 logs temp work && chgrp tomcat . logs temp work; \
+  chmod og+x bin/*.sh; \
+  find . -type d -exec chmod 770 {} +; \
+  # verify Tomcat Native is working properly
+  nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
   test $nativeLines -ge 1 || exit 1
+USER tomcat
 EXPOSE 8080
 # Starting tomcat with Security Manager
 CMD ["catalina.sh", "run", "-security"]
