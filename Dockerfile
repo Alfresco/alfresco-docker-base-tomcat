@@ -63,29 +63,43 @@ RUN set -eu; \
 
 FROM tomcat AS TOMCAT_BUILD
 WORKDIR /build/tomcat
-RUN \
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
-  find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +; \
-  \
+RUN find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +
 # fix permissions (especially for running as non-root)
 # https://github.com/docker-library/tomcat/issues/35
-  chmod -R +rX .; \
-  chmod 770 logs work ; \
-  \
-  # Security improvements:
-  # Remove server banner, Turn off loggin by the VersionLoggerListener, enable remoteIP valve so we know who we're talking to
-  sed -i \
-    -e "s/\  <Listener\ className=\"org.apache.catalina.startup.VersionLoggerListener\"/\  <Listener\ className=\"org.apache.catalina.startup.VersionLoggerListener\"\ logArgs=\"false\"/g" \
-    -e "s%\(^\s*</Host>\)%\t<Valve className=\"org.apache.catalina.valves.RemoteIpValve\" />\n\n\1%" \
-    -e "s/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"/\    <Connector\ port=\"8080\"\ protocol=\"HTTP\/1.1\"\n\               Server=\" \"/g" conf/server.xml; \
-  # Removal of default/unwanted Applications
-  rm -f -r -d webapps/* ; \
-  # Change SHUTDOWN port and command.
-  #     sed -i "s/<Server\ port=\"8005\"\ shutdown=\"SHUTDOWN\">/<Server\ port=\"ShutDownPort\"\ shutdown=\"ShutDownCommand\">/g" /usr/local/tomcat/conf/server.xml ; \
-  # Replace default 404,403,500 page
-  sed -i "$ d" conf/web.xml ; \
-  sed -i -e "\$a\    <error-page\>\n\        <error-code\>404<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>403<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\    <error-page\>\n\        <error-code\>500<\/error-code\>\n\        <location\>\/error.jsp<\/location\>\n\    <\/error-page\>\n\n\<\/web-app\>" conf/web.xml
+RUN chmod -R +rX . && chmod 770 logs work
+# Security improvements:
+# Remove server banner, Turn off loggin by the VersionLoggerListener, enable remoteIP valve so we know who we're talking to
+RUN mkdir -p lib/org/apache/catalina/util && cd $_ && echo -e "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
+RUN dnf install xmlstarlet -y
+RUN xmlstarlet ed -L \
+  # Remove comments
+  -d '//comment()' \
+  # Disable shutdown port
+  -d '/Server/@shutdown' -u '/Server/@port' -v -1 \
+  # Remove server banner
+  -u '/Server/Service[@name="Catalina"]/Connector[@port=8080]/@Server' -v "" \
+  # Disable auto deployment of webapps
+  -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n deployXML -v false \
+  -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@autoDeploy' -v false \
+  -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@unpackWARs' -v false \
+  -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n deployOnStartup -v false \
+  # Set RemoteIP valve for better monitoring/logging
+  -s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Valve' \
+  -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n className -v org.apache.catalina.valves.RemoteIpValve \
+  # Do not leack server info within error pages
+  -s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Valve' \
+  -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n className -v org.apache.catalina.valves.ErrorReportValve \
+  -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n showServerInfo -v false \
+  -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n showReport -v false \
+  # Do not leack runtime arguments and variables in logs
+  -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logArgs -v false \
+  -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logEnv -v false \
+  -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logProps -v false \
+  conf/server.xml
+# Remove unwanted files from distribution
+RUN rm -fr webapps/* *.txt *.md RELEASE-NOTES
 
 FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS TOMCAT_BASE_IMAGE
 ARG JAVA_MAJOR
