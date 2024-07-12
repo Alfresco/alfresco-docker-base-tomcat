@@ -99,7 +99,11 @@ RUN yum install -y xmlstarlet gcc make openssl-devel expat-devel java-${JAVA_MAJ
 # hadolint ignore=DL3006
 FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
 
-FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR}
+FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS apr_pkg-rockylinux
+RUN yum install -y apr && yum clean all
+
+# hadolint ignore=DL3006
+FROM apr_pkg-${DISTRIB_NAME}
 ARG DISTRIB_MAJOR
 ARG CREATED
 ARG REVISION
@@ -121,9 +125,8 @@ WORKDIR $CATALINA_HOME
 COPY --from=tomcat_dist /build/tomcat $CATALINA_HOME
 COPY --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN yum install -y apr  && yum clean all; \
-  # verify Tomcat Native is working properly
-  nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
+# verify Tomcat Native is working properly
+RUN nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
   test $nativeLines -ge 1 || exit 1
 EXPOSE 8080
 # Starting tomcat with Security Manager
