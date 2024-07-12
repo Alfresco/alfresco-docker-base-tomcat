@@ -19,8 +19,8 @@ ARG TCNATIVE_SHA512
 
 FROM base AS tomcat
 ARG APACHE_MIRRORS
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 RUN \
-  set -eu; \
   mkdir -p /build/{tcnative,tomcat}; \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
@@ -50,10 +50,9 @@ ARG JAVA_MAJOR
 ENV JAVA_HOME /usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
-RUN set -eu; \
-  cd $BUILD_DIR; \
-  yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config; \
-  cd tcnative/native; \
+WORKDIR ${BUILD_DIR}/tcnative/native
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+RUN yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config; \
   ./configure \
     --libdir=${INSTALL_DIR}/tcnative \
     --with-apr=/usr/bin/apr-1-config \
