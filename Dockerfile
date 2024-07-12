@@ -1,24 +1,21 @@
-# hadolint global ignore=DL3033
+# hadolint global ignore=DL3033,DL3008
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat
 ARG JAVA_MAJOR
 ARG DISTRIB_NAME
 ARG DISTRIB_MAJOR
-ARG TOMCAT_MAJOR
 
-FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS base
-ENV APACHE_MIRRORS="https://archive.apache.org/dist https://dlcdn.apache.org https://downloads.apache.org"
-
+# Tomcat is downloaded and configured on debian as its a binary dist anyway
+FROM debian:12-slim AS tomcat_dist
 ARG TOMCAT_MAJOR
 ARG TOMCAT_VERSION
 ARG TOMCAT_SHA512
 ARG TCNATIVE_VERSION
 ARG TCNATIVE_SHA512
-
-FROM base AS tomcat
-ARG APACHE_MIRRORS
+ENV APACHE_MIRRORS="https://archive.apache.org/dist https://dlcdn.apache.org https://downloads.apache.org"
+ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN \
+RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
   mkdir -p /build/{tcnative,tomcat}; \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
@@ -42,23 +39,6 @@ RUN \
   gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
   tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1 && \
   tar -zxf tcnative.tar.gz -C /build/tcnative --strip-components=1
-
-FROM tomcat AS tcnative_build
-ARG JAVA_MAJOR
-ENV JAVA_HOME=/usr/lib/jvm/java-openjdk
-ARG BUILD_DIR=/build
-ARG INSTALL_DIR=/usr/local
-WORKDIR ${BUILD_DIR}/tcnative/native
-SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config && yum clean all; \
-  ./configure \
-    --libdir=${INSTALL_DIR}/tcnative \
-    --with-apr=/usr/bin/apr-1-config \
-    --with-java-home="$JAVA_HOME"; \
-  make -j "$(nproc)"; \
-  make install
-
-FROM tomcat AS tomcat_build
 WORKDIR /build/tomcat
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
@@ -71,7 +51,6 @@ RUN chmod -R +rX . && chmod 770 logs work
 RUN mkdir -p lib/org/apache/catalina/util
 WORKDIR /build/tomcat/lib/org/apache/catalina/util
 RUN printf "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
-RUN yum install xmlstarlet -y && yum clean all
 WORKDIR /build/tomcat
 RUN xmlstarlet ed -L \
   # Remove comments
@@ -101,8 +80,26 @@ RUN xmlstarlet ed -L \
 # Remove unwanted files from distribution
 RUN rm -fr webapps/* *.txt *.md RELEASE-NOTES
 
-FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR}
+FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS tcnative_build-rockylinux
 ARG JAVA_MAJOR
+ENV JAVA_HOME=/usr/lib/jvm/java-openjdk
+ARG BUILD_DIR=/build
+ARG INSTALL_DIR=/usr/local
+COPY --from=tomcat_dist /build/tcnative $BUILD_DIR/tcnative
+WORKDIR ${BUILD_DIR}/tcnative/native
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+RUN yum install -y xmlstarlet gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config && yum clean all; \
+  ./configure \
+    --libdir=${INSTALL_DIR}/tcnative \
+    --with-apr=/usr/bin/apr-1-config \
+    --with-java-home="$JAVA_HOME"; \
+  make -j "$(nproc)"; \
+  make install
+
+# hadolint ignore=DL3006
+FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
+
+FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR}
 ARG DISTRIB_MAJOR
 ARG CREATED
 ARG REVISION
@@ -121,7 +118,7 @@ ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR
 ENV PATH=$CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
-COPY --from=tomcat_build /build/tomcat $CATALINA_HOME
+COPY --from=tomcat_dist /build/tomcat $CATALINA_HOME
 COPY --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 RUN yum install -y apr  && yum clean all; \
