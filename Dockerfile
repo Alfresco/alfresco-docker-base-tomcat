@@ -109,15 +109,15 @@ ARG CREATED
 ARG REVISION
 LABEL org.label-schema.schema-version="1.0" \
   org.label-schema.name="Alfresco Base Tomcat Image" \
-  org.label-schema.vendor="Alfresco" \
+  org.label-schema.vendor="Hyland" \
   org.label-schema.build-date="$CREATED" \
   org.opencontainers.image.title="Alfresco Base Tomcat Image" \
-  org.opencontainers.image.vendor="Alfresco" \
+  org.opencontainers.image.vendor="Hyland" \
   org.opencontainers.image.revision="$REVISION" \
   org.opencontainers.image.source="https://github.com/Alfresco/alfresco-docker-base-tomcat" \
   org.opencontainers.image.created="$CREATED"
-# let "Tomcat Native" live somewhere isolated
 ENV CATALINA_HOME=/usr/local/tomcat
+# let "Tomcat Native" live somewhere isolated
 ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR
 ENV PATH=$CATALINA_HOME/bin:$PATH
