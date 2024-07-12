@@ -53,7 +53,7 @@ ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
 WORKDIR ${BUILD_DIR}/tcnative/native
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config && yum clean all \
+RUN yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config && yum clean all; \
   ./configure \
     --libdir=${INSTALL_DIR}/tcnative \
     --with-apr=/usr/bin/apr-1-config \
@@ -75,6 +75,7 @@ RUN mkdir -p lib/org/apache/catalina/util
 WORKDIR /build/tomcat/lib/org/apache/catalina/util
 RUN printf "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
 RUN yum install xmlstarlet -y && yum clean all
+WORKDIR /build/tomcat
 RUN xmlstarlet ed -L \
   # Remove comments
   -d '//comment()' \
@@ -126,7 +127,7 @@ WORKDIR $CATALINA_HOME
 COPY --from=TOMCAT_BUILD /build/tomcat $CATALINA_HOME
 COPY --from=TCNATIVE_BUILD /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN yum install -y apr  && yum clean all \
+RUN yum install -y apr  && yum clean all; \
   # verify Tomcat Native is working properly
   nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
   test $nativeLines -ge 1 || exit 1
