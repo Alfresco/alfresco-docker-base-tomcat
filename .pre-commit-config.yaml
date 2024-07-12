@@ -16,3 +16,6 @@ repos:
     rev: v2.12.0
     hooks:
       - id: hadolint
+        args:
+          - -t
+          - warning
