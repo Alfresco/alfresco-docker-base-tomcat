@@ -106,6 +106,20 @@ match the following requirements:
   (for production we using JRE over JDK) as per the [Alfresco compatibility
   matrix](https://docs.alfresco.com/content-services/latest/support/)
 
+#### Specifying the new base image
+
+In addition to the build arguments documented in the [build
+time](#how-to-build-an-image-locally), you need to tell the build process where
+the java base image can be found (if it's not present on the Alfresco image
+registry). The following build arguments are available:
+
+* IMAGE_JAVA_REPO: the repository where the base image can be found (default is
+  quay.io/alfresco)
+* IMAGE_JAVA_NAME: the name of the base image to use (default is
+  alfresco-base-java)
+* IMAGE_JAVA_TAG: the tag of the base image to use (default is
+  jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR})
+
 #### Implementing Tomcat native libs build stage
 
 You'll need to create a new stage in the Dockerfile that will be used to build

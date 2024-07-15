@@ -4,6 +4,9 @@
 ARG JAVA_MAJOR
 ARG DISTRIB_NAME
 ARG DISTRIB_MAJOR
+ARG IMAGE_JAVA_REPO=quay.io/alfresco
+ARG IMAGE_JAVA_NAME=alfresco-base-java
+ARG IMAGE_JAVA_TAG=jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR}
 
 # Tomcat is downloaded and configured on debian as its a binary dist anyway
 FROM debian:12-slim AS tomcat_dist
@@ -77,7 +80,7 @@ RUN xmlstarlet ed -L \
 # Remove unwanted files from distribution
 RUN rm -fr webapps/* *.txt *.md RELEASE-NOTES logs/ temp/ work/ bin/*.bat
 
-FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS tcnative_build-rockylinux
+FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG} AS tcnative_build-rockylinux
 ARG JAVA_MAJOR
 ENV JAVA_HOME=/usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
@@ -96,7 +99,7 @@ RUN yum install -y xmlstarlet gcc make openssl-devel expat-devel java-${JAVA_MAJ
 # hadolint ignore=DL3006
 FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
 
-FROM quay.io/alfresco/alfresco-base-java:jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR} AS apr_pkg-rockylinux
+FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG} AS apr_pkg-rockylinux
 RUN yum install -y apr && yum clean all
 
 # hadolint ignore=DL3006
