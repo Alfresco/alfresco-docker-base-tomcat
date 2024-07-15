@@ -35,6 +35,101 @@ The pinning approach provided in
 [alfresco-base-java](https://github.com/Alfresco/alfresco-docker-base-java/blob/master/README.md#image-pinning)
 is highly suggested for this image too.
 
+## Image customization
+
+This image's Dockerfile is extensively using multi-stage builds to allow for
+customization of the image. The build process can be represented as shown in the
+diagram below:
+
+```mermaid
+flowchart TB
+
+classDef custom fill:lightgrey,stroke:#f66,stroke-width:2px,stroke-dasharray: 5 5
+
+subgraph Tomcat configuration process
+debian(Debian 12 slim image)
+tomcat_dist(Tomcat configurator image)
+end
+
+subgraph Tomcat Native library compilation
+tcnative_build-rocky(tomcat native libs\nRockyLinux build image)
+tcnative_build-mydistro(Add your distribution image\nwith tcnative build env):::custom
+tcnative_build(tomcat native libs build env)
+end
+
+subgraph Java & APR enabled distrbution image
+apr_pkg-rocky(RockyLinux image\nwith APR)
+apr_pkg-mydistro(Add your distribution image\nwith APR):::custom
+end
+
+jbase(JAVA base image)
+tomcat(Tomcat base image)
+
+debian --> tomcat_dist
+tomcat_dist ==> tomcat
+
+jbase --> apr_pkg-rocky & apr_pkg-mydistro --> tomcat
+
+jbase --> tcnative_build-rocky & tcnative_build-mydistro --> tcnative_build
+tcnative_build ==> tomcat
+```
+
+### Customizing the Tomcat configuration
+
+To customize the Tomcat configuration, you can directly modify the `tomcat_dist`
+image build. This step leverage a debian image to download, check & configure
+the Tomcat distribution. By default the tool
+[xmlstarlet](https://xmlstar.sourceforge.net/doc/UG/index.html) is used to
+modify xml files (e.g. `conf/server.xml`) file so you can reuse it to apply
+your own changes. Should you need more tools, you can add them in the using
+the `apt-get install` command. As this is a multi-stage build, the tools
+installed in the `tomcat_dist` image are not present in the final image.
+
+> We recommend that configuration applied in this image is generic and not
+> related to a single web application. A configuration change related to a
+> specific web application should be done in the web application image.
+
+### Using a different base distribution/image
+
+This project lets you use a different base distribution/image to create your
+Alfresco Tomcat base image.
+To do that you need to create additionnal, distro specific, stages in the
+multi-stage build and name them according to the build arguments you want to
+use at [build time](#how-to-build-an-image-locally).
+
+#### Base image requirements
+
+The base image you want to use to build the Alfresco Tomcat base image must
+match the following requirements:
+
+* Provide a compatible and up-to-date Java Runtime Environment (JRE) version
+  (for production we using JRE over JDK) as per the [Alfresco compatibility
+  matrix](https://docs.alfresco.com/content-services/latest/support/)
+
+#### Implementing Tomcat native libs build stage
+
+You'll need to create a new stage in the Dockerfile that will be used to build
+the Tomcat native libraries. This stage should be named
+`tcnative_build-<DISTRIB_NAME>` where `<DISTRIB_NAME>` is the name of the
+distribution you want to use. Take a look at the existing
+`tcnative_build-rockylinux` stage for an example, but overall the goal is to
+install on your target distribution the required packages to build the Tomcat
+native libraries in a the `/usr/local/tcnative` directory, so it can be copied
+to the final image.
+
+For example:
+
+```Dockerfilea
+FROM debian:bullseye-slim AS tcnative_build-ubuntu
+...
+```
+
+#### Implementing APR enabled Tomcat base stage
+
+This stage is pretty simple, you just need to install the APR package on your
+distribution. This stage should be named `apr_pkg-<DISTRIB_NAME>` where
+`<DISTRIB_NAME>` is the name of the distribution you want to use.
+
 ## Development
 
 ### Naming specs
