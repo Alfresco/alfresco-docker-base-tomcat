@@ -93,7 +93,7 @@ installed in the `tomcat_dist` image are not present in the final image.
 
 This project lets you use a different base distribution/image to create your
 Alfresco Tomcat base image.
-To do that you need to create additionnal, distro specific, stages in the
+To do that you need to create additional, distro specific, stages in the
 multi-stage build and name them according to the build arguments you want to
 use at [build time](#how-to-build-an-image-locally).
 
@@ -128,7 +128,7 @@ the Tomcat native libraries. This stage should be named
 distribution you want to use. Take a look at the existing
 `tcnative_build-rockylinux` stage for an example, but overall the goal is to
 install on your target distribution the required packages to build the Tomcat
-native libraries in a the `/usr/local/tcnative` directory, so it can be copied
+native libraries in the `/usr/local/tcnative` directory, so it can be copied
 to the final image.
 
 For example:

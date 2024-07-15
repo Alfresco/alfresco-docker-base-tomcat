@@ -45,10 +45,8 @@ RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
 WORKDIR /build/tomcat
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
-RUN find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +
-# Security improvements:
-# Remove server banner, Turn off loggin by the VersionLoggerListener, enable remoteIP valve so we know who we're talking to
-RUN mkdir -p lib/org/apache/catalina/util
+RUN find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +; \
+  mkdir -p lib/org/apache/catalina/util
 WORKDIR /build/tomcat/lib/org/apache/catalina/util
 RUN printf "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
 WORKDIR /build/tomcat
@@ -64,15 +62,15 @@ RUN xmlstarlet ed -L \
   -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@autoDeploy' -v false \
   -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@unpackWARs' -v false \
   -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n deployOnStartup -v false \
-  # Set RemoteIP valve for better monitoring/logging
+  # Enable RemoteIP valve for better monitoring/logging
   -s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Valve' \
   -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n className -v org.apache.catalina.valves.RemoteIpValve \
-  # Do not leack server info within error pages
+  # Do not leak server info within error pages
   -s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Valve' \
   -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n className -v org.apache.catalina.valves.ErrorReportValve \
   -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n showServerInfo -v false \
   -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n showReport -v false \
-  # Do not leack runtime arguments and variables in logs
+  # Do not leak runtime arguments and variables in logs
   -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logArgs -v false \
   -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logEnv -v false \
   -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logProps -v false \
@@ -88,7 +86,7 @@ ARG INSTALL_DIR=/usr/local
 COPY --from=tomcat_dist /build/tcnative $BUILD_DIR/tcnative
 WORKDIR ${BUILD_DIR}/tcnative/native
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN yum install -y xmlstarlet gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config && yum clean all; \
+RUN yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config && yum clean all; \
   ./configure \
     --libdir=${INSTALL_DIR}/tcnative \
     --with-apr=/usr/bin/apr-1-config \
