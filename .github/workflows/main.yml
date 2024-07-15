@@ -109,7 +109,6 @@ jobs:
             TCNATIVE_VERSION=${{ steps.vars.outputs.tcnative_version }}
             TCNATIVE_SHA512=${{ steps.vars.outputs.tcnative_sha512 }}
           tags: local/${{ env.IMAGE_REPOSITORY }}:ci
-          target: TOMCAT_BASE_IMAGE
 
       - name: Test Built Image
         env:
@@ -150,7 +149,6 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           labels: ${{ steps.vars.outputs.image_labels }}
           provenance: false
-          target: TOMCAT_BASE_IMAGE
 
       - name: Push Image to docker.io
         if: github.ref_name == 'master'
