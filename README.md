@@ -44,7 +44,7 @@ diagram below:
 ```mermaid
 flowchart TB
 
-classDef custom fill:lightgrey,stroke:#f66,stroke-width:2px,stroke-dasharray: 5 5
+classDef custom fill:lightgrey,color:black,stroke:darkgrey,stroke-width:2px,stroke-dasharray: 5 5
 
 subgraph Tomcat configuration process
 debian(Debian 12 slim image)
