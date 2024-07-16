@@ -61,7 +61,6 @@ RUN xmlstarlet ed -L \
   -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n deployXML -v false \
   -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@autoDeploy' -v false \
   -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@unpackWARs' -v false \
-  -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n deployOnStartup -v false \
   # Enable RemoteIP valve for better monitoring/logging
   -s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Valve' \
   -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n className -v org.apache.catalina.valves.RemoteIpValve \
@@ -71,9 +70,9 @@ RUN xmlstarlet ed -L \
   -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n showServerInfo -v false \
   -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[last()]' -t attr -n showReport -v false \
   # Do not leak runtime arguments and variables in logs
-  -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logArgs -v false \
-  -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logEnv -v false \
-  -a '/Server/Listener[@className=org.apache.catalina.startup.VersionLoggerListener]' -t attr -n logProps -v false \
+  -a '/Server/Listener[@className="org.apache.catalina.startup.VersionLoggerListener"]' -t attr -n logArgs -v false \
+  -a '/Server/Listener[@className="org.apache.catalina.startup.VersionLoggerListener"]' -t attr -n logEnv -v false \
+  -a '/Server/Listener[@className="org.apache.catalina.startup.VersionLoggerListener"]' -t attr -n logProps -v false \
   conf/server.xml
 # Remove unwanted files from distribution
 RUN rm -fr webapps/* *.txt *.md RELEASE-NOTES logs/ temp/ work/ bin/*.bat
