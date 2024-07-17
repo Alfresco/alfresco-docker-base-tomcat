@@ -12,3 +12,10 @@ repos:
     rev: 0.14.3
     hooks:
       - id: check-github-workflows
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint
+        args:
+          - -t
+          - warning
