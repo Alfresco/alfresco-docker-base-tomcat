@@ -82,6 +82,9 @@ jobs:
           echo "tcnative_version=$(jq -r .tcnative_version tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
           echo "tcnative_sha512=$(jq -r .tcnative_sha512 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
 
+          echo "apr_version=$(jq -r .apr_version tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
+          echo "apr_sha256=$(jq -r .apr_sha256 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
+
       - name: Login to quay.io
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
@@ -109,6 +112,8 @@ jobs:
             TOMCAT_SHA512=${{ steps.vars.outputs.tomcat_sha512 }}
             TCNATIVE_VERSION=${{ steps.vars.outputs.tcnative_version }}
             TCNATIVE_SHA512=${{ steps.vars.outputs.tcnative_sha512 }}
+            APR_VERSION=${{ steps.vars.outputs.apr_version }}
+            APR_SHA256=${{ steps.vars.outputs.apr_sha256 }}
           tags: local/${{ env.IMAGE_REPOSITORY }}:ci
 
       - name: Test Built Image
@@ -143,6 +148,8 @@ jobs:
             TOMCAT_SHA512=${{ steps.vars.outputs.tomcat_sha512 }}
             TCNATIVE_VERSION=${{ steps.vars.outputs.tcnative_version }}
             TCNATIVE_SHA512=${{ steps.vars.outputs.tcnative_sha512 }}
+            APR_VERSION=${{ steps.vars.outputs.apr_version }}
+            APR_SHA256=${{ steps.vars.outputs.apr_sha256 }}
             REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
           tags: |
