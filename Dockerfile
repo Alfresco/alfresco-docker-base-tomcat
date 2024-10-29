@@ -25,6 +25,7 @@ RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
     if curl -fsSL ${mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; then \
+      curl -fsSL ${mirror}/apr/KEYS | gpg --import; \
       active_mirror=$mirror; \
       break; \
     fi; \
@@ -44,6 +45,7 @@ RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
   \
   gpg --batch --verify tcnative.tar.gz.asc tcnative.tar.gz && \
   gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
+  gpg --batch --verify apr.tar.gz.asc apr.tar.gz && \
   tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1 && \
   tar -zxf tcnative.tar.gz -C /build/tcnative --strip-components=1 && \
   tar -zxf apr.tar.gz -C /build/apr --strip-components=1
