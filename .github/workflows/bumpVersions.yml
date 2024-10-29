@@ -26,9 +26,9 @@ jobs:
       matrix:
         include:
           - tomcat_major: 10
-            tcnative_source_pattern: 1
+            tcnative_source_pattern: 2
           - tomcat_major: 9
-            tcnative_source_pattern: 1
+            tcnative_source_pattern: 2
     steps:
       - name: Checkout
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
