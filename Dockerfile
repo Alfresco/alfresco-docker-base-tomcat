@@ -160,7 +160,7 @@ RUN groupadd --system tomcat && \
   useradd -M -s /bin/false --home $CATALINA_HOME --system --gid tomcat tomcat
 COPY --chown=:tomcat --chmod=640 --from=tomcat_dist /build/tomcat $CATALINA_HOME
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
-COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr $TOMCAT_NATIVE_LIBDIR
+COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr $APR_LIBDIR
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 RUN if [ $DISTRIB_MAJOR -eq 8 ]; then dnf install -y dnf-plugins-core; \
     dnf config-manager -y --set-enabled powertools && \
