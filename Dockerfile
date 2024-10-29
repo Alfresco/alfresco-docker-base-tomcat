@@ -15,11 +15,13 @@ ARG TOMCAT_VERSION
 ARG TOMCAT_SHA512
 ARG TCNATIVE_VERSION
 ARG TCNATIVE_SHA512
+ARG APR_VERSION
+ARG APR_SHA256
 ENV APACHE_MIRRORS="https://archive.apache.org/dist https://dlcdn.apache.org https://downloads.apache.org"
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
-  mkdir -p /build/{tcnative,tomcat}; \
+  mkdir -p /build/{apr,tcnative,tomcat}; \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
     if curl -fsSL ${mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; then \
@@ -33,15 +35,18 @@ RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
   for filetype in '.tar.gz' '.tar.gz.asc'; do \
     curl -fsSLo tomcat${filetype} ${active_mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}${filetype}; \
     curl -fsSLo tcnative${filetype}  ${active_mirror}/tomcat/tomcat-connectors/native/${TCNATIVE_VERSION}/source/tomcat-native-${TCNATIVE_VERSION}-src${filetype}; \
+    curl -fsSLo apr${filetype}  ${active_mirror}/apr/apr-${APR_VERSION}${filetype}; \
   done; \
   \
   echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum -c - || (echo "Checksum did't match: $(sha512sum *tomcat.tar.gz)" && exit 1); \
   echo "$TCNATIVE_SHA512 *tcnative.tar.gz" | sha512sum -c - || (echo "Checksum did't match: $(sha512sum *tcnative.tar.gz)" && exit 1); \
+  echo "$APR_SHA256 *apr.tar.gz" | sha256sum -c - || (echo "Checksum did't match: $(sha256sum *apr.tar.gz)" && exit 1); \
   \
   gpg --batch --verify tcnative.tar.gz.asc tcnative.tar.gz && \
   gpg --batch --verify tomcat.tar.gz.asc tomcat.tar.gz && \
   tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1 && \
-  tar -zxf tcnative.tar.gz -C /build/tcnative --strip-components=1
+  tar -zxf tcnative.tar.gz -C /build/tcnative --strip-components=1 && \
+  tar -zxf apr.tar.gz -C /build/apr --strip-components=1
 WORKDIR /build/tomcat
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
@@ -77,30 +82,46 @@ RUN xmlstarlet ed -L \
 # Remove unwanted files from distribution
 RUN rm -fr webapps/* *.txt *.md RELEASE-NOTES logs/ temp/ work/ bin/*.bat
 
+# hadolint ignore=DL3041
 FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG} AS tcnative_build-rockylinux
+ARG DISTRIB_MAJOR
 ARG JAVA_MAJOR
 ENV JAVA_HOME=/usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
 COPY --from=tomcat_dist /build/tcnative $BUILD_DIR/tcnative
-WORKDIR ${BUILD_DIR}/tcnative/native
+COPY --from=tomcat_dist /build/apr $BUILD_DIR/apr
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN yum install -y gcc make openssl-devel expat-devel java-${JAVA_MAJOR}-openjdk-devel apr-devel redhat-rpm-config && yum clean all; \
-  ./configure \
+RUN yum install -y gcc make expat-devel java-${JAVA_MAJOR}-openjdk-devel redhat-rpm-config && \
+    yum clean all
+WORKDIR ${BUILD_DIR}/apr
+RUN ./configure --prefix=${INSTALL_DIR}/apr; \
+  make -j "$(nproc)"; \
+  make install
+WORKDIR ${BUILD_DIR}/tcnative/native
+RUN if [ $DISTRIB_MAJOR -eq 8 ]; then dnf install -y dnf-plugins-core; \
+    dnf config-manager -y --set-enabled powertools; \
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm; \
+    dnf install -y openssl3-devel; \
+    ln -s /usr/include/openssl3/openssl /usr/include/openssl; \
+    export LIBS="-L/usr/lib64/openssl3 -Wl,-rpath,/usr/lib64/openssl3 -lssl -lcrypto"; \
+    export CFLAGS="-I/usr/include/openssl3"; \
+    else dnf install -y openssl-devel; \
+    fi; \
+    dnf clean all; \
+    ./configure \
     --libdir=${INSTALL_DIR}/tcnative \
-    --with-apr=/usr/bin/apr-1-config \
-    --with-java-home="$JAVA_HOME"; \
+    --with-apr=${INSTALL_DIR}/apr/bin/apr-1-config \
+    --with-java-home="$JAVA_HOME" \
+    --disable-openssl-version-check; \
   make -j "$(nproc)"; \
   make install
 
 # hadolint ignore=DL3006
 FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
 
-FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG} AS apr_pkg-rockylinux
-RUN yum install -y apr && yum clean all
-
 # hadolint ignore=DL3006
-FROM apr_pkg-${DISTRIB_NAME}
+FROM tcnative_build
 ARG DISTRIB_MAJOR
 ARG CREATED
 ARG REVISION
@@ -127,7 +148,8 @@ LABEL org.label-schema.schema-version="1.0" \
 ENV CATALINA_HOME=/usr/local/tomcat
 # let "Tomcat Native" live somewhere isolated
 ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
-ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR
+ENV APR_LIBDIR=$CATALINA_HOME/apr
+ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR:$APR_LIBDIR
 ENV PATH=$CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
 # fix permissions (especially for running as non-root)
@@ -136,8 +158,15 @@ RUN groupadd --system tomcat && \
   useradd -M -s /bin/false --home $CATALINA_HOME --system --gid tomcat tomcat
 COPY --chown=:tomcat --chmod=640 --from=tomcat_dist /build/tomcat $CATALINA_HOME
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
+COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr $TOMCAT_NATIVE_LIBDIR
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN mkdir -m 770 logs temp work && chgrp tomcat . logs temp work; \
+RUN if [ $DISTRIB_MAJOR -eq 8 ]; then dnf install -y dnf-plugins-core; \
+    dnf config-manager -y --set-enabled powertools && \
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+    dnf install -y openssl3-libs && \
+    dnf clean all; \
+  fi; \
+  mkdir -m 770 logs temp work && chgrp tomcat . logs temp work; \
   chmod ug+x bin/*.sh; \
   find . -type d -exec chmod 770 {} +; \
   # verify Tomcat Native is working properly
