@@ -94,30 +94,39 @@ ARG INSTALL_DIR=/usr/local
 COPY --from=tomcat_dist /build/tcnative $BUILD_DIR/tcnative
 COPY --from=tomcat_dist /build/apr $BUILD_DIR/apr
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN yum install -y gcc make expat-devel java-${JAVA_MAJOR}-openjdk-devel redhat-rpm-config && \
-    yum clean all
+RUN <<EOT
+  yum install -y gcc make expat-devel java-${JAVA_MAJOR}-openjdk-devel redhat-rpm-config
+  yum clean all
+EOT
+
 WORKDIR ${BUILD_DIR}/apr
-RUN ./configure --prefix=${INSTALL_DIR}/apr; \
-  make -j "$(nproc)"; \
+RUN <<EOT
+  ./configure --prefix=${INSTALL_DIR}/apr
+  make -j "$(nproc)"
   make install
+EOT
+
 WORKDIR ${BUILD_DIR}/tcnative/native
-RUN if [ $DISTRIB_MAJOR -eq 8 ]; then dnf install -y dnf-plugins-core; \
-    dnf config-manager -y --set-enabled powertools; \
-    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm; \
-    dnf install -y openssl3-devel; \
-    ln -s /usr/include/openssl3/openssl /usr/include/openssl; \
-    export LIBS="-L/usr/lib64/openssl3 -Wl,-rpath,/usr/lib64/openssl3 -lssl -lcrypto"; \
-    export CFLAGS="-I/usr/include/openssl3"; \
-    else dnf install -y openssl-devel; \
-    fi; \
-    dnf clean all; \
-    ./configure \
+RUN <<EOT
+  if [ $DISTRIB_MAJOR -eq 8 ]; then
+    dnf install -y dnf-plugins-core
+    dnf config-manager -y --set-enabled powertools
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf install -y openssl3-devel
+    ln -s /usr/include/openssl3/openssl /usr/include/openssl
+    export LIBS="-L/usr/lib64/openssl3 -Wl,-rpath,/usr/lib64/openssl3 -lssl -lcrypto"
+    export CFLAGS="-I/usr/include/openssl3"
+    else dnf install -y openssl-devel
+  fi
+  dnf clean all
+  ./configure \
     --libdir=${INSTALL_DIR}/tcnative \
     --with-apr=${INSTALL_DIR}/apr/bin/apr-1-config \
     --with-java-home="$JAVA_HOME" \
-    --disable-openssl-version-check; \
-  make -j "$(nproc)"; \
+    --disable-openssl-version-check
+  make -j "$(nproc)"
   make install
+EOT
 
 # hadolint ignore=DL3006
 FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
@@ -162,18 +171,22 @@ COPY --chown=:tomcat --chmod=640 --from=tomcat_dist /build/tomcat $CATALINA_HOME
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr $APR_LIBDIR
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN if [ $DISTRIB_MAJOR -eq 8 ]; then dnf install -y dnf-plugins-core; \
-    dnf config-manager -y --set-enabled powertools && \
-    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
-    dnf install -y openssl3-libs && \
-    dnf clean all; \
-  fi; \
-  mkdir -m 770 logs temp work && chgrp tomcat . logs temp work; \
-  chmod ug+x bin/*.sh; \
-  find . -type d -exec chmod 770 {} +; \
+RUN <<EOT
+  if [ $DISTRIB_MAJOR -eq 8 ]; then
+    dnf install -y dnf-plugins-core
+    dnf config-manager -y --set-enabled powertools
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf install -y openssl3-libs
+    dnf clean all
+  fi
+  mkdir -m 770 logs temp work && chgrp tomcat . logs temp work
+  chmod ug+x bin/*.sh
+  find . -type d -exec chmod 770 {} +
   # verify Tomcat Native is working properly
-  nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')" && \
+  nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')"
   test $nativeLines -ge 1 || exit 1
+EOT
+
 USER tomcat
 EXPOSE 8080
 # Starting tomcat with Security Manager
