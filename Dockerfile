@@ -2,7 +2,7 @@
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat
 ARG JAVA_MAJOR
-ARG DISTRIB_NAME
+ARG DISTRIB_NAME=rockylinux
 ARG DISTRIB_MAJOR
 ARG IMAGE_JAVA_REPO=quay.io/alfresco
 ARG IMAGE_JAVA_NAME=alfresco-base-java
