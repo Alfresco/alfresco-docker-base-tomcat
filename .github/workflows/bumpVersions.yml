@@ -26,9 +26,11 @@ jobs:
       matrix:
         include:
           - tomcat_major: 10
-            tcnative_source_pattern: 1
+            tcnative_source_pattern: 2
+            apr_source_pattern: 1
           - tomcat_major: 9
-            tcnative_source_pattern: 1
+            tcnative_source_pattern: 2
+            apr_source_pattern: 1
     steps:
       - name: Checkout
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
@@ -53,6 +55,7 @@ jobs:
         run: |
           echo "TOMCAT_MAJOR=${{ matrix.tomcat_major }}" >> $GITHUB_ENV
           echo "TCNATIVE_SOURCE_PATTERN=${{ matrix.tcnative_source_pattern }}" >> $GITHUB_ENV
+          echo "APR_SOURCE_PATTERN=${{ matrix.apr_source_pattern }}" >> $GITHUB_ENV
 
       - name: Run updatecli
         run: |
