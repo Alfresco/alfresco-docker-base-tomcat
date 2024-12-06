@@ -104,7 +104,7 @@ match the following requirements:
 
 * Provide a compatible and up-to-date Java Runtime Environment (JRE) version
   (for production we using JRE over JDK) as per the [Alfresco compatibility
-  matrix](https://docs.alfresco.com/content-services/latest/support/)
+  matrix][acs-support]
 
 #### Specifying the new base image
 
@@ -181,3 +181,5 @@ New images are built automatically on each new commit on master and on a weekly 
 
 * [alfresco-community-repo](https://github.com/Alfresco/alfresco-community-repo/blob/master/packaging/docker-alfresco/Dockerfile)
 * [alfresco-community-share](https://github.com/Alfresco/alfresco-community-share/blob/master/packaging/docker/Dockerfile)
+
+[acs-support]: https://support.hyland.com/r/Alfresco/Alfresco-Content-Services/23.4/Alfresco-Content-Services/Supported-Platforms
