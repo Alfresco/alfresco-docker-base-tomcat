@@ -172,7 +172,7 @@ where:
 
 * DISTRIB_NAME is rockylinux
 * DISTRIB_MAJOR is 8 or 9 for rockylinux
-* JAVA_MAJOR is 11, 17 or 21for rockylinux only
+* JAVA_MAJOR is 11, 17 or 21 for rockylinux only
 * TOMCAT_MAJOR is 8 or 9
 
 ### Release
