@@ -38,6 +38,11 @@ jobs:
               flavor: rockylinux
               major: 8
             java_major: 17
+          - tomcat_major: 9
+            base_image:
+              flavor: rockylinux
+              major: 8
+            java_major: 21
           - tomcat_major: 10
             base_image:
               flavor: rockylinux
@@ -53,6 +58,16 @@ jobs:
               flavor: rockylinux
               major: 9
             java_major: 17
+          - tomcat_major: 10
+            base_image:
+              flavor: rockylinux
+              major: 8
+            java_major: 21
+          - tomcat_major: 10
+            base_image:
+              flavor: rockylinux
+              major: 9
+            java_major: 21
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
