@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
 
-      - uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
+      - uses: stefanzweifel/git-auto-commit-action@e348103e9026cc0eee72ae06630dbe30c8bf7a79 # v5.1.0
         id: auto-commit-action
         with:
           branch: bump-tomcat-${{ env.TOMCAT_VERSION }}
