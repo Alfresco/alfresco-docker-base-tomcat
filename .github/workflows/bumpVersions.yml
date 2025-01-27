@@ -39,9 +39,7 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Install updatecli
-        uses: updatecli/updatecli-action@704a64517239e0993c5e3bf6749a063b8f950d9f # v2.70.0
-        with:
-          version: v0.66.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@v8.12.0
 
       - name: Set up Homebrew
         id: set-up-homebrew
@@ -65,7 +63,7 @@ jobs:
         run: |
           echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
 
-      - uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
+      - uses: stefanzweifel/git-auto-commit-action@e348103e9026cc0eee72ae06630dbe30c8bf7a79 # v5.1.0
         id: auto-commit-action
         with:
           branch: bump-tomcat-${{ env.TOMCAT_VERSION }}
