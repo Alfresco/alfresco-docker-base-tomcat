@@ -155,7 +155,7 @@ jobs:
             IMAGE_PREV_SIZE=$(docker manifest inspect ${IMAGE_REGISTRY_NAMESPACE}/${IMAGE_REPOSITORY}@${IMAGE_PREV_SHA} | jq '.layers|map(.size)|add')
             IMAGE_NEW_SIZE=$(docker save local/${{ env.IMAGE_REPOSITORY }}:ci | gzip -c | wc -c)
             if [ $(($IMAGE_NEW_SIZE*10)) -gt $(($IMAGE_PREV_SIZE*11)) ]; then
-              echo "Image size increased beyon 10% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE)"
+              echo "Image size increased beyond 10% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE)"
               exit 1
             else echo "Image size increase within 10% or below (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE)"
             fi
