@@ -117,7 +117,7 @@ RUN <<EOT
     ln -s /usr/include/openssl3/openssl /usr/include/openssl
     export LIBS="-L/usr/lib64/openssl3 -Wl,-rpath,/usr/lib64/openssl3 -lssl -lcrypto"
     export CFLAGS="-I/usr/include/openssl3"
-    else dnf install -y openssl-devel
+  else dnf install -y openssl-devel
   fi
   dnf clean all
   ./configure \
@@ -133,7 +133,7 @@ EOT
 FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
 
 # hadolint ignore=DL3006
-FROM tcnative_build
+FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG}
 ARG DISTRIB_MAJOR
 ARG CREATED
 ARG REVISION
@@ -159,8 +159,8 @@ LABEL org.label-schema.schema-version="1.0" \
   org.opencontainers.image.created="$CREATED"
 ENV CATALINA_HOME=/usr/local/tomcat
 # let "Tomcat Native" live somewhere isolated
-ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
-ENV APR_LIBDIR=$CATALINA_HOME/apr
+ENV TOMCAT_NATIVE_LIBDIR=/usr/local/native-jni-lib
+ENV APR_LIBDIR=/usr/local/apr
 ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR:$APR_LIBDIR
 ENV PATH=$CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
@@ -170,7 +170,7 @@ RUN groupadd --system tomcat && \
   useradd -M -s /bin/false --home $CATALINA_HOME --system --gid tomcat tomcat
 COPY --chown=:tomcat --chmod=640 --from=tomcat_dist /build/tomcat $CATALINA_HOME
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
-COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr $APR_LIBDIR
+COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr/lib $APR_LIBDIR
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 RUN <<EOT
   if [ $DISTRIB_MAJOR -eq 8 ]; then
