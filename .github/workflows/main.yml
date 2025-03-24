@@ -140,6 +140,22 @@ jobs:
             exit 7
           fi
 
+      - name: Check Image size
+        env:
+          IMAGE_ARCH: ${{ runner.arch == 'X64' && 'amd64' || 'arm64' }}
+          TOMCAT: tomcat${{ matrix.tomcat_major }}
+          JAVA: jre${{ matrix.java_major }}
+          DISTRIBUTION: ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+        run: |
+          IMAGE_NEW_SIZE=$(docker save local/${{ env.IMAGE_REPOSITORY }}:ci | gzip -c | wc -c)
+          IMAGE_PREV_SHA=$(docker manifest inspect ${IMAGE_REGISTRY_NAMESPACE}/${IMAGE_REPOSITORY}:${TOMCAT}-${JAVA}-${DISTRIBUTION} | jq -r '.manifests|map(select(.platform.architecture=="amd64"))[0].digest')
+          IMAGE_PREV_SIZE=$(docker manifest inspect ${IMAGE_REGISTRY_NAMESPACE}/${IMAGE_REPOSITORY}@${IMAGE_PREV_SHA} | jq '.layers|map(.size)|add')
+          if [ $(($IMAGE_NEW_SIZE*10)) -gt $(($IMAGE_PREV_SIZE*11)) ]; then
+            echo "Image size increased beyon 10% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE)"
+            exit 1
+          fi
+
+
       - name: Build and Push Image to quay.io
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
