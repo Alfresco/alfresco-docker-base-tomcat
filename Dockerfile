@@ -159,8 +159,8 @@ LABEL org.label-schema.schema-version="1.0" \
   org.opencontainers.image.created="$CREATED"
 ENV CATALINA_HOME=/usr/local/tomcat
 # let "Tomcat Native" live somewhere isolated
-ENV TOMCAT_NATIVE_LIBDIR=/usr/local/native-jni-lib
-ENV APR_LIBDIR=/usr/local/apr
+ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
+ENV APR_LIBDIR=$CATALINA_HOME/apr
 ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR:$APR_LIBDIR
 ENV PATH=$CATALINA_HOME/bin:$PATH
 WORKDIR $CATALINA_HOME
@@ -185,7 +185,7 @@ RUN <<EOT
   find . -type d -exec chmod 770 {} +
   # verify Tomcat Native is working properly
   nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')"
-  test $nativeLines -ge 1 || exit 1
+  test $nativeLines -ge 1 || (echo "Tomcat Native library not found or not working properly" && exit 1)
 EOT
 
 USER tomcat
