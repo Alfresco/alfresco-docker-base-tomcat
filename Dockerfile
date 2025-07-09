@@ -185,7 +185,7 @@ RUN <<EOT
   find . -type d -exec chmod 770 {} +
   # verify Tomcat Native is working properly
   nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')"
-  test $nativeLines -ge 1 || (echo "Tomcat Native library not found or not working properly" && exit 1)
+  test $nativeLines -ge 1 || { echo "Tomcat Native library not found or not working properly"; exit 1; }
 EOT
 
 USER tomcat
