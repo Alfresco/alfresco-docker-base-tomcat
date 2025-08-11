@@ -3,6 +3,6 @@
   "apr_version": "1.7.6",
   "tcnative_sha512": "c8eb81de1cf7316174c36038c2133b013fd18ba11df09c41edb927ff33fef46863ef706b6193487ecde1eed7055d4c47fa23fc29d5a8d53f0c4b6d69b0ce9b33",
   "tcnative_version": "2.0.9",
-  "tomcat_sha512": "1815837fa10083258b653dab1f3947fadbad377fa66546fa74aecea1439c6fed2ef4e40c86fa55e176d8c5739ad448196a7415ddfca6ff8d17c6fe8cdba0fefb",
-  "tomcat_version": "9.0.107"
+  "tomcat_sha512": "243474cd54d8589c97f2db964b13b36920500a298b190370a8c58306db786bb30101c33d9ca85eddd8014c5d7f53fec1685beeb4fb7f3037ffcc2f4124c6c6b7",
+  "tomcat_version": "9.0.108"
 }
