@@ -79,8 +79,11 @@ jobs:
       - name: Autocreate PR
         if: steps.auto-commit-action.outputs.changes_detected == 'true'
         run: |
-          if ! gh pr view --json url --jq .url; then
+          PR_EXISTS=$(gh pr list --head ${{ env.TARGET_BRANCH }} --json url --jq 'length')
+          if [ "$PR_EXISTS" -eq 0 ]; then
             gh pr create --head ${{ env.TARGET_BRANCH }} --title "Bump tomcat to ${{ env.TOMCAT_VERSION }}" --body "Freshly served thanks to updatecli and GitHub Actions"
+          else
+            echo "A pull request for branch ${{ env.TARGET_BRANCH }} already exists. Skipping PR creation."
           fi
         env:
           GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
