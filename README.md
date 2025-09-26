@@ -18,6 +18,7 @@ Tomcat version | Java version | OS            | Image ref                       
 10             | 17           | Rocky Linux 8 | `alfresco/alfresco-base-tomcat:tomcat10-jre17-rockylinux8` | ![tomcat10-jre17-rockylinux8 size][4]
 10             | 17           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat10-jre17-rockylinux9` | ![tomcat10-jre17-rockylinux9 size][5]
 10             | 21           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat10-jre21-rockylinux9` | ![tomcat10-jre21-rockylinux9 size][6]
+11             | 21           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat11-jre21-rockylinux9` | ![tomcat11-jre21-rockylinux9 size][7]
 
 [1]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-rockylinux8
 [2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre17-rockylinux8
@@ -25,6 +26,7 @@ Tomcat version | Java version | OS            | Image ref                       
 [4]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux8
 [5]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux9
 [6]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre21-rockylinux9
+[7]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat11-jre21-rockylinux9
 
 The images are available on:
 
@@ -156,15 +158,20 @@ The images built from this repository are named as follow:
 
 ### How to build an image locally
 
-To build this image, run the following script:
+To build this image, run the following script with the needed variables set properly:
 
 ```bash
-IMAGE_REPOSITORY=alfresco/alfresco-base-tomcat
 docker buildx build -t $IMAGE_REPOSITORY . \
   --build-arg DISTRIB_NAME=$DISTRIB_NAME \
   --build-arg DISTRIB_MAJOR=$DISTRIB_MAJOR \
   --build-arg JAVA_MAJOR=$JAVA_MAJOR \
   --build-arg TOMCAT_MAJOR=$TOMCAT_MAJOR \
+  --build-arg TOMCAT_VERSION=$TOMCAT_VERSION \
+  --build-arg TCNATIVE_VERSION=$TCNATIVE_VERSION \
+  --build-arg APR_VERSION=$APR_VERSION \
+  --build-arg TOMCAT_SHA512=$TOMCAT_SHA512 \
+  --build-arg TCNATIVE_SHA512=$TCNATIVE_SHA512 \
+  --build-arg APR_SHA256=$APR_SHA256 \
   --no-cache
 ```
 
@@ -173,7 +180,7 @@ where:
 * DISTRIB_NAME is rockylinux
 * DISTRIB_MAJOR is 8 or 9 for rockylinux
 * JAVA_MAJOR is 11, 17 or 21 for rockylinux only
-* TOMCAT_MAJOR is 8 or 9
+* TOMCAT_MAJOR is 9, 10 or 11
 
 ### Release
 

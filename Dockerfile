@@ -10,6 +10,7 @@ ARG IMAGE_JAVA_TAG=jre${JAVA_MAJOR}-${DISTRIB_NAME}${DISTRIB_MAJOR}
 
 # Tomcat is downloaded and configured on debian as its a binary dist anyway
 FROM debian:12-slim AS tomcat_dist
+
 ARG TOMCAT_MAJOR
 ARG TOMCAT_VERSION
 ARG TOMCAT_SHA512
@@ -17,11 +18,15 @@ ARG TCNATIVE_VERSION
 ARG TCNATIVE_SHA512
 ARG APR_VERSION
 ARG APR_SHA256
-ENV APACHE_MIRRORS="https://archive.apache.org/dist https://dlcdn.apache.org https://downloads.apache.org"
-ENV DEBIAN_FRONTEND=noninteractive
+
+ENV APACHE_MIRRORS="https://archive.apache.org/dist https://dlcdn.apache.org https://downloads.apache.org" \
+    DEBIAN_FRONTEND=noninteractive
+
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
   mkdir -p /build/{apr,tcnative,tomcat}; \
+  \
   active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
     if curl -fsSL ${mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; then \
@@ -30,7 +35,7 @@ RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
       break; \
     fi; \
   done; \
-  [ -n "active_mirror" ]; \
+  [ -n "$active_mirror" ]; \
   \
   echo "Using mirror ${active_mirror}"; \
   for filetype in '.tar.gz' '.tar.gz.asc'; do \
@@ -49,13 +54,16 @@ RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
   tar -zxf tomcat.tar.gz -C /build/tomcat --strip-components=1 && \
   tar -zxf tcnative.tar.gz -C /build/tcnative --strip-components=1 && \
   tar -zxf apr.tar.gz -C /build/apr --strip-components=1
+
 WORKDIR /build/tomcat
 # sh removes env vars it doesn't support (ones with periods)
 # https://github.com/docker-library/tomcat/issues/77
 RUN find ./bin/ -name '*.sh' -exec sed -ri 's|^#!/bin/sh$|#!/usr/bin/env bash|' '{}' +; \
   mkdir -p lib/org/apache/catalina/util
+
 WORKDIR /build/tomcat/lib/org/apache/catalina/util
 RUN printf "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
+
 WORKDIR /build/tomcat
 RUN xmlstarlet ed -L \
   # Remove comments
@@ -87,14 +95,19 @@ RUN rm -fr webapps/* *.txt *.md RELEASE-NOTES logs/ temp/ work/ bin/*.bat
 
 # hadolint ignore=DL3041
 FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG} AS tcnative_build-rockylinux
+
 ARG DISTRIB_MAJOR
 ARG JAVA_MAJOR
-ENV JAVA_HOME=/usr/lib/jvm/java-openjdk
 ARG BUILD_DIR=/build
 ARG INSTALL_DIR=/usr/local
+
+ENV JAVA_HOME=/usr/lib/jvm/java-openjdk
+
 COPY --from=tomcat_dist /build/tcnative $BUILD_DIR/tcnative
 COPY --from=tomcat_dist /build/apr $BUILD_DIR/apr
+
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 RUN <<EOT
   yum install -y gcc make expat-devel java-${JAVA_MAJOR}-openjdk-devel redhat-rpm-config
   yum clean all
@@ -134,6 +147,7 @@ FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
 
 # hadolint ignore=DL3006
 FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG}
+
 ARG DISTRIB_MAJOR
 ARG CREATED
 ARG REVISION
@@ -141,6 +155,7 @@ ARG LABEL_NAME="Alfresco Base Tomcat Image"
 ARG LABEL_DESC="Apache Tomcat Image tailored for Alfresco products"
 ARG LABEL_VENDOR="Hyland"
 ARG LABEL_SOURCE="https://github.com/Alfresco/alfresco-docker-base-tomcat"
+
 LABEL org.label-schema.schema-version="1.0" \
   org.label-schema.name="$LABEL_NAME" \
   org.label-schema.description="$LABEL_DESC" \
@@ -157,21 +172,26 @@ LABEL org.label-schema.schema-version="1.0" \
   org.opencontainers.image.url="$LABEL_SOURCE" \
   org.opencontainers.image.source="$LABEL_SOURCE" \
   org.opencontainers.image.created="$CREATED"
+
 ENV CATALINA_HOME=/usr/local/tomcat
 # let "Tomcat Native" live somewhere isolated
-ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
-ENV APR_LIBDIR=$CATALINA_HOME/apr
-ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR:$APR_LIBDIR
-ENV PATH=$CATALINA_HOME/bin:$PATH
+ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib \
+    APR_LIBDIR=$CATALINA_HOME/apr
+ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR:$APR_LIBDIR \
+    PATH=$CATALINA_HOME/bin:$PATH
+
 WORKDIR $CATALINA_HOME
 # fix permissions (especially for running as non-root)
 # https://github.com/docker-library/tomcat/issues/35
 RUN groupadd --system tomcat && \
   useradd -M -s /bin/false --home $CATALINA_HOME --system --gid tomcat tomcat
+
 COPY --chown=:tomcat --chmod=640 --from=tomcat_dist /build/tomcat $CATALINA_HOME
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr/lib/libapr-1.so* $APR_LIBDIR/
+
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 RUN <<EOT
   if [ $DISTRIB_MAJOR -eq 8 ]; then
     dnf install -y dnf-plugins-core
@@ -190,5 +210,6 @@ EOT
 
 USER tomcat
 EXPOSE 8080
+
 # Starting tomcat with Security Manager
 CMD ["catalina.sh", "run", "-security"]
