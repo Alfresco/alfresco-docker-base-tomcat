@@ -158,15 +158,20 @@ The images built from this repository are named as follow:
 
 ### How to build an image locally
 
-To build this image, run the following script:
+To build this image, run the following script with the needed variables set properly:
 
 ```bash
-IMAGE_REPOSITORY=alfresco/alfresco-base-tomcat
 docker buildx build -t $IMAGE_REPOSITORY . \
   --build-arg DISTRIB_NAME=$DISTRIB_NAME \
   --build-arg DISTRIB_MAJOR=$DISTRIB_MAJOR \
   --build-arg JAVA_MAJOR=$JAVA_MAJOR \
   --build-arg TOMCAT_MAJOR=$TOMCAT_MAJOR \
+  --build-arg TOMCAT_VERSION=$TOMCAT_VERSION \
+  --build-arg TCNATIVE_VERSION=$TCNATIVE_VERSION \
+  --build-arg APR_VERSION=$APR_VERSION \
+  --build-arg TOMCAT_SHA512=$TOMCAT_SHA512 \
+  --build-arg TCNATIVE_SHA512=$TCNATIVE_SHA512 \
+  --build-arg APR_SHA256=$APR_SHA256 \
   --no-cache
 ```
 
@@ -175,7 +180,7 @@ where:
 * DISTRIB_NAME is rockylinux
 * DISTRIB_MAJOR is 8 or 9 for rockylinux
 * JAVA_MAJOR is 11, 17 or 21 for rockylinux only
-* TOMCAT_MAJOR is 8 or 9
+* TOMCAT_MAJOR is 9, 10 or 11
 
 ### Release
 

@@ -172,11 +172,11 @@ LABEL org.label-schema.schema-version="1.0" \
   org.opencontainers.image.source="$LABEL_SOURCE" \
   org.opencontainers.image.created="$CREATED"
 
+ENV CATALINA_HOME=/usr/local/tomcat
 # let "Tomcat Native" live somewhere isolated
-ENV CATALINA_HOME=/usr/local/tomcat \
-    TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib \
-    APR_LIBDIR=$CATALINA_HOME/apr \
-    LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR:$APR_LIBDIR \
+ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib \
+    APR_LIBDIR=$CATALINA_HOME/apr
+ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR:$APR_LIBDIR \
     PATH=$CATALINA_HOME/bin:$PATH
 
 WORKDIR $CATALINA_HOME
