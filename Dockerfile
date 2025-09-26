@@ -26,7 +26,8 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
   mkdir -p /build/{apr,tcnative,tomcat}; \
-    active_mirror=; \
+  \
+  active_mirror=; \
   for mirror in $APACHE_MIRRORS; do \
     if curl -fsSL ${mirror}/tomcat/tomcat-${TOMCAT_MAJOR}/KEYS | gpg --import; then \
       curl -fsSL ${mirror}/apr/KEYS | gpg --import; \
@@ -34,7 +35,7 @@ RUN apt-get -y update && apt-get -y install xmlstarlet curl gpg; \
       break; \
     fi; \
   done; \
-  [ -n "active_mirror" ]; \
+  [ -n active_mirror ]; \
   \
   echo "Using mirror ${active_mirror}"; \
   for filetype in '.tar.gz' '.tar.gz.asc'; do \
