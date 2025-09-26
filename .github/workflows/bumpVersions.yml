@@ -25,6 +25,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - tomcat_major: 11
+            tcnative_source_pattern: 2
+            apr_source_pattern: 1
           - tomcat_major: 10
             tcnative_source_pattern: 2
             apr_source_pattern: 1
