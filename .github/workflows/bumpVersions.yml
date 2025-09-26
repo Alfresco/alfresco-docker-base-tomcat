@@ -42,7 +42,7 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Install updatecli
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@v8.31.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@v8.36.0
 
       - name: Set up Homebrew
         id: set-up-homebrew
