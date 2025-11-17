@@ -65,7 +65,8 @@ WORKDIR /build/tomcat/lib/org/apache/catalina/util
 RUN printf "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
 
 WORKDIR /build/tomcat
-RUN if [ "$TOMCAT_MAJOR" = "11" ]; then \
+ARG USE_SECURITY_MANAGER=true
+RUN if [ "$USE_SECURITY_MANAGER" = "false" ]; then \
     DEPLOY_XML_VALUE=true; \
   else \
     DEPLOY_XML_VALUE=false; \
@@ -154,7 +155,7 @@ FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
 # hadolint ignore=DL3006
 FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG}
 
-ARG TOMCAT_MAJOR
+ARG USE_SECURITY_MANAGER=true
 ARG DISTRIB_MAJOR
 ARG CREATED
 ARG REVISION
@@ -186,7 +187,7 @@ ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib \
     APR_LIBDIR=$CATALINA_HOME/apr
 ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR:$APR_LIBDIR \
     PATH=$CATALINA_HOME/bin:$PATH \
-    TOMCAT_MAJOR=$TOMCAT_MAJOR
+    USE_SECURITY_MANAGER=$USE_SECURITY_MANAGER
 
 WORKDIR $CATALINA_HOME
 # fix permissions (especially for running as non-root)
@@ -219,6 +220,6 @@ EOT
 USER tomcat
 EXPOSE 8080
 
-# Starting tomcat with Security Manager for Tomcat 9 and 10
-# Security Manager is deprecated in Java 17+ and disabled for Tomcat 11
-CMD ["sh", "-c", "if [ \"$TOMCAT_MAJOR\" = \"11\" ]; then catalina.sh run; else catalina.sh run -security; fi"]
+# Starting tomcat with or without Security Manager based on USE_SECURITY_MANAGER
+# Security Manager is deprecated in Java 17+ (set USE_SECURITY_MANAGER=false to disable)
+CMD ["sh", "-c", "if [ \"$USE_SECURITY_MANAGER\" = \"false\" ]; then catalina.sh run; else catalina.sh run -security; fi"]

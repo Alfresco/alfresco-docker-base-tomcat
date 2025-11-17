@@ -63,6 +63,7 @@ jobs:
               flavor: rockylinux
               major: 9
             java_major: 21
+            use_security_manager: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -124,6 +125,7 @@ jobs:
             TCNATIVE_SHA512=${{ steps.vars.outputs.tcnative_sha512 }}
             APR_VERSION=${{ steps.vars.outputs.apr_version }}
             APR_SHA256=${{ steps.vars.outputs.apr_sha256 }}
+            USE_SECURITY_MANAGER=${{ matrix.use_security_manager || 'true' }}
           tags: local/${{ env.IMAGE_REPOSITORY }}:ci
 
       - name: Test Built Image
@@ -181,6 +183,7 @@ jobs:
             TCNATIVE_SHA512=${{ steps.vars.outputs.tcnative_sha512 }}
             APR_VERSION=${{ steps.vars.outputs.apr_version }}
             APR_SHA256=${{ steps.vars.outputs.apr_sha256 }}
+            USE_SECURITY_MANAGER=${{ matrix.use_security_manager || 'true' }}
             REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
           tags: |
