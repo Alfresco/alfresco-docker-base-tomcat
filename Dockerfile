@@ -18,6 +18,7 @@ ARG TCNATIVE_VERSION
 ARG TCNATIVE_SHA512
 ARG APR_VERSION
 ARG APR_SHA256
+ARG USE_SECURITY_MANAGER
 
 ENV APACHE_MIRRORS="https://archive.apache.org/dist https://dlcdn.apache.org https://downloads.apache.org" \
     DEBIAN_FRONTEND=noninteractive
@@ -65,7 +66,6 @@ WORKDIR /build/tomcat/lib/org/apache/catalina/util
 RUN printf "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
 
 WORKDIR /build/tomcat
-ARG USE_SECURITY_MANAGER=true
 RUN if [ "$USE_SECURITY_MANAGER" = "false" ]; then \
     DEPLOY_XML_VALUE=true; \
   else \
@@ -155,7 +155,7 @@ FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
 # hadolint ignore=DL3006
 FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG}
 
-ARG USE_SECURITY_MANAGER=true
+ARG USE_SECURITY_MANAGER
 ARG DISTRIB_MAJOR
 ARG CREATED
 ARG REVISION
