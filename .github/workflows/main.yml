@@ -33,31 +33,37 @@ jobs:
               flavor: rockylinux
               major: 8
             java_major: 11
+            use_security_manager: true
           - tomcat_major: 9
             base_image:
               flavor: rockylinux
               major: 8
             java_major: 17
+            use_security_manager: true
           - tomcat_major: 10
             base_image:
               flavor: rockylinux
               major: 8
             java_major: 11
+            use_security_manager: true
           - tomcat_major: 10
             base_image:
               flavor: rockylinux
               major: 8
             java_major: 17
+            use_security_manager: true
           - tomcat_major: 10
             base_image:
               flavor: rockylinux
               major: 9
             java_major: 17
+            use_security_manager: true
           - tomcat_major: 10
             base_image:
               flavor: rockylinux
               major: 9
             java_major: 21
+            use_security_manager: true
           - tomcat_major: 11
             base_image:
               flavor: rockylinux
@@ -125,7 +131,7 @@ jobs:
             TCNATIVE_SHA512=${{ steps.vars.outputs.tcnative_sha512 }}
             APR_VERSION=${{ steps.vars.outputs.apr_version }}
             APR_SHA256=${{ steps.vars.outputs.apr_sha256 }}
-            USE_SECURITY_MANAGER=${{ matrix.use_security_manager || 'true' }}
+            USE_SECURITY_MANAGER=${{ matrix.use_security_manager }}
           tags: local/${{ env.IMAGE_REPOSITORY }}:ci
 
       - name: Test Built Image
@@ -183,7 +189,7 @@ jobs:
             TCNATIVE_SHA512=${{ steps.vars.outputs.tcnative_sha512 }}
             APR_VERSION=${{ steps.vars.outputs.apr_version }}
             APR_SHA256=${{ steps.vars.outputs.apr_sha256 }}
-            USE_SECURITY_MANAGER=${{ matrix.use_security_manager || 'true' }}
+            USE_SECURITY_MANAGER=${{ matrix.use_security_manager }}
             REVISION=${{ github.run_number }}
             CREATED=${{ steps.vars.outputs.image_created }}
           tags: |

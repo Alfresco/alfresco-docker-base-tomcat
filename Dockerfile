@@ -217,9 +217,14 @@ RUN <<EOT
   test $nativeLines -ge 1 || { echo "Tomcat Native library not found or not working properly"; exit 1; }
 EOT
 
+# Set CATALINA_OPTS based on USE_SECURITY_MANAGER at build time
+# Security Manager is deprecated in Java 17+ (set USE_SECURITY_MANAGER=false to disable)
+RUN if [ "$USE_SECURITY_MANAGER" != "false" ]; then \
+      echo 'export CATALINA_OPTS="${CATALINA_OPTS} -security"' > ${CATALINA_HOME}/bin/setenv.sh; \
+      chmod +x ${CATALINA_HOME}/bin/setenv.sh; \
+    fi
+
 USER tomcat
 EXPOSE 8080
 
-# Starting tomcat with or without Security Manager based on USE_SECURITY_MANAGER
-# Security Manager is deprecated in Java 17+ (set USE_SECURITY_MANAGER=false to disable)
-CMD ["sh", "-c", "if [ \"$USE_SECURITY_MANAGER\" = \"false\" ]; then catalina.sh run; else catalina.sh run -security; fi"]
+CMD ["catalina.sh", "run"]
