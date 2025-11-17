@@ -65,7 +65,12 @@ WORKDIR /build/tomcat/lib/org/apache/catalina/util
 RUN printf "server.info=Alfresco servlet container/$TOMCAT_MAJOR\nserver.number=$TOMCAT_MAJOR" > ServerInfo.properties
 
 WORKDIR /build/tomcat
-RUN xmlstarlet ed -L \
+RUN if [ "$TOMCAT_MAJOR" = "11" ]; then \
+    DEPLOY_XML_VALUE=true; \
+  else \
+    DEPLOY_XML_VALUE=false; \
+  fi; \
+  xmlstarlet ed -L \
   # Remove comments
   -d '//comment()' \
   # Disable shutdown port
@@ -73,7 +78,7 @@ RUN xmlstarlet ed -L \
   # Remove server banner
   -u '/Server/Service[@name="Catalina"]/Connector[@port=8080]/@Server' -v "" \
   # Disable auto deployment of webapps
-  -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n deployXML -v false \
+  -a '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n deployXML -v $DEPLOY_XML_VALUE \
   -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@autoDeploy' -v false \
   -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@unpackWARs' -v false \
   # Enable RemoteIP valve for better handling when behind reverse proxy
@@ -121,6 +126,7 @@ RUN <<EOT
 EOT
 
 WORKDIR ${BUILD_DIR}/tcnative/native
+# hadolint ignore=DL3041
 RUN <<EOT
   if [ $DISTRIB_MAJOR -eq 8 ]; then
     dnf install -y dnf-plugins-core
@@ -148,6 +154,7 @@ FROM tcnative_build-${DISTRIB_NAME} AS tcnative_build
 # hadolint ignore=DL3006
 FROM ${IMAGE_JAVA_REPO}/${IMAGE_JAVA_NAME}:${IMAGE_JAVA_TAG}
 
+ARG TOMCAT_MAJOR
 ARG DISTRIB_MAJOR
 ARG CREATED
 ARG REVISION
@@ -178,7 +185,8 @@ ENV CATALINA_HOME=/usr/local/tomcat
 ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib \
     APR_LIBDIR=$CATALINA_HOME/apr
 ENV LD_LIBRARY_PATH=$TOMCAT_NATIVE_LIBDIR:$APR_LIBDIR \
-    PATH=$CATALINA_HOME/bin:$PATH
+    PATH=$CATALINA_HOME/bin:$PATH \
+    TOMCAT_MAJOR=$TOMCAT_MAJOR
 
 WORKDIR $CATALINA_HOME
 # fix permissions (especially for running as non-root)
@@ -191,7 +199,7 @@ COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/tcnative $TOMC
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr/lib/libapr-1.so* $APR_LIBDIR/
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-
+# hadolint ignore=DL3041
 RUN <<EOT
   if [ $DISTRIB_MAJOR -eq 8 ]; then
     dnf install -y dnf-plugins-core
@@ -211,5 +219,6 @@ EOT
 USER tomcat
 EXPOSE 8080
 
-# Starting tomcat with Security Manager
-CMD ["catalina.sh", "run", "-security"]
+# Starting tomcat with Security Manager for Tomcat 9 and 10
+# Security Manager is deprecated in Java 17+ and disabled for Tomcat 11
+CMD ["sh", "-c", "if [ \"$TOMCAT_MAJOR\" = \"11\" ]; then catalina.sh run; else catalina.sh run -security; fi"]
