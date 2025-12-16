@@ -61,11 +61,6 @@ jobs:
           - tomcat_major: 10
             base_image:
               flavor: rockylinux
-              major: 8
-            java_major: 25
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
               major: 9
             java_major: 25
           - tomcat_major: 11
