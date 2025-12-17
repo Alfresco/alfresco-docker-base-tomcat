@@ -122,6 +122,7 @@ EOT
 
 WORKDIR ${BUILD_DIR}/tcnative/native
 RUN <<EOT
+  dnf update --security -y
   if [ $DISTRIB_MAJOR -eq 8 ]; then
     dnf install -y dnf-plugins-core
     dnf config-manager -y --set-enabled powertools
