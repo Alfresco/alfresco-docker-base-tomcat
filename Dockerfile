@@ -122,11 +122,11 @@ EOT
 
 WORKDIR ${BUILD_DIR}/tcnative/native
 RUN <<EOT
-  dnf update --security -y
   if [ $DISTRIB_MAJOR -eq 8 ]; then
     dnf install -y dnf-plugins-core
     dnf config-manager -y --set-enabled powertools
     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    /usr/bin/crb enable
     dnf install -y openssl3-devel
     ln -s /usr/include/openssl3/openssl /usr/include/openssl
     export LIBS="-L/usr/lib64/openssl3 -Wl,-rpath,/usr/lib64/openssl3 -lssl -lcrypto"
