@@ -1,8 +1,8 @@
 # Alfresco Docker Base Tomcat [![Build Status](https://img.shields.io/github/actions/workflow/status/Alfresco/alfresco-docker-base-tomcat/main.yml?branch=master)](https://github.com/Alfresco/alfresco-docker-base-tomcat/actions/workflows/main.yml) ![Docker Hub Pulls](https://img.shields.io/docker/pulls/alfresco/alfresco-base-tomcat)
 
-This repository provides the base Docker images for Tomcat 10.1.x and 9.0.x that
-are meant to be used within the Alfresco engineering to build Docker images for
-Java/Tomcat applications.
+This repository provides the base Docker images for Tomcat that are meant to be
+used within the Alfresco engineering to build Docker images for Java/Tomcat
+applications.
 
 This image relies on the [alfresco-docker-base-java](https://github.com/Alfresco/alfresco-docker-base-java) image.
 
@@ -19,6 +19,7 @@ Tomcat version | Java version | OS            | Image ref                       
 10             | 17           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat10-jre17-rockylinux9` | ![tomcat10-jre17-rockylinux9 size][5]
 10             | 21           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat10-jre21-rockylinux9` | ![tomcat10-jre21-rockylinux9 size][6]
 11             | 21           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat11-jre21-rockylinux9` | ![tomcat11-jre21-rockylinux9 size][7]
+11             | 25           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat11-jre25-rockylinux9` | ![tomcat11-jre25-rockylinux9 size][8]
 
 [1]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre11-rockylinux8
 [2]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat9-jre17-rockylinux8
@@ -27,6 +28,7 @@ Tomcat version | Java version | OS            | Image ref                       
 [5]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre17-rockylinux9
 [6]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre21-rockylinux9
 [7]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat11-jre21-rockylinux9
+[8]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat11-jre25-rockylinux9
 
 The images are available on:
 
