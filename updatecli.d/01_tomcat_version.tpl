@@ -53,6 +53,7 @@ targets:
     name: Update Tomcat version in json target
     kind: json
     sourceid: tomcatVersion
+    disableconditions: true
     spec:
       engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
@@ -61,6 +62,8 @@ targets:
     name: Update TCnative version in json target
     kind: json
     sourceid: tcnativeTag
+    dependson:
+      - condition#isTCNativeFullyReleased
     spec:
       engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
@@ -69,6 +72,7 @@ targets:
     name: Update APR version in json target
     kind: json
     sourceid: aprTag
+    disableconditions: true
     spec:
       engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
