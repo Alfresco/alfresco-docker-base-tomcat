@@ -37,9 +37,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          # Required to trigger the main workflow once this workflow creates a PR
-          token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Install updatecli
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@v9.3.2
@@ -70,23 +67,10 @@ jobs:
         run: |
           echo "TARGET_BRANCH=bump-tomcat-${{ env.TOMCAT_VERSION }}" >> $GITHUB_ENV
 
-      - id: auto-commit-action
-        name: Git Auto Commit
-        uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3 # v7.0.0
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
         with:
           branch: ${{ env.TARGET_BRANCH }}
-          push_options: '--force'
-          commit_user_name: ${{ vars.BOT_GITHUB_USERNAME }}
-          commit_user_email: ${{ vars.BOT_GITHUB_EMAIL }}
-
-      - name: Autocreate PR
-        if: steps.auto-commit-action.outputs.changes_detected == 'true'
-        run: |
-          PR_EXISTS=$(gh pr list --head ${{ env.TARGET_BRANCH }} --json url --jq 'length')
-          if [ "$PR_EXISTS" -eq 0 ]; then
-            gh pr create --head ${{ env.TARGET_BRANCH }} --title "Bump tomcat to ${{ env.TOMCAT_VERSION }}" --body "Freshly served thanks to updatecli and GitHub Actions"
-          else
-            echo "A pull request for branch ${{ env.TARGET_BRANCH }} already exists. Skipping PR creation."
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          title:  "Bump tomcat to ${{ env.TOMCAT_VERSION }}"
+          body: "Freshly served thanks to updatecli and GitHub Actions"
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
