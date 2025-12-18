@@ -54,6 +54,7 @@ targets:
     kind: json
     sourceid: tomcatVersion
     spec:
+      engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: tomcat_version
   tcnativeJson:
@@ -61,6 +62,7 @@ targets:
     kind: json
     sourceid: tcnativeTag
     spec:
+      engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: tcnative_version
   aprJson:
@@ -68,5 +70,6 @@ targets:
     kind: json
     sourceid: aprTag
     spec:
+      engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: apr_version
