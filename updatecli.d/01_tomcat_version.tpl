@@ -38,6 +38,16 @@ sources:
         kind: semver
         pattern: "~{{ requiredEnv "APR_SOURCE_PATTERN" }}"
 
+conditions:
+  isTCNativeFullyReleased:
+    name: Check if tcnative is fully released
+    kind: http
+    sourceid: tcnativeTag
+    spec:
+      url: https://archive.apache.org/dist/tomcat/tomcat-connectors/native/{{ source `tcnativeTag` }}/source/tomcat-native-{{ source `tcnativeTag` }}-src.tar.gz
+      request:
+        verb: HEAD
+
 targets:
   tomcatJson:
     name: Update Tomcat version in json target
