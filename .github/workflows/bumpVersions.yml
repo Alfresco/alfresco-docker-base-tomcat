@@ -74,3 +74,7 @@ jobs:
           title:  "Bump tomcat to ${{ env.TOMCAT_VERSION }}"
           body: "Freshly served thanks to updatecli and GitHub Actions"
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          team-reviewers: ops-readiness-performance
+          author: ${{ vars.BOT_GITHUB_USERNAME }} <${{ vars.BOT_GITHUB_EMAIL }}>
+          committer: ${{ vars.BOT_GITHUB_USERNAME }} <${{ vars.BOT_GITHUB_EMAIL }}>
+          labels: updatecli
