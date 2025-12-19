@@ -38,25 +38,42 @@ sources:
         kind: semver
         pattern: "~{{ requiredEnv "APR_SOURCE_PATTERN" }}"
 
+conditions:
+  isTCNativeFullyReleased:
+    name: Check if tcnative is fully released
+    kind: http
+    sourceid: tcnativeTag
+    spec:
+      url: https://archive.apache.org/dist/tomcat/tomcat-connectors/native/{{ source `tcnativeTag` }}/source/tomcat-native-{{ source `tcnativeTag` }}-src.tar.gz
+      request:
+        verb: HEAD
+
 targets:
   tomcatJson:
     name: Update Tomcat version in json target
     kind: json
     sourceid: tomcatVersion
+    disableconditions: true
     spec:
+      engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: tomcat_version
   tcnativeJson:
     name: Update TCnative version in json target
     kind: json
     sourceid: tcnativeTag
+    dependson:
+      - condition#isTCNativeFullyReleased
     spec:
+      engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: tcnative_version
   aprJson:
     name: Update APR version in json target
     kind: json
     sourceid: aprTag
+    disableconditions: true
     spec:
+      engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: apr_version
