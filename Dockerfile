@@ -109,8 +109,9 @@ COPY --from=tomcat_dist /build/apr $BUILD_DIR/apr
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 RUN <<EOT
-  yum install -y gcc make expat-devel java-${JAVA_MAJOR}-openjdk-devel redhat-rpm-config
-  yum clean all
+  dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-${DISTRIB_MAJOR}.noarch.rpm
+  dnf install -y gcc make expat-devel java-${JAVA_MAJOR}-openjdk-devel redhat-rpm-config
+  dnf clean all
 EOT
 
 WORKDIR ${BUILD_DIR}/apr

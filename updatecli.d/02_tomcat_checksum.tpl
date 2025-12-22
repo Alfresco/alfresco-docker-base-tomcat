@@ -32,6 +32,7 @@ targets:
     kind: json
     sourceid: tomcatChecksum
     spec:
+      engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: tomcat_sha512
   tcnativeJson:
@@ -39,6 +40,7 @@ targets:
     kind: json
     sourceid: tcnativeChecksum
     spec:
+      engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: tcnative_sha512
   aprJson:
@@ -46,5 +48,6 @@ targets:
     kind: json
     sourceid: aprChecksum
     spec:
+      engine: dasel/v2
       file: tomcat{{ requiredEnv "TOMCAT_MAJOR" }}.json
       key: apr_sha256
