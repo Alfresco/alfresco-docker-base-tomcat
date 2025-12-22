@@ -19,60 +19,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  setup_matrix:
+    name: Setup build matrix
+    runs-on: ubuntu-slim
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      timestamp: ${{ steps.set-matrix.outputs.timestamp }}
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      
+      - id: set-matrix
+        run: |
+          echo "matrix=$(yq -o=json -I=0 '.' .github/build-matrix.yaml)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date -u +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
+
   docker_images:
     name: >-
       Tomcat ${{ matrix.tomcat_major }}
       jre${{ matrix.java_major }}
       on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+    needs: setup_matrix
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - tomcat_major: 9
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 11
-          - tomcat_major: 9
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 17
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 11
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 17
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 17
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 21
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 25
-          - tomcat_major: 11
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 21
-          - tomcat_major: 11
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 25
+        include: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -94,7 +64,7 @@ jobs:
             echo "image_labels=quay.expires-after=2w" >> $GITHUB_OUTPUT
           fi
           echo "image_created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-          echo "timestamp=$(date -u +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
+          echo "timestamp=${{ needs.setup_matrix.outputs.timestamp }}" >> $GITHUB_OUTPUT
 
           echo "tomcat_version=$(jq -r .tomcat_version tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
           echo "tomcat_sha512=$(jq -r .tomcat_sha512 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
@@ -111,13 +81,6 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-
-      - name: Login to docker.io
-        if: github.ref_name == 'master'
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build image for tests
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -199,20 +162,70 @@ jobs:
           labels: ${{ steps.vars.outputs.image_labels }}
           provenance: false
 
+  push_quay_tags:
+    name: >-
+      Push quay.io tags for Tomcat ${{ matrix.tomcat_major }}
+      jre${{ matrix.java_major }}
+      on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+    if: github.ref_name == 'master'
+    needs: [setup_matrix, docker_images]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Login to quay.io
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
       - name: Push additional timestamped tag to quay.io
-        if: github.ref_name == 'master'
         env:
-          SRC_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
-          DST_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.timestamp }}
+          IMAGE_TAG: tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+          SRC_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+          DST_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}-${{ needs.setup_matrix.outputs.timestamp }}
         run: |
           docker buildx imagetools create ${{ env.SRC_IMAGE }} -t ${{ env.DST_IMAGE }}
 
+  push_dockerhub_tags:
+    name: >-
+      Push docker.io tags for Tomcat ${{ matrix.tomcat_major }}
+      jre${{ matrix.java_major }}
+      on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+    if: github.ref_name == 'master'
+    needs: [setup_matrix, docker_images]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Login to quay.io
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Login to docker.io
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Push images to docker.io
-        if: github.ref_name == 'master'
         env:
-          SRC_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
-          DST_IMAGE: ${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
+          IMAGE_TAG: tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+          SRC_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
+          DST_IMAGE: ${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
         run: >-
           docker buildx imagetools create ${{ env.SRC_IMAGE }}
           -t ${{ env.DST_IMAGE }}
-          -t ${{ env.DST_IMAGE }}-${{ steps.vars.outputs.timestamp }}
+          -t ${{ env.DST_IMAGE }}-${{ needs.setup_matrix.outputs.timestamp }}
