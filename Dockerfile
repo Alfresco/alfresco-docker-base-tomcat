@@ -124,10 +124,15 @@ EOT
 WORKDIR ${BUILD_DIR}/tcnative/native
 RUN <<EOT
   if [ $DISTRIB_MAJOR -eq 8 ]; then
-    dnf install -y dnf-plugins-core
-    dnf config-manager -y --set-enabled powertools
-    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    dnf install -y openssl3-devel
+    # OPSEXP-3749 workaround for bugged openssl3 packages
+    # dnf install -y dnf-plugins-core
+    # dnf config-manager -y --set-enabled powertools
+    # dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    # dnf install -y openssl3-devel
+    ARCH=$(uname -m)
+    dnf install -y \
+      https://archives.fedoraproject.org/pub/archive/epel/8.9/Everything/$ARCH/Packages/o/openssl3-devel-3.2.1-1.2.el8.$ARCH.rpm \
+      https://archives.fedoraproject.org/pub/archive/epel/8.9/Everything/$ARCH/Packages/o/openssl3-libs-3.2.1-1.2.el8.$ARCH.rpm
     ln -s /usr/include/openssl3/openssl /usr/include/openssl
     export LIBS="-L/usr/lib64/openssl3 -Wl,-rpath,/usr/lib64/openssl3 -lssl -lcrypto"
     export CFLAGS="-I/usr/include/openssl3"
@@ -195,10 +200,14 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 RUN <<EOT
   if [ $DISTRIB_MAJOR -eq 8 ]; then
-    dnf install -y dnf-plugins-core
-    dnf config-manager -y --set-enabled powertools
-    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    dnf install -y openssl3-libs
+    # OPSEXP-3749 workaround for bugged openssl3 packages
+    # dnf install -y dnf-plugins-core
+    # dnf config-manager -y --set-enabled powertools
+    # dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    # dnf install -y openssl3-libs
+    ARCH=$(uname -m)
+    dnf install -y \
+      https://archives.fedoraproject.org/pub/archive/epel/8.9/Everything/$ARCH/Packages/o/openssl3-libs-3.2.1-1.2.el8.$ARCH.rpm
     dnf clean all
   fi
   mkdir -m 770 logs temp work && chgrp tomcat . logs temp work
