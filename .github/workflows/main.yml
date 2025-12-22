@@ -202,14 +202,14 @@ jobs:
 
 
       - name: Login to docker.io
-        if: github.ref_name == 'master'
+        if: github.ref_name != 'master'
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push images to docker.io
-        if: github.ref_name == 'master'
+        if: github.ref_name != 'master'
         uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
         env:
           SRC_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
