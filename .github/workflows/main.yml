@@ -186,7 +186,6 @@ jobs:
 
       - name: Push additional timestamped tag to quay.io
         env:
-          IMAGE_TAG: tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
           SRC_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
           DST_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}-${{ needs.setup_matrix.outputs.timestamp }}
         run: |
@@ -222,7 +221,6 @@ jobs:
 
       - name: Push images to docker.io
         env:
-          IMAGE_TAG: tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
           SRC_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
           DST_IMAGE: ${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:tomcat${{ matrix.tomcat_major }}-jre${{ matrix.java_major }}-${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
         run: >-
