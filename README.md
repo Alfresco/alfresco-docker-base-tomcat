@@ -18,6 +18,7 @@ Tomcat version | Java version | OS            | Image ref                       
 10             | 17           | Rocky Linux 8 | `alfresco/alfresco-base-tomcat:tomcat10-jre17-rockylinux8` | ![tomcat10-jre17-rockylinux8 size][4]
 10             | 17           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat10-jre17-rockylinux9` | ![tomcat10-jre17-rockylinux9 size][5]
 10             | 21           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat10-jre21-rockylinux9` | ![tomcat10-jre21-rockylinux9 size][6]
+10             | 25           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat10-jre25-rockylinux9` | ![tomcat10-jre25-rockylinux9 size][9]
 11             | 21           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat11-jre21-rockylinux9` | ![tomcat11-jre21-rockylinux9 size][7]
 11             | 25           | Rocky Linux 9 | `alfresco/alfresco-base-tomcat:tomcat11-jre25-rockylinux9` | ![tomcat11-jre25-rockylinux9 size][8]
 
@@ -29,6 +30,7 @@ Tomcat version | Java version | OS            | Image ref                       
 [6]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre21-rockylinux9
 [7]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat11-jre21-rockylinux9
 [8]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat11-jre25-rockylinux9
+[9]: https://img.shields.io/docker/image-size/alfresco/alfresco-base-tomcat/tomcat10-jre25-rockylinux9
 
 The images are available on:
 
