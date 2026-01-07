@@ -24,55 +24,126 @@ jobs:
       Tomcat ${{ matrix.tomcat_major }}
       jre${{ matrix.java_major }}
       on ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - tomcat_major: 9
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 11
-          - tomcat_major: 9
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 17
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 11
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 8
-            java_major: 17
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 17
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 21
-          - tomcat_major: 10
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 25
-          - tomcat_major: 11
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 21
-          - tomcat_major: 11
-            base_image:
-              flavor: rockylinux
-              major: 9
-            java_major: 25
+strategy:
+  fail-fast: false
+  matrix:
+    include:
+      - tomcat_major: 9
+        base_image:
+          flavor: rockylinux
+          major: 8
+        java_major: 11
+        arch: amd64
+      - tomcat_major: 9
+        base_image:
+          flavor: rockylinux
+          major: 8
+        java_major: 11
+        arch: s390x
+
+      - tomcat_major: 9
+        base_image:
+          flavor: rockylinux
+          major: 8
+        java_major: 17
+        arch: amd64
+      - tomcat_major: 9
+        base_image:
+          flavor: rockylinux
+          major: 8
+        java_major: 17
+        arch: s390x
+
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 8
+        java_major: 11
+        arch: amd64
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 8
+        java_major: 11
+        arch: s390x
+
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 8
+        java_major: 17
+        arch: amd64
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 8
+        java_major: 17
+        arch: s390x
+
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 17
+        arch: amd64
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 17
+        arch: s390x
+
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 21
+        arch: amd64
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 21
+        arch: s390x
+
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 25
+        arch: amd64
+      - tomcat_major: 10
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 25
+        arch: s390x
+
+      - tomcat_major: 11
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 21
+        arch: amd64
+      - tomcat_major: 11
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 21
+        arch: s390x
+
+      - tomcat_major: 11
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 25
+        arch: amd64
+      - tomcat_major: 11
+        base_image:
+          flavor: rockylinux
+          major: 9
+        java_major: 25
+        arch: s390x
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -188,7 +259,7 @@ jobs:
             CREATED=${{ steps.vars.outputs.image_created }}
           tags: |
             quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
-          platforms: linux/amd64,linux/arm64/v8
+          platforms: linux/amd64,linux/arm64/v8,linux/s390x
           labels: ${{ steps.vars.outputs.image_labels }}
           provenance: false
 
