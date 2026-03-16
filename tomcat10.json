@@ -1,8 +1,8 @@
 {
   "apr_sha256": "6a10e7f7430510600af25fabf466e1df61aaae910bf1dc5d10c44a4433ccc81d",
   "apr_version": "1.7.6",
-  "tcnative_sha512": "7bdcf6fab95b7a349ea2cc9f428cff165439191aa69928b6feb9c49d72b5b28fbb411a7ca94042320f8b1a571b29e8a74889d57a9e9cf4cf6e4ff3a0a158d342",
-  "tcnative_version": "2.0.13",
+  "tcnative_sha512": "33d626fab35cbfa7398ca90cabd99950c6362ab4e19637012850fd84ecc78184e4c6c975ece92dc8d6461b6a8c2f83221cbc7374ff154422e7722606a4a144c7",
+  "tcnative_version": "2.0.14",
   "tomcat_sha512": "241183fe5dec15936205ec495b65e04218117affc10e90c5fbc56bce0b4f031ee944d468c128f0ae484fd1d5bd9bec22b65a95a8cfd94cb7fc1f12c7ef434d99",
   "tomcat_version": "10.1.52"
 }
