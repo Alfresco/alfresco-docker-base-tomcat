@@ -106,14 +106,14 @@ jobs:
           echo "apr_sha256=$(jq -r .apr_sha256 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
 
       - name: Login to quay.io
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: Build image for tests
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           load: true
           build-args: |
@@ -170,7 +170,7 @@ jobs:
           fi
 
       - name: Build and Push Image to quay.io
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           push: ${{ github.actor != 'dependabot[bot]' }}
           build-args: |
@@ -203,7 +203,7 @@ jobs:
 
       - name: Login to docker.io
         if: github.ref_name == 'master'
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
