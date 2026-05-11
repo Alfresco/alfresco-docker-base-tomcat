@@ -1,4 +1,4 @@
-# hadolint global ignore=DL3033,DL3008
+# hadolint global ignore=DL3033,DL3008,DL3041
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat
 ARG JAVA_MAJOR
@@ -194,6 +194,8 @@ RUN groupadd --system tomcat && \
 
 COPY --chown=:tomcat --chmod=640 --from=tomcat_dist /build/tomcat $CATALINA_HOME
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/tcnative $TOMCAT_NATIVE_LIBDIR
+COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/lib64/libssl.so.3 $TOMCAT_NATIVE_LIBDIR/
+COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/lib64/libcrypto.so.3 $TOMCAT_NATIVE_LIBDIR/
 COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr/lib/libapr-1.so* $APR_LIBDIR/
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
