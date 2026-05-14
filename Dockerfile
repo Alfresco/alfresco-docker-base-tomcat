@@ -193,11 +193,12 @@ COPY --chown=:tomcat --chmod=640 --from=tcnative_build /usr/local/apr/lib/libapr
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 RUN <<EOT
+  dnf upgrade -y
   if [ $DISTRIB_MAJOR -eq 8 ]; then
     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     dnf install -y openssl3-libs
-    dnf clean all
   fi
+  dnf clean all
   mkdir -m 770 logs temp work && chgrp tomcat . logs temp work
   chmod ug+x bin/*.sh
   find . -type d -exec chmod 770 {} +
