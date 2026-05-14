@@ -1,4 +1,4 @@
-# hadolint global ignore=DL3033,DL3008
+# hadolint global ignore=DL3033,DL3008,DL3041
 # Alfresco Base Tomcat Image
 # see also https://github.com/docker-library/tomcat
 ARG JAVA_MAJOR
@@ -109,7 +109,7 @@ COPY --from=tomcat_dist /build/apr $BUILD_DIR/apr
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 RUN <<EOT
-  dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-${DISTRIB_MAJOR}.noarch.rpm
+  [ $DISTRIB_MAJOR -eq 8 ] && dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-${DISTRIB_MAJOR}.noarch.rpm
   dnf install -y gcc make expat-devel java-${JAVA_MAJOR}-openjdk-devel redhat-rpm-config
   dnf clean all
 EOT
@@ -124,15 +124,9 @@ EOT
 WORKDIR ${BUILD_DIR}/tcnative/native
 RUN <<EOT
   if [ $DISTRIB_MAJOR -eq 8 ]; then
-    # OPSEXP-3749 workaround for bugged openssl3 packages
-    # dnf install -y dnf-plugins-core
-    # dnf config-manager -y --set-enabled powertools
-    # dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    # dnf install -y openssl3-devel
-    ARCH=$(uname -m)
-    dnf install -y \
-      https://archives.fedoraproject.org/pub/archive/epel/8.9/Everything/$ARCH/Packages/o/openssl3-devel-3.2.1-1.2.el8.$ARCH.rpm \
-      https://archives.fedoraproject.org/pub/archive/epel/8.9/Everything/$ARCH/Packages/o/openssl3-libs-3.2.1-1.2.el8.$ARCH.rpm
+    dnf install -y dnf-plugins-core
+    dnf config-manager -y --set-enabled powertools
+    dnf install -y openssl3-devel
     ln -s /usr/include/openssl3/openssl /usr/include/openssl
     export LIBS="-L/usr/lib64/openssl3 -Wl,-rpath,/usr/lib64/openssl3 -lssl -lcrypto"
     export CFLAGS="-I/usr/include/openssl3"
@@ -200,14 +194,8 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 RUN <<EOT
   if [ $DISTRIB_MAJOR -eq 8 ]; then
-    # OPSEXP-3749 workaround for bugged openssl3 packages
-    # dnf install -y dnf-plugins-core
-    # dnf config-manager -y --set-enabled powertools
-    # dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    # dnf install -y openssl3-libs
-    ARCH=$(uname -m)
-    dnf install -y \
-      https://archives.fedoraproject.org/pub/archive/epel/8.9/Everything/$ARCH/Packages/o/openssl3-libs-3.2.1-1.2.el8.$ARCH.rpm
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf install -y openssl3-libs
     dnf clean all
   fi
   mkdir -m 770 logs temp work && chgrp tomcat . logs temp work
@@ -215,7 +203,7 @@ RUN <<EOT
   find . -type d -exec chmod 770 {} +
   # verify Tomcat Native is working properly
   nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')"
-  test $nativeLines -ge 1 || { echo "Tomcat Native library not found or not working properly"; exit 1; }
+  test "$nativeLines" -ge 1 || { echo "Tomcat Native library not found or not working properly"; exit 1; }
 EOT
 
 USER tomcat
