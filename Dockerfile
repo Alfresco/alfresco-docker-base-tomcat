@@ -201,9 +201,11 @@ RUN <<EOT
   mkdir -m 770 logs temp work && chgrp tomcat . logs temp work
   chmod ug+x bin/*.sh
   find . -type d -exec chmod 770 {} +
-  # verify Tomcat Native is working properly
-  nativeLines="$(catalina.sh configtest 2>&1 | grep -c 'Loaded Apache Tomcat Native library')"
-  test "$nativeLines" -ge 1 || { echo "Tomcat Native library not found or not working properly"; exit 1; }
+  echo "Testing Tomcat Native library..."
+  configtest_out="$(catalina.sh configtest 2>&1)" || true
+  echo "$configtest_out"
+  echo "$configtest_out" | grep -q 'Loaded Apache Tomcat Native library' || \
+    { echo "Tomcat Native library not found or not working properly"; exit 1; }
 EOT
 
 USER tomcat
