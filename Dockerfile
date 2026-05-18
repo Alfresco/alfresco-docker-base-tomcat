@@ -201,9 +201,12 @@ RUN <<EOT
   mkdir -m 770 logs temp work && chgrp tomcat . logs temp work
   chmod ug+x bin/*.sh
   find . -type d -exec chmod 770 {} +
+
   echo "Testing Tomcat Native library..."
-  configtest_out="$(catalina.sh configtest 2>&1)" || true
+  configtest_rc=0
+  configtest_out="$(catalina.sh configtest 2>&1)" || configtest_rc=$?
   echo "$configtest_out"
+  [ $configtest_rc -eq 0 ] || { echo "catalina.sh configtest exited with code $configtest_rc"; exit $configtest_rc; }
   echo "$configtest_out" | grep -q 'Loaded Apache Tomcat Native library' || \
     { echo "Tomcat Native library not found or not working properly"; exit 1; }
 EOT
