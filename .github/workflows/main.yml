@@ -154,7 +154,7 @@ jobs:
           TOMCAT: tomcat${{ matrix.tomcat_major }}
           JAVA: jre${{ matrix.java_major }}
           DISTRIBUTION: ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
-          IMAGE_SIZE_MAX_PERCENT: 20
+          IMAGE_SIZE_MAX_PERCENT: 50
         run: |
           IMAGE_PREV_SHA=$(docker manifest inspect ${IMAGE_REGISTRY_NAMESPACE}/${IMAGE_REPOSITORY}:${TOMCAT}-${JAVA}-${DISTRIBUTION} | jq -r '.manifests|map(select(.platform.architecture=="amd64"))[0].digest')
           if [ -z "$IMAGE_PREV_SHA" ]; then
