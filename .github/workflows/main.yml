@@ -180,7 +180,7 @@ jobs:
             SKIP_SIZE_CHECK="${{ contains(github.event.pull_request.labels.*.name, 'ci/skip-image-size-check') }}"
             if [ "$IMAGE_NEW_SIZE" -gt "$ALLOWED_SIZE" ]; then
               if [ "$SKIP_SIZE_CHECK" == "true" ]; then
-                echo "WARNING: Image size increased beyond ${IMAGE_SIZE_MAX_PERCENT}% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE). Continuing because label 'ci/skip-image-size-check' is set."
+                echo "::warning::Image size increased beyond ${IMAGE_SIZE_MAX_PERCENT}% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE). Continuing because label 'ci/skip-image-size-check' is set."
               else
                 echo "Image size increased beyond ${IMAGE_SIZE_MAX_PERCENT}% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE)"
                 exit 1
