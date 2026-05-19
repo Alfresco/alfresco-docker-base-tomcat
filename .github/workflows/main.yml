@@ -2,6 +2,14 @@
 name: Build the tomcats
 on:
   push:
+    branches:
+      - master
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.github/workflows/main.yml'
+      - 'tomcat*.json'
+  pull_request:
     paths:
       - 'Dockerfile'
       - '.dockerignore'
@@ -90,7 +98,7 @@ jobs:
             echo "image_tag=$IMAGE_BASE_NAME" >> $GITHUB_OUTPUT
             echo "image_labels=" >> $GITHUB_OUTPUT
           else
-            echo "image_tag=${IMAGE_BASE_NAME}-${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
+            echo "image_tag=${IMAGE_BASE_NAME}-${GITHUB_HEAD_REF//\//-}" >> $GITHUB_OUTPUT
             echo "image_labels=quay.expires-after=2w" >> $GITHUB_OUTPUT
           fi
           echo "image_created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
@@ -154,7 +162,7 @@ jobs:
           TOMCAT: tomcat${{ matrix.tomcat_major }}
           JAVA: jre${{ matrix.java_major }}
           DISTRIBUTION: ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
-          IMAGE_SIZE_MAX_PERCENT: 50
+          IMAGE_SIZE_MAX_PERCENT: 10
         run: |
           IMAGE_PREV_SHA=$(docker manifest inspect ${IMAGE_REGISTRY_NAMESPACE}/${IMAGE_REPOSITORY}:${TOMCAT}-${JAVA}-${DISTRIBUTION} | jq -r '.manifests|map(select(.platform.architecture=="amd64"))[0].digest')
           if [ -z "$IMAGE_PREV_SHA" ]; then
@@ -165,9 +173,14 @@ jobs:
             IMAGE_NEW_SIZE=$(docker save local/${{ env.IMAGE_REPOSITORY }}:ci | gzip -c | wc -c)
             # Calculate allowed size increase
             ALLOWED_SIZE=$((IMAGE_PREV_SIZE + (IMAGE_PREV_SIZE * IMAGE_SIZE_MAX_PERCENT / 100)))
+            SKIP_SIZE_CHECK="${{ contains(github.event.pull_request.labels.*.name, 'ci/skip-image-size-check') }}"
             if [ "$IMAGE_NEW_SIZE" -gt "$ALLOWED_SIZE" ]; then
-              echo "Image size increased beyond ${IMAGE_SIZE_MAX_PERCENT}% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE)"
-              exit 1
+              if [ "$SKIP_SIZE_CHECK" == "true" ]; then
+                echo "WARNING: Image size increased beyond ${IMAGE_SIZE_MAX_PERCENT}% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE). Continuing because label 'ci/skip-image-size-check' is set."
+              else
+                echo "Image size increased beyond ${IMAGE_SIZE_MAX_PERCENT}% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE)"
+                exit 1
+              fi
             else echo "Image size increase within ${IMAGE_SIZE_MAX_PERCENT}% or below (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE)"
             fi
           fi
