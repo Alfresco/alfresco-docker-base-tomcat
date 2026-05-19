@@ -2,6 +2,14 @@
 name: Build the tomcats
 on:
   push:
+    branches:
+      - master
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.github/workflows/main.yml'
+      - 'tomcat*.json'
+  pull_request:
     paths:
       - 'Dockerfile'
       - '.dockerignore'
@@ -15,7 +23,7 @@ env:
   IMAGE_REPOSITORY: alfresco-base-tomcat
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -74,6 +82,9 @@ jobs:
               major: 9
             java_major: 25
     runs-on: ubuntu-latest
+    env:
+      HAS_QUAY_CREDS: ${{ secrets.QUAY_USERNAME != '' }}
+      HAS_DOCKER_CREDS: ${{ secrets.DOCKER_USERNAME != '' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -90,7 +101,7 @@ jobs:
             echo "image_tag=$IMAGE_BASE_NAME" >> $GITHUB_OUTPUT
             echo "image_labels=" >> $GITHUB_OUTPUT
           else
-            echo "image_tag=${IMAGE_BASE_NAME}-${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
+            echo "image_tag=${IMAGE_BASE_NAME}-${GITHUB_HEAD_REF//\//-}" >> $GITHUB_OUTPUT
             echo "image_labels=quay.expires-after=2w" >> $GITHUB_OUTPUT
           fi
           echo "image_created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
@@ -106,6 +117,7 @@ jobs:
           echo "apr_sha256=$(jq -r .apr_sha256 tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_OUTPUT
 
       - name: Login to quay.io
+        if: env.HAS_QUAY_CREDS == 'true'
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: quay.io
@@ -154,7 +166,7 @@ jobs:
           TOMCAT: tomcat${{ matrix.tomcat_major }}
           JAVA: jre${{ matrix.java_major }}
           DISTRIBUTION: ${{ matrix.base_image.flavor }}${{ matrix.base_image.major }}
-          IMAGE_SIZE_MAX_PERCENT: 50
+          IMAGE_SIZE_MAX_PERCENT: 10
         run: |
           IMAGE_PREV_SHA=$(docker manifest inspect ${IMAGE_REGISTRY_NAMESPACE}/${IMAGE_REPOSITORY}:${TOMCAT}-${JAVA}-${DISTRIBUTION} | jq -r '.manifests|map(select(.platform.architecture=="amd64"))[0].digest')
           if [ -z "$IMAGE_PREV_SHA" ]; then
@@ -165,9 +177,14 @@ jobs:
             IMAGE_NEW_SIZE=$(docker save local/${{ env.IMAGE_REPOSITORY }}:ci | gzip -c | wc -c)
             # Calculate allowed size increase
             ALLOWED_SIZE=$((IMAGE_PREV_SIZE + (IMAGE_PREV_SIZE * IMAGE_SIZE_MAX_PERCENT / 100)))
+            SKIP_SIZE_CHECK="${{ contains(github.event.pull_request.labels.*.name, 'ci/skip-image-size-check') }}"
             if [ "$IMAGE_NEW_SIZE" -gt "$ALLOWED_SIZE" ]; then
-              echo "Image size increased beyond ${IMAGE_SIZE_MAX_PERCENT}% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE)"
-              exit 1
+              if [ "$SKIP_SIZE_CHECK" == "true" ]; then
+                echo "::warning::Image size increased beyond ${IMAGE_SIZE_MAX_PERCENT}% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE). Continuing because label 'ci/skip-image-size-check' is set."
+              else
+                echo "Image size increased beyond ${IMAGE_SIZE_MAX_PERCENT}% (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE)"
+                exit 1
+              fi
             else echo "Image size increase within ${IMAGE_SIZE_MAX_PERCENT}% or below (from $IMAGE_PREV_SIZE to $IMAGE_NEW_SIZE, allowed: $ALLOWED_SIZE)"
             fi
           fi
@@ -175,7 +192,7 @@ jobs:
       - name: Build and Push Image to quay.io
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
-          push: ${{ github.actor != 'dependabot[bot]' }}
+          push: ${{ github.actor != 'dependabot[bot]' && env.HAS_QUAY_CREDS == 'true' }}
           build-args: |
             DISTRIB_NAME=${{ matrix.base_image.flavor }}
             DISTRIB_MAJOR=${{ matrix.base_image.major }}
@@ -196,7 +213,7 @@ jobs:
           provenance: false
 
       - name: Push additional timestamped tag to quay.io
-        if: github.ref_name == 'master'
+        if: github.ref_name == 'master' && env.HAS_QUAY_CREDS == 'true'
         env:
           SRC_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
           DST_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}-${{ steps.vars.outputs.timestamp }}
@@ -205,14 +222,14 @@ jobs:
 
 
       - name: Login to docker.io
-        if: github.ref_name == 'master'
+        if: github.ref_name == 'master' && env.HAS_DOCKER_CREDS == 'true'
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push images to docker.io
-        if: github.ref_name == 'master'
+        if: github.ref_name == 'master' && env.HAS_DOCKER_CREDS == 'true'
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         env:
           SRC_IMAGE: quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
