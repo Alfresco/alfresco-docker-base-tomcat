@@ -195,4 +195,4 @@ New images are built automatically on each new commit on master and on a weekly 
 * [alfresco-community-repo](https://github.com/Alfresco/alfresco-community-repo/blob/master/packaging/docker-alfresco/Dockerfile)
 * [alfresco-community-share](https://github.com/Alfresco/alfresco-community-share/blob/master/packaging/docker/Dockerfile)
 
-[acs-support]: https://support.hyland.com/r/Alfresco/Alfresco-Content-Services/23.4/Alfresco-Content-Services/Supported-Platforms
+[acs-support]: https://docs.hyland.com/r/Current/Alfresco-Supported-Platforms/Part-2-Platform-Compatibility
