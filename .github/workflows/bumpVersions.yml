@@ -38,11 +38,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install updatecli
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@v18.21.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@v18.26.0
 
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@fd832223f9f99ebf0244dd20658680e5d4aca049
+        uses: Homebrew/actions/setup-homebrew@a657b8b0cd35d0f65cce41fce9b24cf054b49869
 
       - name: Install htmlq
         run: |
