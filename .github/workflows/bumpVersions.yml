@@ -54,25 +54,56 @@ jobs:
           echo "TCNATIVE_SOURCE_PATTERN=${{ matrix.tcnative_source_pattern }}" >> $GITHUB_ENV
           echo "APR_SOURCE_PATTERN=${{ matrix.apr_source_pattern }}" >> $GITHUB_ENV
 
+      - name: Save current versions
+        id: current
+        run: |
+          versions_file=tomcat${{ matrix.tomcat_major }}.json
+          echo "tomcat=$(jq -r '.tomcat_version' $versions_file)" >> $GITHUB_OUTPUT
+          echo "tcnative=$(jq -r '.tcnative_version' $versions_file)" >> $GITHUB_OUTPUT
+          echo "apr=$(jq -r '.apr_version' $versions_file)" >> $GITHUB_OUTPUT
+
       - name: Run updatecli
         run: |
           updatecli apply
 
-      - name: Set new tomcat version as env var
+      - name: Save updated versions
+        id: updated
         run: |
-          echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
+          versions_file=tomcat${{ matrix.tomcat_major }}.json
+          echo "tomcat=$(jq -r '.tomcat_version' $versions_file)" >> $GITHUB_OUTPUT
+          echo "tcnative=$(jq -r '.tcnative_version' $versions_file)" >> $GITHUB_OUTPUT
+          echo "apr=$(jq -r '.apr_version' $versions_file)" >> $GITHUB_OUTPUT
 
-      - name: Set target branch
+      - name: Set PR title
+        id: pr
+        env:
+          OLD_TOMCAT: ${{ steps.current.outputs.tomcat }}
+          OLD_TCNATIVE: ${{ steps.current.outputs.tcnative }}
+          OLD_APR: ${{ steps.current.outputs.apr }}
+          NEW_TOMCAT: ${{ steps.updated.outputs.tomcat }}
+          NEW_TCNATIVE: ${{ steps.updated.outputs.tcnative }}
+          NEW_APR: ${{ steps.updated.outputs.apr }}
         run: |
-          echo "TARGET_BRANCH=bump-tomcat-${{ env.TOMCAT_VERSION }}" >> $GITHUB_ENV
+          parts=()
+          [ "$NEW_TOMCAT" != "$OLD_TOMCAT" ] && parts+=("tomcat to $NEW_TOMCAT")
+          [ "$NEW_TCNATIVE" != "$OLD_TCNATIVE" ] && parts+=("tcnative to $NEW_TCNATIVE")
+          [ "$NEW_APR" != "$OLD_APR" ] && parts+=("apr to $NEW_APR")
+
+          title="Bump ${parts[0]:-tomcat to $NEW_TOMCAT}"
+          for part in "${parts[@]:1}"; do
+            title="$title and $part"
+          done
+          [ "$NEW_TOMCAT" = "$OLD_TOMCAT" ] && title="$title for tomcat ${{ matrix.tomcat_major }}"
+
+          echo "title=$title" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         if: github.event_name != 'pull_request'
         with:
-          branch: ${{ env.TARGET_BRANCH }}
+          branch: bump-tomcat-${{ matrix.tomcat_major }}
           base: ${{ github.event.repository.default_branch }}
-          title:  "Bump tomcat to ${{ env.TOMCAT_VERSION }}"
+          title: ${{ steps.pr.outputs.title }}
           body: "Freshly served thanks to updatecli and GitHub Actions"
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           team-reviewers: ops-readiness-performance
