@@ -54,17 +54,45 @@ jobs:
           echo "TCNATIVE_SOURCE_PATTERN=${{ matrix.tcnative_source_pattern }}" >> $GITHUB_ENV
           echo "APR_SOURCE_PATTERN=${{ matrix.apr_source_pattern }}" >> $GITHUB_ENV
 
+      - name: Save current versions
+        run: |
+          f=tomcat${{ matrix.tomcat_major }}.json
+          echo "OLD_TOMCAT=$(jq -r '.tomcat_version' $f)" >> $GITHUB_ENV
+          echo "OLD_TCNATIVE=$(jq -r '.tcnative_version' $f)" >> $GITHUB_ENV
+          echo "OLD_APR=$(jq -r '.apr_version' $f)" >> $GITHUB_ENV
+
       - name: Run updatecli
         run: |
           updatecli apply
 
-      - name: Set new tomcat version as env var
+      - name: Set PR title and target branch
         run: |
-          echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
+          f=tomcat${{ matrix.tomcat_major }}.json
+          tomcat=$(jq -r '.tomcat_version' $f)
+          tcnative=$(jq -r '.tcnative_version' $f)
+          apr=$(jq -r '.apr_version' $f)
 
-      - name: Set target branch
-        run: |
-          echo "TARGET_BRANCH=bump-tomcat-${{ env.TOMCAT_VERSION }}" >> $GITHUB_ENV
+          parts=()
+          [ "$tomcat" != "$OLD_TOMCAT" ] && parts+=("tomcat to $tomcat")
+          [ "$tcnative" != "$OLD_TCNATIVE" ] && parts+=("tcnative to $tcnative")
+          [ "$apr" != "$OLD_APR" ] && parts+=("apr to $apr")
+
+          if [ "$tomcat" != "$OLD_TOMCAT" ]; then
+            branch="bump-tomcat-$tomcat"
+          else
+            branch="bump-tomcat${{ matrix.tomcat_major }}"
+            [ "$tcnative" != "$OLD_TCNATIVE" ] && branch="$branch-tcnative-$tcnative"
+            [ "$apr" != "$OLD_APR" ] && branch="$branch-apr-$apr"
+          fi
+
+          title="Bump ${parts[0]:-tomcat to $tomcat}"
+          for part in "${parts[@]:1}"; do
+            title="$title and $part"
+          done
+          [ "$tomcat" = "$OLD_TOMCAT" ] && title="$title for tomcat ${{ matrix.tomcat_major }}"
+
+          echo "PR_TITLE=$title" >> $GITHUB_ENV
+          echo "TARGET_BRANCH=$branch" >> $GITHUB_ENV
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
@@ -72,7 +100,7 @@ jobs:
         with:
           branch: ${{ env.TARGET_BRANCH }}
           base: ${{ github.event.repository.default_branch }}
-          title:  "Bump tomcat to ${{ env.TOMCAT_VERSION }}"
+          title: ${{ env.PR_TITLE }}
           body: "Freshly served thanks to updatecli and GitHub Actions"
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           team-reviewers: ops-readiness-performance
