@@ -55,22 +55,28 @@ jobs:
           echo "APR_SOURCE_PATTERN=${{ matrix.apr_source_pattern }}" >> $GITHUB_ENV
 
       - name: Save current versions
+        id: current
         run: |
-          f=tomcat${{ matrix.tomcat_major }}.json
-          echo "OLD_TOMCAT=$(jq -r '.tomcat_version' $f)" >> $GITHUB_ENV
-          echo "OLD_TCNATIVE=$(jq -r '.tcnative_version' $f)" >> $GITHUB_ENV
-          echo "OLD_APR=$(jq -r '.apr_version' $f)" >> $GITHUB_ENV
+          versions_file=tomcat${{ matrix.tomcat_major }}.json
+          echo "tomcat=$(jq -r '.tomcat_version' $versions_file)" >> $GITHUB_OUTPUT
+          echo "tcnative=$(jq -r '.tcnative_version' $versions_file)" >> $GITHUB_OUTPUT
+          echo "apr=$(jq -r '.apr_version' $versions_file)" >> $GITHUB_OUTPUT
 
       - name: Run updatecli
         run: |
           updatecli apply
 
       - name: Set PR title and target branch
+        id: pr
+        env:
+          OLD_TOMCAT: ${{ steps.current.outputs.tomcat }}
+          OLD_TCNATIVE: ${{ steps.current.outputs.tcnative }}
+          OLD_APR: ${{ steps.current.outputs.apr }}
         run: |
-          f=tomcat${{ matrix.tomcat_major }}.json
-          tomcat=$(jq -r '.tomcat_version' $f)
-          tcnative=$(jq -r '.tcnative_version' $f)
-          apr=$(jq -r '.apr_version' $f)
+          versions_file=tomcat${{ matrix.tomcat_major }}.json
+          tomcat=$(jq -r '.tomcat_version' $versions_file)
+          tcnative=$(jq -r '.tcnative_version' $versions_file)
+          apr=$(jq -r '.apr_version' $versions_file)
 
           parts=()
           [ "$tomcat" != "$OLD_TOMCAT" ] && parts+=("tomcat to $tomcat")
@@ -91,16 +97,16 @@ jobs:
           done
           [ "$tomcat" = "$OLD_TOMCAT" ] && title="$title for tomcat ${{ matrix.tomcat_major }}"
 
-          echo "PR_TITLE=$title" >> $GITHUB_ENV
-          echo "TARGET_BRANCH=$branch" >> $GITHUB_ENV
+          echo "title=$title" >> $GITHUB_OUTPUT
+          echo "branch=$branch" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         if: github.event_name != 'pull_request'
         with:
-          branch: ${{ env.TARGET_BRANCH }}
+          branch: ${{ steps.pr.outputs.branch }}
           base: ${{ github.event.repository.default_branch }}
-          title: ${{ env.PR_TITLE }}
+          title: ${{ steps.pr.outputs.title }}
           body: "Freshly served thanks to updatecli and GitHub Actions"
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           team-reviewers: ops-readiness-performance
