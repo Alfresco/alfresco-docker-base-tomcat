@@ -117,5 +117,6 @@ jobs:
           title: ${{ steps.pr.outputs.title }}
           body: "Freshly served thanks to updatecli and GitHub Actions"
           token: ${{ steps.app-token.outputs.token }}
+          sign-commits: true
           team-reviewers: ops-readiness-performance
           labels: updatecli
