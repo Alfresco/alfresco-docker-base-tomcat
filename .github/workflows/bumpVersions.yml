@@ -66,36 +66,42 @@ jobs:
         run: |
           updatecli apply
 
+      - name: Save updated versions
+        id: updated
+        run: |
+          versions_file=tomcat${{ matrix.tomcat_major }}.json
+          echo "tomcat=$(jq -r '.tomcat_version' $versions_file)" >> $GITHUB_OUTPUT
+          echo "tcnative=$(jq -r '.tcnative_version' $versions_file)" >> $GITHUB_OUTPUT
+          echo "apr=$(jq -r '.apr_version' $versions_file)" >> $GITHUB_OUTPUT
+
       - name: Set PR title and target branch
         id: pr
         env:
           OLD_TOMCAT: ${{ steps.current.outputs.tomcat }}
           OLD_TCNATIVE: ${{ steps.current.outputs.tcnative }}
           OLD_APR: ${{ steps.current.outputs.apr }}
+          NEW_TOMCAT: ${{ steps.updated.outputs.tomcat }}
+          NEW_TCNATIVE: ${{ steps.updated.outputs.tcnative }}
+          NEW_APR: ${{ steps.updated.outputs.apr }}
         run: |
-          versions_file=tomcat${{ matrix.tomcat_major }}.json
-          tomcat=$(jq -r '.tomcat_version' $versions_file)
-          tcnative=$(jq -r '.tcnative_version' $versions_file)
-          apr=$(jq -r '.apr_version' $versions_file)
-
           parts=()
-          [ "$tomcat" != "$OLD_TOMCAT" ] && parts+=("tomcat to $tomcat")
-          [ "$tcnative" != "$OLD_TCNATIVE" ] && parts+=("tcnative to $tcnative")
-          [ "$apr" != "$OLD_APR" ] && parts+=("apr to $apr")
+          [ "$NEW_TOMCAT" != "$OLD_TOMCAT" ] && parts+=("tomcat to $NEW_TOMCAT")
+          [ "$NEW_TCNATIVE" != "$OLD_TCNATIVE" ] && parts+=("tcnative to $NEW_TCNATIVE")
+          [ "$NEW_APR" != "$OLD_APR" ] && parts+=("apr to $NEW_APR")
 
-          if [ "$tomcat" != "$OLD_TOMCAT" ]; then
-            branch="bump-tomcat-$tomcat"
+          if [ "$NEW_TOMCAT" != "$OLD_TOMCAT" ]; then
+            branch="bump-tomcat-$NEW_TOMCAT"
           else
             branch="bump-tomcat${{ matrix.tomcat_major }}"
-            [ "$tcnative" != "$OLD_TCNATIVE" ] && branch="$branch-tcnative-$tcnative"
-            [ "$apr" != "$OLD_APR" ] && branch="$branch-apr-$apr"
+            [ "$NEW_TCNATIVE" != "$OLD_TCNATIVE" ] && branch="$branch-tcnative-$NEW_TCNATIVE"
+            [ "$NEW_APR" != "$OLD_APR" ] && branch="$branch-apr-$NEW_APR"
           fi
 
-          title="Bump ${parts[0]:-tomcat to $tomcat}"
+          title="Bump ${parts[0]:-tomcat to $NEW_TOMCAT}"
           for part in "${parts[@]:1}"; do
             title="$title and $part"
           done
-          [ "$tomcat" = "$OLD_TOMCAT" ] && title="$title for tomcat ${{ matrix.tomcat_major }}"
+          [ "$NEW_TOMCAT" = "$OLD_TOMCAT" ] && title="$title for tomcat ${{ matrix.tomcat_major }}"
 
           echo "title=$title" >> $GITHUB_OUTPUT
           echo "branch=$branch" >> $GITHUB_OUTPUT
