@@ -58,13 +58,30 @@ jobs:
         run: |
           updatecli apply
 
-      - name: Set new tomcat version as env var
+      - name: Compute PR title and branch from changed versions
         run: |
-          echo "TOMCAT_VERSION=$(jq -r '.tomcat_version' tomcat${{ matrix.tomcat_major }}.json)" >> $GITHUB_ENV
-
-      - name: Set target branch
-        run: |
-          echo "TARGET_BRANCH=bump-tomcat-${{ env.TOMCAT_VERSION }}" >> $GITHUB_ENV
+          FILE="tomcat${TOMCAT_MAJOR}.json"
+          OLD=$(git show "HEAD:${FILE}")
+          title_parts=()
+          branch_parts=()
+          for component in tomcat tcnative apr; do
+            old_version=$(jq -r ".${component}_version" <<< "$OLD")
+            new_version=$(jq -r ".${component}_version" "$FILE")
+            if [ "$old_version" != "$new_version" ]; then
+              title_parts+=("${component} to ${new_version}")
+              branch_parts+=("${component}-${new_version}")
+            fi
+          done
+          if [ ${#title_parts[@]} -eq 0 ]; then
+            echo "No version changes detected for Tomcat ${TOMCAT_MAJOR}"
+            echo "PR_TITLE=Bump Tomcat ${TOMCAT_MAJOR} dependencies" >> $GITHUB_ENV
+            echo "TARGET_BRANCH=bump-tomcat${TOMCAT_MAJOR}" >> $GITHUB_ENV
+            exit 0
+          fi
+          title=$(IFS=,; echo "${title_parts[*]}" | sed 's/,/, /g')
+          branch=$(IFS=-; echo "${branch_parts[*]}")
+          echo "PR_TITLE=Bump ${title} (Tomcat ${TOMCAT_MAJOR})" >> $GITHUB_ENV
+          echo "TARGET_BRANCH=bump-tomcat${TOMCAT_MAJOR}-${branch}" >> $GITHUB_ENV
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
@@ -72,7 +89,8 @@ jobs:
         with:
           branch: ${{ env.TARGET_BRANCH }}
           base: ${{ github.event.repository.default_branch }}
-          title:  "Bump tomcat to ${{ env.TOMCAT_VERSION }}"
+          title: ${{ env.PR_TITLE }}
+          commit-message: ${{ env.PR_TITLE }}
           body: "Freshly served thanks to updatecli and GitHub Actions"
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           team-reviewers: ops-readiness-performance
