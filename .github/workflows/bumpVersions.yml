@@ -105,6 +105,7 @@ jobs:
           client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
           permission-contents: write
+          permission-members: read
           permission-pull-requests: write
 
       - name: Create Pull Request
